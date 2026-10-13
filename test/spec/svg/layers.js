@@ -49,10 +49,11 @@ describe('iD.svgLayers', function () {
         expect(d3_select(nodes[i++]).classed('panoramax')).toBe(true);
         expect(d3_select(nodes[i++]).classed('local-photos')).toBe(true);
         expect(d3_select(nodes[i++]).classed('width-indicator')).toBe(true);
-        expect(d3_select(nodes[i++]).classed('measure-tape')).toBe(true);
         expect(d3_select(nodes[i++]).classed('debug')).toBe(true);
         expect(d3_select(nodes[i++]).classed('geolocate')).toBe(true);
         expect(d3_select(nodes[i++]).classed('touch')).toBe(true);
+        // above the touch targets, so its handles win over the objects below
+        expect(d3_select(nodes[i++]).classed('measure-tape')).toBe(true);
         /* eslint-enable no-useless-assignment */
     });
 
