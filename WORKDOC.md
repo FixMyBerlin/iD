@@ -13,8 +13,8 @@ Keep features reasonably separated (own files, own commits, clear commit message
 
 ## Ground rules
 
-- We work on **`FixMyBerlin/iD`** (`origin`), since 2026-10-13. With `gh`, always pass `--repo FixMyBerlin/iD`: the fork's parents are `tordans/iD` and `openstreetmap/iD`, and `gh` would pick one of them otherwise.
-- `tordans/iD` (`tordans`) was our fork until then. Its branch `radnetz-berlin` and its PR 10 are frozen; we do not push there anymore.
+- We work on **`FixMyBerlin/iD`** (remote `fixmyberlin`), since 2026-10-13. Push with `git push fixmyberlin radnetz-mapping` (the branch tracks it, so plain `git push` works too). With `gh`, always pass `--repo FixMyBerlin/iD`: the fork's parents are `tordans/iD` and `openstreetmap/iD`, and `gh` would pick one of them otherwise.
+- `tordans/iD` stays `origin`: the repository is shared with the other iD worktrees, which push there. It was our fork until then. Its branch `radnetz-berlin` and its PR 10 are frozen; we do not push there anymore.
 - `openstreetmap/iD` (`upstream`) is read-only for us: only fetch from it. Its push URL is set to `NO_PUSH_to_openstreetmap_iD`.
 - All feature work happens on the `radnetz-mapping` branch unless noted. It is the default branch of the fork; `develop` there is the copy of upstream.
 - Netlify (site `radnetz-mapping`, FixMyCity team) builds and serves only this branch: `https://radnetz-mapping.netlify.app`. No deploy previews, no other branches (`netlify.toml`).
@@ -24,7 +24,7 @@ Keep features reasonably separated (own files, own commits, clear commit message
 | What | Value |
 |---|---|
 | Worktree | `~/Development/OSM/iD--radnetz-berlin` |
-| Branch | `radnetz-mapping` → `origin/radnetz-mapping` (FixMyBerlin/iD); until 2026-10-13 `radnetz-berlin` on tordans/iD |
+| Branch | `radnetz-mapping` → `fixmyberlin/radnetz-mapping` (FixMyBerlin/iD); until 2026-10-13 `radnetz-berlin` on tordans/iD |
 | Base | `upstream/develop` @ `d9879e101` (2026-09-27) |
 | Main checkout | `~/Development/OSM/iD` (`develop`) |
 
