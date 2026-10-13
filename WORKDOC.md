@@ -25,7 +25,7 @@ Keep features reasonably separated (own files, own commits, clear commit message
 |---|---|
 | Worktree | `~/Development/OSM/iD--radnetz-berlin` |
 | Branch | `radnetz-mapping` → `fixmyberlin/radnetz-mapping` (FixMyBerlin/iD); until 2026-10-13 `radnetz-berlin` on tordans/iD |
-| Base | `upstream/develop` @ `d9879e101` (2026-09-27) |
+| Base | `upstream/develop` @ `32c05ed6f` (merged 2026-10-13; first base `d9879e101`, 2026-09-27) |
 | Main checkout | `~/Development/OSM/iD` (`develop`) |
 
 Updating the base: `git -C ~/Development/OSM/iD pull --ff-only upstream develop`, then merge `develop` into `radnetz-mapping`.
@@ -1536,6 +1536,7 @@ infra3D is street-level imagery we have for Berlin; it needs a login. The link f
 
 ## Progress log
 
+- 2026-10-13: Merged `upstream/develop` (9 commits, among them `coreHistory` in TypeScript). No conflicts; one type fix in `ui/fields/traffic_sign.ts`. A rebase was tried first and dropped: it replays the six feature merges and conflicts on the first. Backup of the state before: local branch `backup/radnetz-mapping-before-rebase-2026-10-13`.
 - 2026-10-13: OSM login on the Netlify site: own OAuth 2 application under the OSM account "FixMyCity TILDA" (client id in `netlify.toml`; redirect URIs for the Netlify site and `127.0.0.1:8080`). iD's default application only allows the addresses of the iD project. The local build still uses iD's default application. Not tested yet.
 - 2026-10-13: Three points left from the review of 2026-10-12:
   - Progress: a failed request no longer disables "Done"; the note says a click tries again.

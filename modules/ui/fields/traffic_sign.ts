@@ -112,7 +112,7 @@ export function uiFieldTrafficSign(field: unknown, context: iD.Context) {
         if (single && _recommend) {
             const plainTags = tags as Tags;
             // changed while selected, else compared with the downloaded version
-            const originalTags = context.history().base().hasEntity(_entityIDs[0])?.tags;
+            const originalTags = context.history().base().hasEntity(_entityIDs[0] as iD.OsmEntity['id'])?.tags;
             const previousSign = _previousSign !== null ? _previousSign : originalTags?.[fieldKey];
             const plan = signTagPlan({ key: fieldKey, tags: plainTags, previousSign, originalTags, recommend: _recommend });
             rows = (plan ?? []).map(row => ({ ...row, reason: rowReason(row, plainTags, previousSign) }));
