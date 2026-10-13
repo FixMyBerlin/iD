@@ -224,6 +224,7 @@
 }
 /* already tagged: green with a check; another value tagged: the arrow label */
 .ideditor .photoviewer .mapillary-sign-bar button.mapillary-sign-bar-action.present {
+    opacity: 1;
     background: rgba(76, 175, 80, 0.45);
     color: #fff;
 }

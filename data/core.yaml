@@ -1231,6 +1231,7 @@ en:
       custom_data:
         interactive: "Selectable: shown, features can be selected"
         readonly: "Overlay only: shown, cannot be selected"
+        readonly_tracked: "Not available with progress tracking: the lines must be selectable to mark them as done"
         hidden: "Hidden: not shown"
     autohidden: "These features have been automatically hidden because too many would be shown on the screen.  You can zoom in to edit them."
     osmhidden: "These features have been automatically hidden because the OpenStreetMap layer is hidden."
@@ -1282,7 +1283,8 @@ en:
     suggested_image: "yellow frame: the image row chosen in the Mapillary images field"
     suggested: "yellow frame: fits the direction the sign faces"
     write_tags: Set these tags
-    present: "green: already tagged, click to remove it again"
+    present: "green: already tagged"
+    present_undo: "set in this session, click to remove it again"
     replaces: "orange: replaces {value}"
     annotation: Set a traffic sign from Mapillary.
     annotation_remove: Removed a tag set from Mapillary.
@@ -1305,7 +1307,7 @@ en:
     error: The progress could not be saved.
     disabled:
       logged_out: Log in to OpenStreetMap to change the progress.
-      unavailable: The progress database cannot be reached from this address.
+      unavailable: The progress database could not be reached. A click tries again.
       no_id: This line has no id (id or lfd_nr), so it cannot be tracked.
   map_display:
     title: Map Display

@@ -384,6 +384,21 @@ function imageActionsFor(context: coreContext, entity: iD.OsmEntity, exclude: st
 
 
 function renderButtons(context: coreContext, row: d3.Selection<HTMLDivElement>, actions: Action[]) {
+    // A tagged (green) button takes its tag out again only when the tag was set in this session:
+    // a tag that was on the feature before is not removed by a click out of habit.
+    const base = context.history().base();
+    const removable = (d: Action) => {
+        if (!d.present) return false;
+        const entity = d.image ? selectedEntity(context) : selectedWay(context);
+        if (!entity) return false;
+        const before = base.hasEntity(entity.id);
+        return !before || Object.keys(d.changes).some(key => before.tags[key] !== entity.tags[key]);
+    };
+    const title = (d: Action) => {
+        if (removable(d)) return `${d.title} – ${t('mapillary_sign_bar.present_undo')}`;
+        return d.suggested ? `${d.title} – ${t(d.image ? 'mapillary_sign_bar.suggested_image' : 'mapillary_sign_bar.suggested')}` : d.title;
+    };
+
     const buttons = row.selectAll<HTMLButtonElement, Action>('.mapillary-sign-bar-action')
         .data(actions, d => d.id);
     buttons.exit().remove();
@@ -394,17 +409,19 @@ function renderButtons(context: coreContext, row: d3.Selection<HTMLDivElement>, 
         .merge(buttons)
         .order()
         .text(d => d.label)
-        .attr('title', d => d.suggested ? `${d.title} – ${t(d.image ? 'mapillary_sign_bar.suggested_image' : 'mapillary_sign_bar.suggested')}` : d.title)
+        .attr('title', title)
         .classed('present', d => d.present)
+        .classed('removable', removable)
         .classed('replaces', d => !!d.replaces)
         .classed('suggested', d => !!d.suggested && !d.present)
-        .property('disabled', d => !!d.disabled)
+        .property('disabled', d => !!d.disabled || (d.present && !removable(d)))
         .on('click', (_event, d) => {
             const entity = d.image ? selectedEntity(context) : selectedWay(context);
             if (!entity) return;
-            // a second click takes the tag out again
-            const tags: Record<string, string> = { ...entity.tags, ...(d.present ? {} : d.changes) };
-            if (d.present) {
+            // a second click takes a tag of this session out again
+            const undo = removable(d);
+            const tags: Record<string, string> = { ...entity.tags, ...(undo ? {} : d.changes) };
+            if (undo) {
                 for (const [key, value] of Object.entries(d.remove)) {
                     if (value === undefined) {
                         delete tags[key];
@@ -415,7 +432,7 @@ function renderButtons(context: coreContext, row: d3.Selection<HTMLDivElement>, 
             }
             context.perform(
                 actionChangeTags(entity.id, tags),
-                t(d.present ? 'mapillary_sign_bar.annotation_remove' : 'mapillary_sign_bar.annotation')
+                t(undo ? 'mapillary_sign_bar.annotation_remove' : 'mapillary_sign_bar.annotation')
             );
         });
 }

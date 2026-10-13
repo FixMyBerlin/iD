@@ -86,7 +86,7 @@ export function progressTileTags(bbox: BBox, ring = 0): string[] {
 export type ProgressTracker = {
     /** The mark of a done line */
     get(id: string): ProgressMark | undefined;
-    /** Why the user cannot change a mark now, or undefined */
+    /** Why the user cannot change a mark now (`unavailable`: the last request failed, worth another try), or undefined */
     disabledReason(): 'unavailable' | 'logged_out' | undefined;
     /** `bbox` of the whole line, so the mark is found from every tile the line touches */
     setDone(id: string, bbox: BBox): Promise<void>;
@@ -202,6 +202,7 @@ export function createProgressTracker(context: iD.Context, trackerID: ProgressTr
         async setDone(id, bbox) {
             const tags = progressTileTags(bbox).slice(0, MAX_TILE_TAGS);
             const entry = await client.put(id, { done: true }, tags);
+            _unavailable = false;
             _changes++;
             store(entry);
             dispatch.call('change');
@@ -210,6 +211,7 @@ export function createProgressTracker(context: iD.Context, trackerID: ProgressTr
         async setNotDone(id) {
             // batch: deleting an entry that someone else removed already is not an error
             await client.batch({ delete: [id] });
+            _unavailable = false;
             _changes++;
             _marks.delete(id);
             _markTiles.delete(id);

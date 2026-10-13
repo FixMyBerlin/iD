@@ -1536,6 +1536,11 @@ infra3D is street-level imagery we have for Berlin; it needs a login. The link f
 
 ## Progress log
 
+- 2026-10-13: OSM login on the Netlify site: own OAuth 2 application under the OSM account "FixMyCity TILDA" (client id in `netlify.toml`; redirect URIs for the Netlify site and `127.0.0.1:8080`). iD's default application only allows the addresses of the iD project. The local build still uses iD's default application. Not tested yet.
+- 2026-10-13: Three points left from the review of 2026-10-12:
+  - Progress: a failed request no longer disables "Done"; the note says a click tries again.
+  - Custom data layers: read-only is not available for a layer with progress tracking (the button is greyed, its tooltip says why).
+  - Mapillary bar: a green button takes its tag out again only when the tag was set in this session. A tag that was there before stays, the button is inert as it was.
 - 2026-10-13: Moved to the fork `FixMyBerlin/iD`: branch `radnetz-mapping` (default branch), Netlify site `radnetz-mapping`, a draft PR there against `develop` as the overview (FixMyBerlin/iD PR 1, never merged). The PR on tordans/iD is closed with a link. The Netlify site is linked to the repo through the Netlify GitHub app of the FixMyBerlin organisation; deploy previews are off and only `radnetz-mapping` is built. The new site's origin is allowed in the three key-value DB projects (checked 2026-10-13). To do: update the editor links in the track dataset and the MapRoulette tasks; test the OSM login on the new address.
 - 2026-10-12: Review of the day's changes, fixed: a mark set while the view was loading could vanish again; zoomed out, every tracked line looked not done (now no casings there); polygons of data layers are not culled by their bounds (a mask's bounds are not reliable); the progress section could land below the properties; the way table keeps the row of a tag removed in this session; removing a supplementary sign keeps the value's separator; the infra3D link no longer pulls in the whole imagery package.
 - 2026-10-12: infra3D links (feature 36): a "3D" button in the sidebar's preset header and "infra3D ↗" in the Mapillary bar.

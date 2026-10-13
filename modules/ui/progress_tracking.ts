@@ -93,7 +93,8 @@ export function uiProgressTracking(context: iD.Context) {
             .attr('aria-checked', String(!!current.mark))
             .attr('title', t(current.mark ? 'progress_tracking.undo_tooltip' : 'progress_tracking.done_tooltip'))
             .text(`${current.mark ? '✓ ' : ''}${t('progress_tracking.done')}`)
-            .property('disabled', !!current.disabled || _saving);
+            // "unavailable" is only a note: the last request failed, a click tries again
+            .property('disabled', (!!current.disabled && current.disabled !== 'unavailable') || _saving);
 
         const date = current.mark && new Date(current.mark.at).toLocaleDateString(localizer.languageCode(), { dateStyle: 'medium' });
         section.select('.progress-tracking-byline')

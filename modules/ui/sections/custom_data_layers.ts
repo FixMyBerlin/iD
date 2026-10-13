@@ -166,7 +166,9 @@ export function uiSectionCustomDataLayers(context: iD.Context) {
             ...(mode === 'hidden' ? {} : { selectable: mode === 'interactive' })
         }),
         name: layerName,
-        tooltipPrefix: 'map_data.layer_mode.custom_data'
+        tooltipPrefix: 'map_data.layer_mode.custom_data',
+        // the lines of a tracked layer must stay clickable
+        unavailable: (layer, mode) => layer.tracker && mode === 'readonly' ? 'map_data.layer_mode.custom_data.readonly_tracked' : undefined
     });
 
 

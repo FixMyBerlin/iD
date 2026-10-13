@@ -64,3 +64,12 @@
 .photos-pane .layer-list button:last-of-type {
     border-radius: 0 3px 3px 0;
 }
+
+/* a mode the entry cannot have (e.g. read-only for a data layer with progress tracking) */
+:is(.map-data-pane, .map-display-pane) .layer-mode button.unavailable {
+    cursor: not-allowed;
+}
+:is(.map-data-pane, .map-display-pane) .layer-mode button.unavailable .icon,
+:is(.map-data-pane, .map-display-pane) .layer-mode button.unavailable:hover .icon {
+    opacity: 0.1;
+}

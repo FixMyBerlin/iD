@@ -33,8 +33,11 @@ export function uiLayerModeToggle<T>(options: {
     setMode: (d: T, mode: LayerMode) => void;
     name: (d: T) => string;
     tooltipPrefix: string;
+    /** A mode this entry cannot have: the string key of the reason, shown as the button's tooltip */
+    unavailable?: (d: T, mode: LayerMode) => string | undefined;
 }) {
     const { getMode, setMode, name, tooltipPrefix } = options;
+    const reason = (d: ModeButton<T>) => options.unavailable?.(d.datum, d.mode);
 
     return function(items: Selection<HTMLLIElement, T, any, any>) {
         const group = items.selectAll<HTMLDivElement, T>('.layer-mode')
@@ -54,11 +57,13 @@ export function uiLayerModeToggle<T>(options: {
             .attr('class', d => `layer-mode-${d.mode}`)
             .attr('role', 'radio')
             .call(uiPaneTooltip()
-                .title((d: ModeButton<T>) => t.append(`${tooltipPrefix}.${d.mode}`))
+                .title((d: ModeButton<T>) => t.append(reason(d) ?? `${tooltipPrefix}.${d.mode}`))
             )
             .on('click', (d3_event: MouseEvent, d) => {
                 d3_event.preventDefault();
                 d3_event.stopPropagation();
+                // not `disabled`: a disabled button shows no tooltip with the reason
+                if (reason(d)) return;
                 setMode(d.datum, d.mode);
             })
             .each(function(d) {
@@ -70,6 +75,8 @@ export function uiLayerModeToggle<T>(options: {
 
         buttons.merge(buttonsEnter)
             .classed('active', d => getMode(d.datum) === d.mode)
+            .classed('unavailable', d => !!reason(d))
+            .attr('aria-disabled', d => reason(d) ? 'true' : null)
             .attr('aria-checked', d => String(getMode(d.datum) === d.mode))
             .attr('aria-label', d => `${name(d.datum)}: ${t(`${tooltipPrefix}.${d.mode}`)}`);
     };
