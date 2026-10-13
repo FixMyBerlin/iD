@@ -8,25 +8,27 @@ This file holds the plan and progress. Update it whenever something changes.
 1. **Primary:** build a great, complete editor for this project, here in this worktree.
 2. **Secondary:** later, extract single features into separate branches/contributions.
 
-We do not let goal 2 slow down goal 1. Features are merged or built directly on `radnetz-berlin`.
+We do not let goal 2 slow down goal 1. Features are merged or built directly on `radnetz-mapping`.
 Keep features reasonably separated (own files, own commits, clear commit messages) where it's cheap, so they can be extracted later.
 
 ## Ground rules
 
-- We only work on **`tordans/iD`** (`origin`). With `gh`, always pass `--repo tordans/iD`.
+- We work on **`FixMyBerlin/iD`** (`origin`), since 2026-10-13. With `gh`, always pass `--repo FixMyBerlin/iD`: the fork's parents are `tordans/iD` and `openstreetmap/iD`, and `gh` would pick one of them otherwise.
+- `tordans/iD` (`tordans`) was our fork until then. Its branch `radnetz-berlin` and its PR 10 are frozen; we do not push there anymore.
 - `openstreetmap/iD` (`upstream`) is read-only for us: only fetch from it. Its push URL is set to `NO_PUSH_to_openstreetmap_iD`.
-- All feature work happens on the `radnetz-berlin` branch unless noted.
+- All feature work happens on the `radnetz-mapping` branch unless noted. It is the default branch of the fork; `develop` there is the copy of upstream.
+- Netlify (site `radnetz-mapping`, FixMyCity team) builds and serves only this branch: `https://radnetz-mapping.netlify.app`. No deploy previews, no other branches (`netlify.toml`).
 
 ## Setup
 
 | What | Value |
 |---|---|
 | Worktree | `~/Development/OSM/iD--radnetz-berlin` |
-| Branch | `radnetz-berlin` → `origin/radnetz-berlin` (tordans/iD) |
+| Branch | `radnetz-mapping` → `origin/radnetz-mapping` (FixMyBerlin/iD); until 2026-10-13 `radnetz-berlin` on tordans/iD |
 | Base | `upstream/develop` @ `d9879e101` (2026-09-27) |
 | Main checkout | `~/Development/OSM/iD` (`develop`) |
 
-Updating the base: `git -C ~/Development/OSM/iD pull --ff-only upstream develop`, then merge `develop` into `radnetz-berlin`.
+Updating the base: `git -C ~/Development/OSM/iD pull --ff-only upstream develop`, then merge `develop` into `radnetz-mapping`.
 
 ## Features
 
@@ -1534,6 +1536,7 @@ infra3D is street-level imagery we have for Berlin; it needs a login. The link f
 
 ## Progress log
 
+- 2026-10-13: Moved to the fork `FixMyBerlin/iD`: branch `radnetz-mapping` (default branch), Netlify site `radnetz-mapping`, a PR there against `develop` as the overview. The PR on tordans/iD is closed with a link. To do after the move: allow the new site's origin in the three key-value DB projects, and update the editor links in the track dataset.
 - 2026-10-12: Review of the day's changes, fixed: a mark set while the view was loading could vanish again; zoomed out, every tracked line looked not done (now no casings there); polygons of data layers are not culled by their bounds (a mask's bounds are not reliable); the progress section could land below the properties; the way table keeps the row of a tag removed in this session; removing a supplementary sign keeps the value's separator; the infra3D link no longer pulls in the whole imagery package.
 - 2026-10-12: infra3D links (feature 36): a "3D" button in the sidebar's preset header and "infra3D ↗" in the Mapillary bar.
 - 2026-10-12: Progress tracking: "Done" is one toggle (nothing / done). Origins of the three key-value projects checked: `127.0.0.1` and the Netlify preview of PR 10 answer 200.

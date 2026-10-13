@@ -1,0 +1,8 @@
+# Radnetz mapping editor (FixMyBerlin/iD): Netlify builds and serves only the branch `radnetz-mapping`.
+# Deploy previews and other branch deploys are turned off in the site settings.
+[build]
+  command = "npm run all"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
