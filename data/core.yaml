@@ -804,6 +804,9 @@ en:
         directions: Per direction
         directions_tooltip: "Add signs that apply in one direction of the way only (“traffic_sign:forward”, “traffic_sign:backward”). The sign of the whole way is tagged as “traffic_sign”, without a direction. Direction signs that only repeat the sign of the whole way are shown as that; they are tagged that way with your next change of that sign."
         directions_locked_tooltip: "This way has signs per direction (“traffic_sign:forward”, “traffic_sign:backward”). Remove them to switch this off."
+    traffic_sign_none:
+      label: No sign here
+      tooltip: "Sets {tag}: checked, there is no sign"
     traffic_sign_plan:
       header: "The traffic sign suggests these tags:"
       apply: Apply these tags
@@ -1238,6 +1241,7 @@ en:
   live_touched:
     title: Live edits nearby
     toggle: Show and share live edits
+    unreachable: Live edits could not be turned on. The server cannot be reached from this address.
     login: Live edits need your OpenStreetMap login, so others can see who is editing.
     login_button: Log in to OpenStreetMap
     consent:

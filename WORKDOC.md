@@ -1536,6 +1536,14 @@ infra3D is street-level imagery we have for Berlin; it needs a login. The link f
 
 ## Progress log
 
+- 2026-10-13: Fixes from the first day on the new site and from a tester's list.
+  - Measuring tape (feature 21): the tape layer was below iD's click targets. A press on a handle that sat over a node or way went to that object: the tape closed and the node was dragged. The layer is now the topmost. Reproduced and checked in Firefox with Playwright. A drag start without a tape no longer throws.
+  - Traffic sign fields: an empty field offers "No sign here", which sets `none`.
+  - Map: direction arrows also for `oneway:bicycle=yes` / `-1` on ways that are not one-way (`svg/lines.js`).
+  - TILDA checklist: with `oneway=no` and `oneway:bicycle=yes` the row says "TILDA reads yes from oneway:bicycle=yes" instead of "TILDA reads it as yes".
+  - `unload` → `pagehide` for releasing the history lock (`ui/init.js`): Chrome is turning `unload` off, then the lock stayed.
+  - Live edits: when the server cannot be reached, a message instead of an uncaught error.
+  - Not ours to fix, both are allow lists for the new address `https://radnetz-mapping.netlify.app`: TILDA (`appInstances.const.ts` in tilda-geo, for the notes login) and the key-value project `live-touched`.
 - 2026-10-13: Merged `upstream/develop` (9 commits, among them `coreHistory` in TypeScript). No conflicts; one type fix in `ui/fields/traffic_sign.ts`. A rebase was tried first and dropped: it replays the six feature merges and conflicts on the first. Backup of the state before: local branch `backup/radnetz-mapping-before-rebase-2026-10-13`.
 - 2026-10-13: OSM login on the Netlify site: own OAuth 2 application under the OSM account "FixMyCity TILDA" (client id in `netlify.toml`; redirect URIs for the Netlify site and `127.0.0.1:8080`). iD's default application only allows the addresses of the iD project. The local build still uses iD's default application. Not tested yet.
 - 2026-10-13: Three points left from the review of 2026-10-12:

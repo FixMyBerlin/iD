@@ -22,6 +22,17 @@ function onewayArrowColour(tags) {
     return 'black';
 }
 
+/**
+ * Radnetz Berlin: bicycles ride one way although the way is not one-way for all
+ * (`oneway:bicycle=yes` or `-1` without `oneway`): the direction that matters for bike infrastructure.
+ * @param {iD.OsmWay} entity
+ * @returns {'yes' | '-1' | undefined}
+ */
+function bicycleOneway(entity) {
+    const value = entity.tags['oneway:bicycle'];
+    return (value === 'yes' || value === '-1') && !entity.isOneWay() ? value : undefined;
+}
+
 export function svgLines(projection, context) {
     var detected = utilDetect();
 
@@ -292,11 +303,11 @@ export function svgLines(projection, context) {
 
         Object.keys(pathdata).forEach(function(k) {
             var v = pathdata[k];
-            var onewayArr = v.filter(function(d) { return d.isOneWay(); });
+            var onewayArr = v.filter(function(d) { return d.isOneWay() || bicycleOneway(d); });
             var onewaySegments = svgMarkerSegments(
                 projection, graph, 36,
-                entity => entity.isOneWayBackwards(),
-                entity => entity.isBiDirectional(),
+                entity => bicycleOneway(entity) ? bicycleOneway(entity) === '-1' : entity.isOneWayBackwards(),
+                entity => !bicycleOneway(entity) && entity.isBiDirectional(),
             );
             onewaydata[k] = utilArrayFlatten(onewayArr.map(onewaySegments));
 

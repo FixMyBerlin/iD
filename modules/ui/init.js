@@ -346,9 +346,12 @@ export function uiInit(context) {
         window.onbeforeunload = function() {
             return context.save();
         };
-        window.onunload = function() {
+        // Radnetz Berlin: `pagehide`, not `unload`. Chrome is turning `unload` off ("Permissions policy
+        // violation: unload is not allowed"); then the lock stayed and the next visit could not
+        // save or restore the edits.
+        window.addEventListener('pagehide', function() {
             context.history().unlock();
-        };
+        });
 
         d3_select(window)
             .on('resize.editor', function() {

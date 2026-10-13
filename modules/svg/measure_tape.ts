@@ -39,7 +39,8 @@ export function svgMeasureTape(projection: Projection, context: iD.Context, disp
 
     const behavior = d3_drag<SVGElement, Handle>()
         .subject((d3_event, d) => {
-            if (d === 'both') return { x: d3_event.x, y: d3_event.y };
+            // no tape anymore (it ended with this very press): nothing to drag, but do not throw
+            if (d === 'both' || !measureTape.state()) return { x: d3_event.x, y: d3_event.y };
             const [x, y] = handlePoint(d);
             return { x, y };
         })

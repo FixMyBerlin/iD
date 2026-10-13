@@ -65,7 +65,11 @@ function stateNote(attribute: RequiredAttribute) {
             : t('inspector.tilda.default.generic', { tag: attribute.default });
     }
     if (state === 'ignored') return t('inspector.tilda.state.ignored');
-    if (state === 'ok' && tilda !== undefined && tilda !== value) return t('inspector.tilda.state.normalized', { value: tilda });
+    if (state === 'ok' && tilda !== undefined && tilda !== value) {
+        // another tag decides (`oneway:bicycle` over `oneway`): name it, "reads it as yes" alone misleads
+        return attribute.source ? t('inspector.tilda.state.derived', { value: tilda, tag: attribute.source })
+            : t('inspector.tilda.state.normalized', { value: tilda });
+    }
     return '';
 }
 

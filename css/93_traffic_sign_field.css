@@ -13,3 +13,26 @@
     font-size: 12px;
     font-weight: bold;
 }
+
+/* below an empty traffic sign field: "No sign here" (sets `none`) */
+.ideditor .form-field-input-traffic-sign button.traffic-sign-none,
+.ideditor button.traffic-sign-none {
+    display: inline-block;
+    width: auto;
+    height: 22px;
+    margin: 4px 0 0;
+    padding: 0 8px;
+    border: 1px dashed var(--border-color);
+    border-radius: 11px;
+    background: transparent;
+    color: var(--text-color);
+    font-size: 12px;
+    opacity: 0.8;
+}
+.ideditor button.traffic-sign-none:hover {
+    background: var(--bg-color-3);
+    opacity: 1;
+}
+.ideditor .inspector-hover button.traffic-sign-none {
+    display: none;
+}

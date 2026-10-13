@@ -140,6 +140,27 @@ export function uiFieldTrafficSign(field: unknown, context: iD.Context) {
     }
 
 
+    /** Below an empty field: one click for "there is no sign here" (`traffic_sign=none`) */
+    function drawNoneButton() {
+        if (!_selection) return;
+        const empty = _entityIDs.length > 0 && _tags[fieldKey] === undefined;
+
+        const button = _selection.selectAll<HTMLButtonElement, number>('.traffic-sign-none')
+            .data(empty ? [0] : []);
+        button.exit().remove();
+        button.enter()
+            .append('button')
+            .attr('type', 'button')
+            .attr('class', 'traffic-sign-none')
+            .attr('title', t('inspector.traffic_sign_none.tooltip', { tag: `${fieldKey}=none` }))
+            .call(t.append('inspector.traffic_sign_none.label'))
+            .on('click', (d3_event: MouseEvent) => {
+                d3_event.preventDefault();
+                dispatch.call('change', trafficSign, { [fieldKey]: 'none' });
+            });
+    }
+
+
     function createImpl(fieldModule: TrafficSignFieldModule) {
         const { createTrafficSignField } = fieldModule;
 
@@ -189,6 +210,7 @@ export function uiFieldTrafficSign(field: unknown, context: iD.Context) {
                 selection.call(_impl);
                 _selection = selection;
                 drawSuggestions();
+                drawNoneButton();
                 return loadSignRecommender(context);
             })
             .then(function(recommend) {
@@ -207,6 +229,7 @@ export function uiFieldTrafficSign(field: unknown, context: iD.Context) {
         const value = tags[fieldKey];
         trackSign(typeof value === 'string' ? value : undefined);
         drawSuggestions();
+        drawNoneButton();
         if (_impl) {
             _impl.tags(tags);
         } else {

@@ -168,6 +168,17 @@ describe('roadAttributes', () => {
         expect(byId(requiredAttributes(resultFor(withSource, 'right'), withSource, undefined, new Set(['cycleway:right:width']))).source_width.state).toBe('ok');
     });
 
+    it('oneway=no with oneway:bicycle=yes: names the tag TILDA reads instead', () => {
+        const tags = { highway: 'cycleway', oneway: 'no', 'oneway:bicycle': 'yes' };
+        const oneway = byId(requiredAttributes(resultFor(tags, 'self'), tags)).oneway;
+        expect(oneway.value).toBe('no');
+        expect(oneway.tilda).toBe('yes');
+        expect(oneway.source).toBe('oneway:bicycle=yes');
+        // without the other tag there is no source
+        const plain = { highway: 'cycleway', oneway: 'yes' };
+        expect(byId(requiredAttributes(resultFor(plain, 'self'), plain)).oneway.source).toBeUndefined();
+    });
+
     it('Radinfra FAQ: bicycle roads always need the marking, the buffer only with a line', () => {
         const tags = { highway: 'residential', bicycle_road: 'yes', traffic_sign: 'DE:244.1' };
         const attributes = byId(requiredAttributes(resultFor(tags, 'self'), tags));

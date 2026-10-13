@@ -84,6 +84,17 @@ export function uiSectionLiveTouched(context: iD.Context) {
     }
 
 
+    /** Turns live edits on; when the server cannot be reached (e.g. this address is not allowed there) it says so */
+    function turnOn(live: LiveTouched) {
+        live.enable()
+            .catch((err: unknown) => {
+                console.error('live touched:', err);  // eslint-disable-line no-console
+                (context.ui() as unknown as { flash: { iconName(name: string): { label(text: string): () => void } } })
+                    .flash.iconName('#iD-icon-no').label(t('live_touched.unreachable'))();
+            })
+            .finally(section.reRender);
+    }
+
     function toggle(this: HTMLInputElement) {
         const live = liveTouched();
         if (!live || (this.checked && !isLoggedIn())) {
@@ -96,7 +107,7 @@ export function uiSectionLiveTouched(context: iD.Context) {
             return;
         }
         if (live.hasConsent()) {
-            live.enable().finally(section.reRender);
+            turnOn(live);
             return;
         }
         this.checked = false;
@@ -135,7 +146,8 @@ export function uiSectionLiveTouched(context: iD.Context) {
             .call(t.append('live_touched.consent.accept'))
             .on('click.accept', () => {
                 modal.close();
-                liveTouched()?.enable().finally(section.reRender);
+                const live = liveTouched();
+                if (live) turnOn(live);
                 section.reRender();
             });
     }

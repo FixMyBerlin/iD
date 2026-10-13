@@ -99,6 +99,8 @@ type Rule = {
     sourceFor?: string;
     /** the tag TILDA derives the value from when the key is missing (state `inherited`, with that tag) */
     derivedFrom?: (ctx: RuleContext) => { tag: string; tilda: string } | undefined;
+    /** The tag TILDA reads instead of this key when both are there (`oneway:bicycle` wins over `oneway`) */
+    overriddenBy?: (ctx: RuleContext) => string | undefined;
     when?: (ctx: RuleContext) => boolean;
     optional?: boolean | ((ctx: RuleContext) => boolean);
 };
@@ -212,6 +214,12 @@ export function sideOnewayDefault(tags: Tags, side: 'left' | 'right'): 'yes' | '
  * The oneway default, as a tag value, where it is reliable: on a road side always (never ask for
  * `cycleway:<side>:oneway`, WORKDOC feature 32), else TILDA's default for the category.
  */
+/** TILDA takes the direction from `oneway:bicycle` when it is tagged (`derive_oneway.lua`) */
+function onewayBicycleTag(ctx: RuleContext) {
+    const value = ctx.side === 'self' ? ctx.tags['oneway:bicycle'] : undefined;
+    return value === undefined ? undefined : `oneway:bicycle=${value}`;
+}
+
 function assumedOneway(ctx: RuleContext) {
     if (ctx.side !== 'self') return sideOnewayDefault(ctx.tags, ctx.side);
     if (!RELIABLE_ONEWAY_DEFAULT.has(ctx.category)) return undefined;
@@ -243,7 +251,7 @@ const COMMON: Rule[] = [
         assumed: () => 'no', note: 'surface_colour' },
     { id: 'oneway', key: 'oneway', feeds: ['verkehrsri'], options: ['yes', 'no', '-1'], tilda: field('oneway'), guesses: ['assumed_no', 'implicit_yes'],
         // lanes on the road run with the traffic, bicycle roads are two-way: TILDA's default is reliable there
-        assumed: assumedOneway,
+        assumed: assumedOneway, overriddenBy: onewayBicycleTag,
         // a road side: only "both ways" is information, the direction follows from the side
         assumedOptions: ['no'], note: ctx => ctx.side !== 'self' ? 'oneway_side' : undefined }
 ];
@@ -393,7 +401,7 @@ function evaluate(rules: Rule[], ctx: RuleContext): RequiredAttribute[] {
                 tagged,
                 lookup,
                 tilda,
-                source: derived?.tag,
+                source: derived?.tag ?? (value !== undefined && tilda !== undefined && tilda !== value ? rule.overriddenBy?.(ctx) : undefined),
                 state,
                 options,
                 default: state === 'assumed' ? `${key}=${assumed}` : undefined,
@@ -438,7 +446,7 @@ export function isRoad(tags: Tags) {
 
 const ROAD: Rule[] = [
     // a road without `oneway` is two-way (infraVelo drops `oneway=no` anyway)
-    { id: 'oneway', key: 'oneway', feeds: ['verkehrsri'], options: ['yes', 'no', '-1'], assumed: () => 'no', note: 'oneway_road' },
+    { id: 'oneway', key: 'oneway', feeds: ['verkehrsri'], options: ['yes', 'no', '-1'], assumed: () => 'no', note: 'oneway_road', overriddenBy: onewayBicycleTag },
     ONEWAY_BICYCLE,
     { id: 'dual_carriageway', key: 'dual_carriageway', feeds: ['verkehrsri'], options: ['yes', 'no'], strict: true, optional: true,
         assumed: () => 'no', note: 'dual_carriageway',

@@ -64,10 +64,12 @@ export function svgLayers(projection: Projection, context: iD.Context) {
         { id: 'panoramax', layer: svgPanoramaxImages(projection, context, dispatch) },
         { id: 'local-photos', layer: svgLocalPhotos(projection, context, dispatch) },
         { id: 'width-indicator', layer: svgWidthIndicator(projection, context, dispatch) },
-        { id: 'measure-tape', layer: svgMeasureTape(projection, context, dispatch) },
         { id: 'debug', layer: svgDebug(projection, context) },
         { id: 'geolocate', layer: svgGeolocate(projection) },
         { id: 'touch', layer: svgTouch() },
+        // above the touch targets: else a press on a tape handle over a node or way goes to that
+        // object and drags it instead of the tape
+        { id: 'measure-tape', layer: svgMeasureTape(projection, context, dispatch) },
     ];
 
 
