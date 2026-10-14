@@ -1,6 +1,7 @@
 import { select as d3_select } from 'd3-selection';
 import { PRIVACY_URL, type LiveItem } from '@osm-editor-kit/live-touched';
 
+import { kvErrorMessage } from '../../core/kv_error_message';
 import { t } from '../../core/localizer';
 import type { LiveTouched } from '../../live_touched/live_touched';
 import { modeSelect } from '../../modes/select';
@@ -89,8 +90,10 @@ export function uiSectionLiveTouched(context: iD.Context) {
         live.enable()
             .catch((err: unknown) => {
                 console.error('live touched:', err);  // eslint-disable-line no-console
-                (context.ui() as unknown as { flash: { iconName(name: string): { label(text: string): () => void } } })
-                    .flash.iconName('#iD-icon-no').label(t('live_touched.unreachable'))();
+                (context.ui().flash as any)
+                    .duration(6000)
+                    .iconName('#iD-icon-no')
+                    .label(t.append('live_touched.unreachable', { reason: kvErrorMessage(err) }))();
             })
             .finally(section.reRender);
     }

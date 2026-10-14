@@ -13,7 +13,7 @@ import {
     matchesCustomDataFilter,
     type CustomDataLayer
 } from '../renderer/custom_data_layers';
-import { progressFeatureID, progressTracker, type ProgressTrackerID } from '../progress/tracker';
+import { PROGRESS_REFRESH_MS, progressFeatureID, progressTracker, type ProgressTrackerID } from '../progress/tracker';
 import { services } from '../services';
 import { utilHashcode } from '../util';
 import { svgPath } from './helpers';
@@ -137,6 +137,13 @@ export function svgCustomData(
         if (!_trackersListenedTo.has(layer.tracker)) {
             _trackersListenedTo.add(layer.tracker);
             tracker.on(`change.${namespace}`, () => dispatch.call('change'));
+            // the marks are loaded on draw; a map that stands still is drawn again from time to
+            // time, so marks of other mappers show up without panning
+            if (!minimap) {
+                window.setInterval(() => {
+                    if (customDataLayers.enabled().some(enabled => enabled.tracker) && !document.hidden) dispatch.call('change');
+                }, PROGRESS_REFRESH_MS);
+            }
         }
         return tracker;
     }

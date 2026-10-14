@@ -10,6 +10,7 @@ import {
     type CategoryGap
 } from '@tilda-geo/bicycle-infrastructure';
 
+import { kvErrorMessage } from '../../core/kv_error_message';
 import { localizer, t } from '../../core/localizer';
 import { svgIcon } from '../../svg/icon';
 import { utilRebind } from '../../util/rebind';
@@ -175,11 +176,11 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
         const version = context.hasEntity(wayID as Parameters<iD.Context['hasEntity']>[0])?.version;
         const request = stored ? checks.remove(wayID, check)
             : checks.set(wayID, check, answer, version === undefined ? undefined : String(version));
-        request.catch(() => {
+        request.catch((err: unknown) => {
             (context.ui().flash as any)
-                .duration(4000)
+                .duration(6000)
                 .iconName('#iD-icon-alert')
-                .label(t.append('inspector.tilda.checks.save_failed'))();
+                .label(t.append('inspector.tilda.checks.save_failed', { reason: kvErrorMessage(err) }))();
         });
     }
 

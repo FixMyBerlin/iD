@@ -7,10 +7,6 @@ import { loadSignRecommender, loadedSignJoiner, loadedSignRecommender } from '..
 import type { Operation } from '../core/history';
 import type { WayId } from '../osm';
 
-/** Half of the way in view is enough to see what happens (iD's own operations ask for 80 %) */
-const MIN_VISIBLE_SHARE = 0.5;
-
-
 function titleID(option: ExtractOption) {
     const variant = option.protectedLane ? 'protected' : option.variant;
     return `operations.extract_sidepath.title.${variant}.${option.side}`;
@@ -68,8 +64,7 @@ function extractSidepathOperation(context: iD.Context, wayID: WayId, option: Ext
 
     operation.disabled = function() {
         const graph = context.graph();
-        const way = graph.entity(wayID);
-        if (way.extent(graph).percentContainedIn(context.map().extent()) < MIN_VISIBLE_SHARE) return 'too_large';
+        // no "not enough of it is visible": it slowed the work down too much (testers, 2026-10-14)
         // the traffic sign decides highway and access of the new way: wait for its rules
         if (loadedSignRecommender() === undefined) {
             loadSignRecommender(context).catch(() => { /* extract without sign rules */ });

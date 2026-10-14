@@ -1536,6 +1536,11 @@ infra3D is street-level imagery we have for Berlin; it needs a login. The link f
 
 ## Progress log
 
+- 2026-10-14: Tester feedback and a check of the progress marks.
+  - Read-only features: since 2026-10-13 all touch targets were checked, also midpoints, whose datum is no OSM entity. The check threw on every redraw while read-only categories were set; that stopped the listeners after it. Effects seen: the right-click menu of a way did not open (no split), and very likely the sidebar and the Mapillary bar did not update after a click (TILDA value buttons, "No sign here", the image buttons). Fixed; the right-click was reproduced and checked in Firefox.
+  - Progress marks (feature 35): the map shows the marks from the key-value DB only, never from the dataset. Before a change the line's mark is read again; when someone else changed it since the view was loaded, nothing is written and a message says so ("bob marked this line as done in the meantime"). A selected line is read again at once. A map that stands still asks for new marks every ~2 minutes.
+  - Key-value DB errors are named: address not allowed, login not accepted, too many requests, offline (`core/kv_error_message.ts`), for checks, progress and live edits. All four projects accept the new address (checked 2026-10-13).
+  - Extract and merge (features 17, 28): no "not enough of it is visible" anymore.
 - 2026-10-13: Fixes from the first day on the new site and from a tester's list.
   - Measuring tape (feature 21): the tape layer was below iD's click targets. A press on a handle that sat over a node or way went to that object: the tape closed and the node was dragged. The layer is now the topmost. Reproduced and checked in Firefox with Playwright. A drag start without a tape no longer throws.
   - Traffic sign fields: an empty field offers "No sign here", which sets `none`.

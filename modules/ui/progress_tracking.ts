@@ -1,3 +1,4 @@
+import { kvErrorMessage } from '../core/kv_error_message';
 import { t, localizer } from '../core/localizer';
 import { progressFeatureID, progressTracker, type ProgressMark } from '../progress/tracker';
 import { customDataLayerOfFeature, customDataLineBBox } from '../svg/custom_data';
@@ -37,6 +38,14 @@ export function uiProgressTracking(context: iD.Context) {
     }
 
 
+    function flash(text: string, icon: string) {
+        (context.ui().flash as any)
+            .duration(6000)
+            .iconName(icon)
+            .label((selection: d3.Selection) => selection.text(text))();
+    }
+
+
     /** Done, or back to nothing */
     function toggle() {
         const layer = _datum && customDataLayerOfFeature(_datum);
@@ -49,11 +58,16 @@ export function uiProgressTracking(context: iD.Context) {
 
         _saving = true;
         render();
+        // the tracker reads the line's mark again first: when someone else changed it since the
+        // view was loaded, nothing is written and we say so
         (done ? tracker.setDone(featureID, bbox!) : tracker.setNotDone(featureID))
-            .catch(() => {
-                (context.ui() as unknown as { flash: { iconName(name: string): { label(text: string): () => void } } })
-                    .flash.iconName('#iD-icon-no').label(t('progress_tracking.error'))();
+            .then(change => {
+                if (change.result !== 'already') return;
+                flash(change.mark
+                    ? t('progress_tracking.already_done', { user: change.mark.user })
+                    : t('progress_tracking.already_open'), '#iD-icon-info');
             })
+            .catch((err: unknown) => flash(t('progress_tracking.error', { reason: kvErrorMessage(err) }), '#iD-icon-no'))
             .then(() => {
                 _saving = false;
                 render();
@@ -113,7 +127,14 @@ export function uiProgressTracking(context: iD.Context) {
     }
 
     progressTracking.datum = function(datum: DataFeature | undefined) {
+        const changed = datum !== _datum;
         _datum = datum;
+        // a newly selected line: show its mark as it is on the server now, not as loaded for the view
+        const layer = changed && datum ? customDataLayerOfFeature(datum) : undefined;
+        const featureID = progressFeatureID(datum?.properties);
+        if (layer?.tracker && featureID) {
+            progressTracker(context, layer.tracker).refresh(featureID).catch(() => {});
+        }
         return progressTracking;
     };
 

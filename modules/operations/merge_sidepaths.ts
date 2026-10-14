@@ -3,13 +3,8 @@ import { t } from '../core/localizer';
 import { modeSelect } from '../modes/select';
 import { svgPath } from '../svg/helpers';
 import { loadSignRecommender, loadedSignJoiner, loadedSignRecommender } from '../traffic_sign/recommender';
-import { utilTotalExtent } from '../util';
 import type { Operation } from '../core/history';
 import type { WayId } from '../osm';
-
-/** Half of the way in view is enough to see what happens (iD's own operations ask for 80 %) */
-const MIN_VISIBLE_SHARE = 0.5;
-
 
 /**
  * "Merge into a foot and cycle path" for a selected cycleway and footway(s) (or footway and
@@ -57,7 +52,7 @@ export function operationsMergeSidepaths(context: iD.Context, selectedIDs: strin
         const current = selection();
         if (!current) return 'not_eligible';
         if (current.disabled) return current.disabled;
-        if (utilTotalExtent(wayIDs, context.graph()).percentContainedIn(context.map().extent()) < MIN_VISIBLE_SHARE) return 'too_large';
+        // no "not enough of them is visible": it slowed the work down too much (testers, 2026-10-14)
         // the signs decide `segregated` and are joined by the tool's rules: wait for them
         if (loadedSignRecommender() === undefined) {
             loadSignRecommender(context).catch(() => { /* merge without sign rules */ });

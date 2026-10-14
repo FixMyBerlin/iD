@@ -1,4 +1,4 @@
-import { createKvClient, type KvClient, type KvEntry } from '@osm-editor-kit/key-value-db-client';
+import { createKvClient, KvError, type KvClient, type KvEntry } from '@osm-editor-kit/key-value-db-client';
 import { dispatch as d3_dispatch } from 'd3-dispatch';
 
 /**
@@ -8,6 +8,10 @@ import { dispatch as d3_dispatch } from 'd3-dispatch';
  *
  * One entry per done line: the entry id is the id of the line in its dataset (`id` or `lfd_nr`).
  * "Not done" deletes the entry. Who and when come from the server.
+ *
+ * The map shows the marks from the DB only, never from the dataset (its file is older). They are
+ * at most `TILE_FRESH_MS` old. Before a change the line's mark is read again: when someone else
+ * changed it in the meantime, nothing is written and the caller gets the current mark.
  *
  * The API has no area query. As its docs suggest, an entry carries the map tiles it touches as
  * tags (`z14/8800/5373`), and the view asks for the entries of its tiles.
@@ -34,6 +38,8 @@ const TILES_PER_REQUEST = 20;
 /** more tiles than this in view: zoomed out too far, nothing is loaded */
 const MAX_VIEW_TILES = 60;
 const TILE_FRESH_MS = 2 * 60 * 1000;
+/** How often a map that stands still asks for new marks (the tiles are stale by then) */
+export const PROGRESS_REFRESH_MS = TILE_FRESH_MS + 5 * 1000;
 const PAGE_SIZE = 500;
 const ID_PATTERN = /^[A-Za-z0-9._:/-]{1,128}$/;
 
@@ -83,14 +89,22 @@ export function progressTileTags(bbox: BBox, ring = 0): string[] {
 }
 
 
+/**
+ * What a change did: `saved`, or `already` when the server had that state already (someone else
+ * changed the line since the view was loaded); `mark` is the line's mark on the server now.
+ */
+export type ProgressChange = { result: 'saved' | 'already'; mark: ProgressMark | undefined };
+
 export type ProgressTracker = {
     /** The mark of a done line */
     get(id: string): ProgressMark | undefined;
+    /** Reads the mark of one line from the server again, e.g. when it is selected */
+    refresh(id: string): Promise<ProgressMark | undefined>;
     /** Why the user cannot change a mark now (`unavailable`: the last request failed, worth another try), or undefined */
     disabledReason(): 'unavailable' | 'logged_out' | undefined;
     /** `bbox` of the whole line, so the mark is found from every tile the line touches */
-    setDone(id: string, bbox: BBox): Promise<void>;
-    setNotDone(id: string): Promise<void>;
+    setDone(id: string, bbox: BBox): Promise<ProgressChange>;
+    setNotDone(id: string): Promise<ProgressChange>;
     /**
      * Loads the marks of the view; cheap when its tiles are fresh, so it can run on every draw.
      * `false` when the view is too large to load: what is done there is not known.
@@ -190,8 +204,36 @@ export function createProgressTracker(context: iD.Context, trackerID: ProgressTr
     }
 
 
+    /** The line's mark on the server now; updates the local one */
+    async function refresh(id: string) {
+        let entry: KvEntry<ProgressData> | undefined;
+        try {
+            entry = await client.get(id);
+        } catch (err) {
+            if (!(err instanceof KvError && err.status === 404)) throw err;
+        }
+        _unavailable = false;
+        const before = _marks.get(id);
+        if (entry) {
+            store(entry);
+        } else {
+            _marks.delete(id);
+            _markTiles.delete(id);
+        }
+        const mark = _marks.get(id);
+        if (before?.at !== mark?.at) {
+            // a load of the view that started earlier must not bring the old state back
+            _changes++;
+            dispatch.call('change');
+        }
+        return mark;
+    }
+
+
     const tracker: ProgressTracker = {
         get: id => _marks.get(id),
+
+        refresh,
 
         disabledReason() {
             if (_unavailable) return 'unavailable';
@@ -200,15 +242,24 @@ export function createProgressTracker(context: iD.Context, trackerID: ProgressTr
         },
 
         async setDone(id, bbox) {
+            // done already (by someone else since the view was loaded): keep their mark
+            const current = await refresh(id);
+            if (current) return { result: 'already', mark: current };
+
             const tags = progressTileTags(bbox).slice(0, MAX_TILE_TAGS);
             const entry = await client.put(id, { done: true }, tags);
             _unavailable = false;
             _changes++;
             store(entry);
             dispatch.call('change');
+            return { result: 'saved', mark: _marks.get(id) };
         },
 
         async setNotDone(id) {
+            // not done anymore (someone else took the mark away): nothing to do
+            const current = await refresh(id);
+            if (!current) return { result: 'already', mark: undefined };
+
             // batch: deleting an entry that someone else removed already is not an error
             await client.batch({ delete: [id] });
             _unavailable = false;
@@ -216,6 +267,7 @@ export function createProgressTracker(context: iD.Context, trackerID: ProgressTr
             _marks.delete(id);
             _markTiles.delete(id);
             dispatch.call('change');
+            return { result: 'saved', mark: undefined };
         },
 
         loadView(bbox) {

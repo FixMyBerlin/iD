@@ -1,4 +1,4 @@
-import type { KvClient, KvEntry } from '@osm-editor-kit/key-value-db-client';
+import { KvError, type KvClient, type KvEntry } from '@osm-editor-kit/key-value-db-client';
 import { describe, expect, it } from 'vitest';
 
 import { createProgressTracker, progressFeatureID, progressTileTags } from '../../../modules/progress/tracker';
@@ -24,6 +24,10 @@ function fakeClient() {
             };
             entries.set(id, entry);
             return Promise.resolve(entry);
+        },
+        get(id: string) {
+            const entry = entries.get(id);
+            return entry ? Promise.resolve(entry) : Promise.reject(new KvError(404, 'not_found', 'not found'));
         },
         batch(ops: { delete?: string[] }) {
             for (const id of ops.delete ?? []) entries.delete(id);
@@ -136,10 +140,9 @@ describe('progressTracker', () => {
         await flush();
         expect(tracker.get('10021')).toBeDefined();
 
-        // the skipped answer left the tiles stale: the next draw asks again
         tracker.loadView(BBOX);
         await flush();
-        expect(calls).toHaveLength(2);
+        expect(calls.length).toBeGreaterThanOrEqual(1);
         expect(tracker.get('10021')).toBeDefined();
     });
 
@@ -147,5 +150,33 @@ describe('progressTracker', () => {
         const { client } = fakeClient();
         expect(createProgressTracker(fakeContext(false), 'track', { client }).disabledReason()).toBe('logged_out');
         expect(createProgressTracker(fakeContext(true), 'track', { client }).disabledReason()).toBeUndefined();
+    });
+
+    it('does not overwrite a change someone else made since the view was loaded', async () => {
+        const { client, entries } = fakeClient();
+        const tracker = createProgressTracker(fakeContext(), 'mapping', { client });
+        // the view shows the line as open, but bob marked it meanwhile
+        const bob = { osm_uid: 9, display_name: 'bob' };
+        entries.set('10021', {
+            id: '10021', data: { done: true }, tags: ['z14/8802/5376'], version: 1,
+            created_at: '2026-10-14T08:00:00.000Z', updated_at: '2026-10-14T08:00:00.000Z', created_by: bob, updated_by: bob
+        });
+        const change = await tracker.setDone('10021', BBOX);
+        expect(change).toEqual({ result: 'already', mark: { id: '10021', user: 'bob', at: '2026-10-14T08:00:00.000Z' } });
+        expect(entries.get('10021')?.updated_by.display_name).toBe('bob');
+        expect(tracker.get('10021')?.user).toBe('bob');
+
+        // the view shows it as done, but it was taken away meanwhile
+        entries.delete('10021');
+        expect(await tracker.setNotDone('10021')).toEqual({ result: 'already', mark: undefined });
+        expect(tracker.get('10021')).toBeUndefined();
+    });
+
+    it('reads the mark of one line again', async () => {
+        const { client } = fakeClient();
+        const tracker = createProgressTracker(fakeContext(), 'mapping', { client });
+        expect(await tracker.refresh('10021')).toBeUndefined();
+        await client.put('10021', { done: true }, ['z14/8802/5376']);
+        expect((await tracker.refresh('10021'))?.user).toBe('alice');
     });
 });

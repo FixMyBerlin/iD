@@ -1,4 +1,5 @@
 import { actionChangeTags } from '../actions/change_tags';
+import { kvErrorMessage } from '../core/kv_error_message';
 import { t } from '../core/localizer';
 import { validationIssue, validationIssueFix } from '../core/validation';
 import type { CreateValidator, Validator } from '../core/validation/models';
@@ -142,11 +143,11 @@ function createValidator(context: iD.Context, type: string, kind: CyclewayOneway
             onClick: disabled ? undefined : function(context) {
                 const version = context.hasEntity(entityID as Parameters<iD.Context['hasEntity']>[0])?.version;
                 checks.set(entityID, finding.key, `${finding.key}=${finding.value}`, version === undefined ? undefined : String(version))
-                    .catch(() => {
+                    .catch((err: unknown) => {
                         (context.ui().flash as any)
-                            .duration(4000)
+                            .duration(6000)
                             .iconName('#iD-icon-alert')
-                            .label(t.append('inspector.tilda.checks.save_failed'))();
+                            .label(t.append('inspector.tilda.checks.save_failed', { reason: kvErrorMessage(err) }))();
                     });
             }
         }));

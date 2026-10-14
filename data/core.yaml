@@ -88,7 +88,6 @@ en:
       flash: "Extracted into a separate way. This road: {changes}"
       flash_kept: "Extracted into a separate way. This road: {changes}. Kept bicycle={bicycle} instead of use_sidepath."
       loading: Loading the traffic sign rules, try again in a moment.
-      too_large: This can't be extracted because not enough of it is currently visible.
       incomplete: This can't be extracted because not all of its nodes are downloaded.
       closed: This can't be extracted because it is a closed way.
       too_short: This can't be extracted because the way is too short.
@@ -105,7 +104,6 @@ en:
       flash: Merged into one foot and cycle path.
       flash_dropped: "Merged into one foot and cycle path. Not taken over from the deleted way: {dropped}"
       loading: Loading the traffic sign rules, try again in a moment.
-      too_large: These can't be merged because not enough of them is currently visible.
       mixed: These can't be merged because several cycleways and several footways are selected. Select one cycleway with its footways, or one footway with its cycleways.
       lengths: These can't be merged because their lengths differ too much and more than two ways are selected. Split the ways first, or select one cycleway and one footway.
       apart: These can't be merged because they don't run side by side (more than 25 m apart somewhere). Split the ways first.
@@ -863,7 +861,7 @@ en:
         not_verified: Not verified yet
         changed_since: the way was changed since
         you: you
-        save_failed: "The check could not be saved."
+        save_failed: "The check could not be saved: {reason}"
         disabled:
           new_way: "Upload the way first; a check needs its OpenStreetMap id."
           unavailable: "Checks are not available from this address."
@@ -1241,7 +1239,7 @@ en:
   live_touched:
     title: Live edits nearby
     toggle: Show and share live edits
-    unreachable: Live edits could not be turned on. The server cannot be reached from this address.
+    unreachable: "Live edits could not be turned on: {reason}"
     login: Live edits need your OpenStreetMap login, so others can see who is editing.
     login_button: Log in to OpenStreetMap
     consent:
@@ -1303,12 +1301,21 @@ en:
     tooltip_feature: "Open infra3D looking at this feature (the middle of a line). Needs an infra3D account."
     tooltip_image: "Open infra3D where this image was taken. Needs an infra3D account."
     tooltip_sign: "Open infra3D looking at this sign. Needs an infra3D account."
+  kv_errors:
+    origin_not_allowed: "The project database does not accept requests from {origin}. Ask the admin to allow this address."
+    login: Your OpenStreetMap login was not accepted. Log out and in again.
+    rate_limited: Too many requests to the project database. Try again in a minute.
+    osm_unavailable: OpenStreetMap could not confirm your login right now. Try again later.
+    server: "The project database answered with an error ({status} {code})."
+    network: "The project database could not be reached from {origin}: offline, or this address is not allowed there."
   progress_tracking:
     done: Done
     done_tooltip: Mark this line as done
     undo_tooltip: Take the mark away again
     done_by: "Done: {user}, {date}"
-    error: The progress could not be saved.
+    error: "The progress could not be saved: {reason}"
+    already_done: "{user} marked this line as done in the meantime."
+    already_open: Someone took the mark away in the meantime.
     disabled:
       logged_out: Log in to OpenStreetMap to change the progress.
       unavailable: The progress database could not be reached. A click tries again.
