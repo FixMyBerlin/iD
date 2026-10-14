@@ -92,6 +92,8 @@ export var uiFields = {
     tel: uiFieldTel,
     text: uiFieldText,
     textarea: uiFieldTextarea,
+    // Radnetz Berlin: the fields of this fork, grouped after iD's own
+    // eslint-disable-next-line sort-keys
     mapillaryImages: uiFieldMapillaryImages,
     surfaceSmoothness: uiFieldSurfaceSmoothness,
     trafficSign: uiFieldTrafficSign,

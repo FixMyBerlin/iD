@@ -37,6 +37,7 @@ function fakeContext(authenticated = true) {
         connection: () => ({
             authenticated: () => authenticated,
             getAccessToken: () => 'token',
+            // eslint-disable-next-line no-unused-vars
             userDetails: (callback: (...args: unknown[]) => void) => callback(undefined, { id: '7' })
         })
     } as unknown as iD.Context;
