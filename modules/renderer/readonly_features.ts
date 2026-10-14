@@ -109,11 +109,14 @@ export const readOnlyFeatures = createReadOnlyFeatures();
 
 /** The OSM entity an SVG element of the map stands for (targets carry it in `properties`) */
 function entityForDatum(datum: unknown): Entity | undefined {
-    const d = datum as { properties?: { entity?: Entity }; id?: string; type?: string } | undefined;
+    const d = datum as { properties?: { entity?: unknown }; type?: string } | undefined;
     if (!d) return undefined;
-    if (d.properties?.entity) return d.properties.entity;
-    if (typeof d.id === 'string' && (d.type === 'node' || d.type === 'way' || d.type === 'relation')) return d as unknown as Entity;
-    return undefined;
+    // touch targets carry the entity in `properties`; midpoint targets carry a midpoint there,
+    // which is no OSM entity (no `geometry()`): those are skipped
+    const candidate = (d.properties?.entity ?? d) as { type?: string; geometry?: unknown };
+    const isEntity = (candidate.type === 'node' || candidate.type === 'way' || candidate.type === 'relation') &&
+        typeof candidate.geometry === 'function';
+    return isEntity ? candidate as unknown as Entity : undefined;
 }
 
 
