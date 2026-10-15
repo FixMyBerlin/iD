@@ -192,15 +192,17 @@ export function rendererMap(context) {
             .on(_pointerPrefix + 'over.vertices', function(d3_event) {
                 if (map.editableDataEnabled() && !_isTransformed) {
                     var hover = d3_event.target.__data__;
-                    surface.call(drawVertices.drawHover, context.graph(), hover, map.extent());
-                    dispatch.call('drawn', this, { full: false });
+                    if (drawVertices.drawHover(surface, context.graph(), hover, map.extent())) {
+                        dispatch.call('drawn', this, { full: false });
+                    }
                 }
             })
             .on(_pointerPrefix + 'out.vertices', function(d3_event) {
                 if (map.editableDataEnabled() && !_isTransformed) {
                     var hover = d3_event.relatedTarget && d3_event.relatedTarget.__data__;
-                    surface.call(drawVertices.drawHover, context.graph(), hover, map.extent());
-                    dispatch.call('drawn', this, { full: false });
+                    if (drawVertices.drawHover(surface, context.graph(), hover, map.extent())) {
+                        dispatch.call('drawn', this, { full: false });
+                    }
                 }
             });
 

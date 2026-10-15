@@ -176,11 +176,16 @@ export function utilEntityAndDeepMemberIDs(ids: EntityID[], graph: coreGraph): E
 // returns an selector to select entity ids for:
 //  - deep descendant entityIDs for any of those entities that are relations
 export function utilDeepMemberSelector(ids: EntityID[], graph: coreGraph, skipMultipolygonMembers: boolean): string {
+    return utilEntitySelector(utilDeepMemberIDs(ids, graph, skipMultipolygonMembers));
+}
+
+// returns the deep descendant entityIDs for any of those entities that are relations
+export function utilDeepMemberIDs(ids: EntityID[], graph: coreGraph, skipMultipolygonMembers: boolean): EntityID[] {
     const idsSet = new Set(ids);
     const seen: Set<EntityID> = new Set();
     const returners: Set<EntityID> = new Set();
     ids.forEach(collectDeepDescendants);
-    return utilEntitySelector(Array.from(returners));
+    return Array.from(returners);
 
     function collectDeepDescendants(id: EntityID) {
         if (seen.has(id)) return;
@@ -197,6 +202,25 @@ export function utilDeepMemberSelector(ids: EntityID[], graph: coreGraph, skipMu
             .map(member => member.id)
             .forEach(collectDeepDescendants);   // recurse
     }
+}
+
+
+// Selects the same elements as `selection.selectAll(utilEntitySelector(ids))`.
+// A selector with one class per id gets slow for many ids (e.g. the members of a large
+// relation): the browser matches every element against every class. For many ids,
+// one pass over the elements with a lookup in a set is much faster.
+export function utilSelectEntityElements(selection: d3.Selection<Element>, ids: EntityID[]): d3.Selection<Element> {
+    if (ids.length <= 20) return selection.selectAll<Element, unknown>(utilEntitySelector(ids));
+
+    const idSet = new Set(ids);
+    return selection.selectAll<Element, unknown>('*')
+        .filter(function(this: Element) {
+            const classList = this.classList;
+            for (let i = 0; i < classList.length; i++) {
+                if (idSet.has(classList[i] as EntityID)) return true;
+            }
+            return false;
+        });
 }
 
 

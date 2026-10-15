@@ -25,9 +25,9 @@ import { operationsExtractSidepath } from '../operations/extract_sidepath';
 import { operationsMergeSidepaths } from '../operations/merge_sidepaths';
 import { uiCmd } from '../ui/cmd';
 import {
-    utilArrayIntersection, utilArrayUnion, utilDeepMemberSelector, utilEntityOrDeepMemberSelector,
+    utilArrayIntersection, utilArrayUnion, utilDeepMemberIDs, utilEntityAndDeepMemberIDs,
     utilEntitySelector, utilKeybinding, utilTotalExtent, utilGetAllNodes,
-    utilArrayUniq
+    utilArrayUniq, utilSelectEntityElements
 } from '../util';
 
 
@@ -485,11 +485,9 @@ export function modeSelect(context, selectedIDs) {
             if (context.map().withinEditableZoom()) {
                 // Apply selection styling if not in wide selection
 
-                surface
-                    .selectAll(utilDeepMemberSelector(selectedIDs, context.graph(), true /* skipMultipolgonMembers */))
+                utilSelectEntityElements(surface, utilDeepMemberIDs(selectedIDs, context.graph(), true /* skipMultipolgonMembers */))
                     .classed('selected-member', true);
-                surface
-                    .selectAll(utilEntityOrDeepMemberSelector(selectedIDs, context.graph()))
+                utilSelectEntityElements(surface, utilEntityAndDeepMemberIDs(selectedIDs, context.graph()))
                     .classed('selected', true);
             }
 
