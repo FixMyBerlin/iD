@@ -390,7 +390,9 @@ export function rendererMap(context) {
             // update selected vertices - the user might have just double-clicked a way,
             // creating a new vertex, triggering a partial redraw without a mode change
             surface.call(drawPoints.drawSelected, graph);
-            surface.call(drawVertices.drawSelected, graph, map.extent());
+            // Radnetz Berlin: a full redraw below draws all vertices with the selected ones; drawing
+            // them here as well doubled the vertex work of every redraw with a selection
+            surface.call(drawVertices.drawSelected, graph, map.extent(), fullRedraw);
         }
 
         surface

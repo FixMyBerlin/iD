@@ -79,4 +79,26 @@ describe('iD.svgVertices', function () {
             expect(drawVertices.drawHover(surface, graph, hoverTarget(way), extent)).toBe(false);
         });
     });
+
+
+    describe('drawSelected', function() {
+        it('only updates the selected vertices when a full redraw follows', function() {
+            var first = new iD.osmNode({ loc: [-0.0001, 0] });
+            var middle = new iD.osmNode({ loc: [0, 0] });
+            var last = new iD.osmNode({ loc: [0.0001, 0] });
+            var way = new iD.osmWay({ nodes: [first.id, middle.id, last.id], tags: { highway: 'residential' } });
+            var graph = new iD.coreGraph([first, middle, last, way]);
+            var extent = iD.geoExtent([-1, -1], [1, 1]);
+            var drawVertices = iD.svgVertices(projection, context);
+            context.selectedIDs = function() { return [way.id]; };
+
+            drawVertices.drawSelected(surface, graph, extent, true);
+            expect(surface.selectAll('.vertex').size()).toBe(0);
+
+            // the full redraw draws them, with the plain middle vertex of the selected way
+            surface.call(drawVertices, graph, [first, middle, last, way], function() { return true; }, extent, true);
+            expect(surface.selectAll('g.vertex.' + middle.id).size()).toBe(1);
+        });
+    });
 });
+

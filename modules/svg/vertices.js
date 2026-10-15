@@ -454,7 +454,10 @@ export function svgVertices(projection, context) {
 
 
     // partial redraw - only update the selected items..
-    drawVertices.drawSelected = function(selection, graph, extent) {
+    // Radnetz Berlin: `onlyUpdate` keeps the selected set current without drawing, for a full redraw
+    // that follows anyway. Each partial draw re-renders all persistent vertices (see `filterRendered`),
+    // so drawing here too doubled the vertex work of every redraw with a selection.
+    drawVertices.drawSelected = function(selection, graph, extent, onlyUpdate) {
         var wireframe = context.surface().classed('fill-wireframe');
         var zoom = geoScaleToZoom(projection.scale());
 
@@ -475,6 +478,8 @@ export function svgVertices(projection, context) {
         } else {
             _currSelected = getSiblingAndChildVertices(context.selectedIDs(), graph, wireframe, zoom);
         }
+
+        if (onlyUpdate) return;
 
         // note that drawVertices will add `_currSelected` automatically if needed..
         var filter = function(d) { return d.id in _prevSelected; };

@@ -1534,8 +1534,31 @@ infra3D is street-level imagery we have for Berlin; it needs a login. The link f
 - **Mapillary bar** (above the viewer). "infra3D ↗": with a selected sign it looks at the sign; without, it opens the image nearest to where the shown Mapillary image was taken. The bar now also shows with an image and nothing selected, for this link.
 - Not built: "click on the map to open". The two buttons cover a selected feature and a shown image; a free map click would need its own mode.
 
+### 37. Local performance harness — ✅ (2026-10-15)
+
+`scripts/perf/` (README there): the test link with real mouse input against Maid's mock OSM API and local copies of the TILDA files; no public service is used, the browser blocks everything else. Per step frames, long tasks, redraws, accidental edits; a CPU profile attributed to source modules (ours marked); `--trace` for the browser's own work; `--base-url` runs the same steps on stock iD (Maid's reference build).
+
+Findings of the first runs (dense Neukölln fixture, 1600×1000):
+
+| Step, zoom 17 (22,000 features in view) | before | after | stock iD 2.42 |
+| --- | --- | --- | --- |
+| pan | 13 fps, 25 s for the input | 32 fps, 11 s | 21–33 fps, 9–18 s |
+| pan with a selection | 10–15 fps | 32 fps | 25–29 fps |
+| hover | 37 fps | 56 fps | 6–8 fps |
+
+At the test link's zoom 19.25 every step is at ~60 fps now (pan with a selection was 15 fps).
+
+What was slow, all from this fork:
+- Read-only categories were muted with `filter` and then `opacity` on every element. Each such element is painted as its own transparent group, so every repaint got very slow (pan with a selection 13 fps at z19). Now `stroke-opacity` / `fill-opacity`, not on the invisible shadows.
+- Their click targets lost the class on every redraw (the draws rewrite the class attribute) and got it back: thousands of style changes per redraw. Targets now get an inline `pointer-events: none`; checked elements are remembered while their data is the same.
+- iD's own (empty) data layer redrew the whole map whenever a vector tile of our data layers arrived (`svg/data.js`).
+- With a selection, every redraw drew all vertices twice (`drawSelected` before the full vertex draw). Now it only updates the selected set when a full draw follows.
+
+Left as it is (iD in general): a full redraw at z17 costs 250–500 ms and runs every 750 ms while panning; iD validates newly loaded data in the background; switching on the Mapillary layer redraws the whole map once.
+
 ## Progress log
 
+- 2026-10-15: Local performance harness (feature 37) and four performance fixes found with it: read-only styling without per-element transparency, read-only targets with an inline style, no full redraw from iD's empty data layer on our vector tiles, no double vertex draw with a selection.
 - 2026-10-14: Tester feedback and a check of the progress marks.
   - Read-only features: since 2026-10-13 all touch targets were checked, also midpoints, whose datum is no OSM entity. The check threw on every redraw while read-only categories were set; that stopped the listeners after it. Effects seen: the right-click menu of a way did not open (no split), and very likely the sidebar and the Mapillary bar did not update after a click (TILDA value buttons, "No sign here", the image buttons). Fixed; the right-click was reproduced and checked in Firefox.
   - Progress marks (feature 35): the map shows the marks from the key-value DB only, never from the dataset. Before a change the line's mark is read again; when someone else changed it since the view was loaded, nothing is written and a message says so ("bob marked this line as done in the meantime"). A selected line is read again at once. A map that stands still asks for new marks every ~2 minutes.

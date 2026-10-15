@@ -130,6 +130,10 @@ export function setupReadOnlyFeatures(context: iD.Context) {
 
     /** Some map elements have the class; without read-only categories there is nothing to do else */
     let _marked = false;
+    /** element → the datum it was checked with and the result */
+    let _checked = new WeakMap<Element, { datum: unknown; readOnly: boolean }>();
+    // the categories or the data changed: check every element again
+    const recheck = () => { _checked = new WeakMap(); };
 
     function applyClasses() {
         const surface = context.surface();
@@ -139,29 +143,48 @@ export function setupReadOnlyFeatures(context: iD.Context) {
         if (!readOnlyFeatures.keys().length) {
             if (!_marked) return;
             surface.selectAll('.readonly-feature').classed('readonly-feature', false);
+            surface.selectAll<HTMLElement, unknown>('.layer-touch .target').style('pointer-events', null);
             _marked = false;
             return;
         }
 
         const graph = context.graph();
-        surface.selectAll<Element, unknown>('.layer-osm path, .layer-osm g.point, .layer-osm g.vertex, .layer-touch .target')
+        /** Whether the element's datum is read-only; most elements keep their datum between draws */
+        const isReadOnlyElement = (element: Element, datum: unknown) => {
+            const checked = _checked.get(element);
+            if (checked && checked.datum === datum) return checked.readOnly;
+            const entity = entityForDatum(datum);
+            const readOnly = !!entity && readOnlyFeatures.isReadOnly(entity, graph, features);
+            _checked.set(element, { datum, readOnly });
+            return readOnly;
+        };
+
+        // the drawn features: a class, which the draws keep (they rewrite only the `tag-*` classes)
+        surface.selectAll<Element, unknown>('.layer-osm path, .layer-osm g.point, .layer-osm g.vertex')
             .each(function(datum) {
-                const entity = entityForDatum(datum);
-                const readOnly = !!entity && readOnlyFeatures.isReadOnly(entity, graph, features);
+                const readOnly = isReadOnlyElement(this, datum);
                 // d3's `classed` is much slower here (thousands of elements)
                 if (readOnly !== this.classList.contains('readonly-feature')) {
                     this.classList.toggle('readonly-feature', readOnly);
                 }
             });
+        // the click targets: an inline style. Each draw rewrites their whole class attribute, so a
+        // class had to be added again every time (thousands of style changes per redraw).
+        surface.selectAll<SVGElement, unknown>('.layer-touch .target')
+            .each(function(datum) {
+                const value = isReadOnlyElement(this, datum) ? 'none' : '';
+                if (this.style.pointerEvents !== value) this.style.pointerEvents = value;
+            });
         _marked = true;
     }
 
     readOnlyFeatures.on('change.setupReadOnlyFeatures', () => {
+        recheck();
         context.map().pan([0, 0]);   // forces a full redraw, which re-applies the classes
     });
     context.history()
-        .on('change.readOnlyFeatures', () => readOnlyFeatures.clearCache())
-        .on('merge.readOnlyFeatures', () => readOnlyFeatures.clearCache());   // new parent ways for vertices
+        .on('change.readOnlyFeatures', () => { readOnlyFeatures.clearCache(); recheck(); })
+        .on('merge.readOnlyFeatures', () => { readOnlyFeatures.clearCache(); recheck(); });   // new parent ways for vertices
     context.map().on('drawn.readOnlyFeatures', applyClasses);
 }
 
