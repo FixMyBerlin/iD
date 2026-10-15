@@ -6322,6 +6322,11 @@ li.hide + li.version .badge .tooltip .popover-arrow {
 .edit-menu-item use {
     pointer-events: none;
 }
+/* opened with a key: one line per entry, the full title */
+.edit-menu.keyboard-menu .edit-menu-item .label {
+    max-width: none;
+    white-space: nowrap;
+}
 
 /* Lasso
 ------------------------------------------------------- */

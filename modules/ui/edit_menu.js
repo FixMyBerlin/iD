@@ -56,8 +56,11 @@ export function uiEditMenu(context) {
         // since the mapper's hand likely obscures the screen below the anchor
         _menuTop = isTouchMenu;
 
+        // A menu opened with a key shows labels, too: its entries can share an icon
+        var isKeyboardMenu = _triggerType === 'keyboard';
+
         // Show labels for touch input since there aren't hover tooltips
-        var showLabels = isTouchMenu;
+        var showLabels = isTouchMenu || isKeyboardMenu;
 
         var buttonHeight = showLabels ? 32 : 34;
         if (showLabels) {
@@ -75,6 +78,7 @@ export function uiEditMenu(context) {
             .append('div')
             .attr('class', 'edit-menu')
             .classed('touch-menu', isTouchMenu)
+            .classed('keyboard-menu', isKeyboardMenu)
             .style('padding', _verticalPadding + 'px 0');
 
         var buttons = _menu.selectAll('.edit-menu-item')
@@ -145,6 +149,24 @@ export function uiEditMenu(context) {
                 const reason = d.disabled();
                 return reason && !d.interrupts?.[reason];
             });
+
+        if (isKeyboardMenu) {
+            // the labels decide the width; arrow keys move between the enabled entries
+            _menuWidth = _menu.node().offsetWidth;
+            var enabledItems = function() { return _menu.selectAll('.edit-menu-item:not(.disabled)').nodes(); };
+            _menu.on('keydown', function(d3_event) {
+                var step = { ArrowDown: 1, ArrowUp: -1 }[d3_event.key];
+                if (!step) return;
+                d3_event.preventDefault();
+                d3_event.stopPropagation();
+                var nodes = enabledItems();
+                var index = nodes.indexOf(document.activeElement);
+                nodes[(index + step + nodes.length) % nodes.length].focus();
+            });
+            // Enter picks the focused entry
+            var first = enabledItems()[0];
+            if (first) first.focus();
+        }
 
         updatePosition();
 

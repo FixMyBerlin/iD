@@ -1,8 +1,10 @@
 import { actionExtractSidepath } from '../actions/extract_sidepath';
+import { behaviorOperation } from '../behavior/operation';
 import { t } from '../core/localizer';
 import { modeSelect } from '../modes/select';
 import { extractOptions, planExtraction, type ExtractOption } from '../sidepath/extract_tags';
 import { svgPath } from '../svg/helpers';
+import { uiCmd } from '../ui/cmd';
 import { loadSignRecommender, loadedSignJoiner, loadedSignRecommender } from '../traffic_sign/recommender';
 import type { Operation } from '../core/history';
 import type { WayId } from '../osm';
@@ -112,8 +114,52 @@ function extractSidepathOperation(context: iD.Context, wayID: WayId, option: Ext
 
 
 /**
+ * ⌘E for the extract entries of the edit menu: one enabled entry runs, several open a menu with
+ * all of them next to the pointer. The entries have no key of their own: the key does not pick one.
+ */
+function extractSidepathKeyOperation(context: iD.Context, wayID: WayId, operations: Operation[]): Operation {
+    const enabled = () => operations.filter(operation => !operation.disabled());
+
+    function showChoices() {
+        // next to the pointer; the way's center if the pointer was last seen outside of the map
+        const { width, height } = context.surfaceRect();
+        const mouse = context.map().mouse();
+        const inside = mouse && mouse[0] >= 0 && mouse[0] <= width && mouse[1] >= 0 && mouse[1] <= height;
+        const anchor = inside ? mouse : context.projection(context.entity(wayID).extent(context.graph()).center());
+        context.ui().showEditMenu(anchor, 'keyboard', operations);
+    }
+
+    const operation: Operation = function(event) {
+        enabled()[0]?.(event);
+    };
+
+    operation.available = () => true;
+
+    // several choices: the interrupt opens the menu, so no "Extract" flash comes before it
+    operation.disabled = function() {
+        const choices = enabled();
+        if (choices.length > 1) return 'choose';
+        return choices.length ? false : operations[0].disabled();
+    };
+
+    operation.interrupts = { choose: () => Promise.resolve(showChoices()) };
+
+    const current = () => enabled()[0] ?? operations[0];
+    operation.tooltip = () => current().tooltip();
+    operation.annotation = () => current().annotation();
+
+    operation.id = 'extract_sidepath';
+    operation.keys = [uiCmd('⌘E')];
+    operation.title = operations[0].title;
+
+    return operation;
+}
+
+
+/**
  * "Extract right cycle track", "… sidewalk", "… cycle track and sidewalk as one path" for the
  * sides of a single selected road (WORKDOC feature 17). Added to the edit menu after "Extract".
+ * ⌘E extracts (one choice) or opens a menu with the choices (several).
  */
 export function operationsExtractSidepath(context: iD.Context, selectedIDs: string[]): Operation[] {
     if (selectedIDs.length !== 1 || !selectedIDs[0].startsWith('w')) return [];
@@ -124,5 +170,10 @@ export function operationsExtractSidepath(context: iD.Context, selectedIDs: stri
     // start loading the traffic sign rules early
     if (loadedSignRecommender() === undefined) loadSignRecommender(context).catch(() => { /* see disabled() */ });
 
-    return extractOptions(way.tags).map(option => extractSidepathOperation(context, wayID, option));
+    const operations = extractOptions(way.tags).map(option => extractSidepathOperation(context, wayID, option));
+    // the behavior is installed and removed with the operation list: hang it on the first entry
+    if (operations.length) {
+        operations[0].behavior = behaviorOperation(context).which(extractSidepathKeyOperation(context, wayID, operations));
+    }
+    return operations;
 }

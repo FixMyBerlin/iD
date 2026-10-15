@@ -1,7 +1,9 @@
 import { actionMergeSidepaths, mergeSidepathsSelection } from '../actions/merge_sidepaths';
+import { behaviorOperation } from '../behavior/operation';
 import { t } from '../core/localizer';
 import { modeSelect } from '../modes/select';
 import { svgPath } from '../svg/helpers';
+import { uiCmd } from '../ui/cmd';
 import { loadSignRecommender, loadedSignJoiner, loadedSignRecommender } from '../traffic_sign/recommender';
 import type { Operation } from '../core/history';
 import type { WayId } from '../osm';
@@ -96,8 +98,9 @@ export function operationsMergeSidepaths(context: iD.Context, selectedIDs: strin
 
     operation.icon = () => '#iD-operation-merge';
     operation.id = 'merge_sidepaths';
-    operation.keys = [];
+    operation.keys = [uiCmd('⌘M')];
     operation.title = t.append('operations.merge_sidepaths.title');
+    operation.behavior = behaviorOperation(context).which(operation);
 
     return [operation];
 }
