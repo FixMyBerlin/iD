@@ -765,6 +765,23 @@ export function rendererMap(context) {
     };
 
 
+    /**
+     * Redraws the data layers only, not the OSM data, e.g. after a data layer loaded tiles.
+     * Sends a partial `drawn`, so that modes re-apply their classes (e.g. the selected data feature).
+     */
+    map.redrawLayers = function() {
+        if (!surface || surface.empty() || !_redrawEnabled) return map;
+        if (_isTransformed) {
+            // mid pan or zoom only full redraws work; one is on its way
+            scheduleRedraw();
+            return map;
+        }
+        wrapper.call(drawLayers);
+        dispatch.call('drawn', this, { full: false });
+        return map;
+    };
+
+
     map.isTransformed = function() {
         return _isTransformed;
     };

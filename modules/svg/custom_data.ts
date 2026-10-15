@@ -123,7 +123,10 @@ export function svgCustomData(
 ) {
     const minimap = !!options?.minimap;
     const namespace = minimap ? 'svgCustomDataMinimap' : 'svgCustomData';
-    const throttledRedraw = throttle(() => dispatch.call('change'), 1000);
+    // New data or marks change nothing in the OSM data: the main map draws its layers only, not
+    // the OSM data (a full redraw takes far longer). The minimap's dispatch redraws just the minimap.
+    const redrawData = () => minimap ? dispatch.call('change') : context.map().redrawLayers();
+    const throttledRedraw = throttle(redrawData, 1000);
     const _geojson = new Map<string, GeoJSONCacheEntry>();
     let _vtService: typeof services.vectorTile | undefined;
 
@@ -136,12 +139,12 @@ export function svgCustomData(
         const tracker = progressTracker(context, layer.tracker);
         if (!_trackersListenedTo.has(layer.tracker)) {
             _trackersListenedTo.add(layer.tracker);
-            tracker.on(`change.${namespace}`, () => dispatch.call('change'));
+            tracker.on(`change.${namespace}`, redrawData);
             // the marks are loaded on draw; a map that stands still is drawn again from time to
             // time, so marks of other mappers show up without panning
             if (!minimap) {
                 window.setInterval(() => {
-                    if (customDataLayers.enabled().some(enabled => enabled.tracker) && !document.hidden) dispatch.call('change');
+                    if (customDataLayers.enabled().some(enabled => enabled.tracker) && !document.hidden) redrawData();
                 }, PROGRESS_REFRESH_MS);
             }
         }
@@ -174,7 +177,7 @@ export function svgCustomData(
                 entry.features = [];
                 console.error(`custom data layer ${layer.url}:`, err);  // eslint-disable-line no-console
             })
-            .finally(() => dispatch.call('change'));
+            .finally(redrawData);
 
         return [];
     }
