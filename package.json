@@ -55,7 +55,11 @@
     "test:once": "vitest run --no-isolate",
     "test:coverage": "vitest run --no-isolate --coverage.enabled",
     "translations": "node scripts/update_locales.js",
-    "vendor:surface-smoothness": "rsync -a --delete --exclude '*.d.ts' ../osm-surface-smoothness-workspace/osm-surface-smoothness-tagging/packages/id-field/dist/ vendor/surface-smoothness-field/ && rsync -a --delete ../osm-surface-smoothness-workspace/osm-surface-smoothness-tagging/packages/data/dist/generated/images vendor/surface-smoothness-field/"
+    "vendor:surface-smoothness": "rsync -a --delete --exclude '*.d.ts' ../osm-surface-smoothness-workspace/osm-surface-smoothness-tagging/packages/id-field/dist/ vendor/surface-smoothness-field/ && rsync -a --delete ../osm-surface-smoothness-workspace/osm-surface-smoothness-tagging/packages/data/dist/generated/images vendor/surface-smoothness-field/",
+    "perf:fixtures": "node scripts/perf/fetch_fixtures.mjs",
+    "perf:build": "node scripts/perf/build.mjs",
+    "perf:serve": "node scripts/perf/serve.mjs",
+    "perf": "node scripts/perf/run.mjs"
   },
   "dependencies": {
     "@mapbox/geojson-area": "^0.2.2",
@@ -136,6 +140,7 @@
     "nise": "^6.1.1",
     "npm-run-all": "^4.0.0",
     "osm-community-index": "^6.1.0",
+    "playwright-core": "^1.64.1",
     "postcss": "^8.5.6",
     "postcss-prefix-selector": "^2.1.1",
     "serve-handler": "^6.1.6",
