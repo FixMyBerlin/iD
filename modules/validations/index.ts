@@ -1,6 +1,7 @@
 export { validationAlmostJunction } from './almost_junction';
 export { validationCloseNodes } from './close_nodes';
 export { validationCrossingWays } from './crossing_ways';
+export { validationCyclewayOnewayRedundant, validationCyclewayOnewayWrong } from './cycleway_side_oneway';
 export { validationDisconnectedWay } from './disconnected_way';
 export { validationFormatting } from './invalid_format';
 export { validationHelpRequest } from './help_request';

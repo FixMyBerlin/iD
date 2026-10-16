@@ -9,6 +9,9 @@ import { utilRebind } from '../../util';
 import { uiPresetIcon } from '../preset_icon';
 import { uiSection } from '../section';
 import { uiTagReference } from '../tag_reference';
+import { uiFavoriteButton } from '../favorite_button';
+import { uiInfra3dButton } from '../infra3d_button';
+import { presetFavorites } from '../../core/preset_favorites';
 
 
 export function uiSectionFeatureType(context) {
@@ -19,10 +22,13 @@ export function uiSectionFeatureType(context) {
     var _presets = [];
 
     var _tagReference;
+    var _favoriteButton = uiFavoriteButton(context);
+    var _infra3dButton = uiInfra3dButton(context);
 
     var section = uiSection('feature-type', context)
         .label(() => t.append('inspector.feature_type'))
-        .disclosureContent(renderDisclosureContent);
+        // Radnetz Berlin: the preset is the sidebar's header, not a collapsible section
+        .content(renderDisclosureContent);
 
     function renderDisclosureContent(selection) {
 
@@ -77,6 +83,11 @@ export function uiSectionFeatureType(context) {
                 .call(_tagReference.body);
         }
 
+        selection.selectAll('.preset-list-button-wrap .accessory-buttons')
+            .call(_favoriteButton.presets(_presets))
+            // Radnetz Berlin: open infra3D at the selected feature
+            .call(_infra3dButton.entityIDs(_entityIDs));
+
         selection.selectAll('.preset-reset')
             .on('click', function() {
                  dispatch.call('choose', this, _presets);
@@ -99,6 +110,15 @@ export function uiSectionFeatureType(context) {
         ].filter(Boolean) : [ t.append('inspector.multiple_types') ];
 
         var label = selection.select('.label-inner');
+
+        // Radnetz Berlin: "Feature type" as a small line above the preset name
+        label.selectAll('.feature-type-kicker')
+            .data([0])
+            .enter()
+            .insert('div', ':first-child')
+            .attr('class', 'feature-type-kicker')
+            .call(t.append('inspector.feature_type'));
+
         var nameparts = label.selectAll('.namepart')
             .data(names, d => d.stringId);
 
@@ -149,6 +169,8 @@ export function uiSectionFeatureType(context) {
             return counts[geom2] - counts[geom1];
         });
     }
+
+    presetFavorites.on('change.featureType', section.reRender);
 
     return utilRebind(section, dispatch, 'on');
 }

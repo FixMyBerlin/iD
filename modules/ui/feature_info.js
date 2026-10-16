@@ -38,8 +38,8 @@ export function uiFeatureInfo(context) {
                 .on('click', function(d3_event) {
                     tooltipBehavior.hide();
                     d3_event.preventDefault();
-                    // open the Map Data pane
-                    context.ui().togglePanes(context.container().select('.map-panes .map-data-pane'));
+                    // open the Map Display pane
+                    context.ui().togglePanes(context.container().select('.map-panes .map-display-pane'));
                 });
         }
 

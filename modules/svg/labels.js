@@ -326,6 +326,9 @@ export function svgLabels(projection, context) {
             area: []
         };
 
+        // looked up once: a selector query for every label is costly with thousands of map elements
+        var labelsNode = selection.select('g.layer-osm.labels').node();
+
         // Try and find a valid label for labellable entities
         for (k = 0; k < labelable.length; k++) {
             var fontSize = labelStack[k][3];
@@ -337,7 +340,7 @@ export function svgLabels(projection, context) {
                 let name = geometry === 'line'
                     ? utilDisplayNameForPath(entity)
                     : utilDisplayName(entity, { isMapLabel: true });
-                var width = name && textWidth(name, fontSize, selection.select('g.layer-osm.labels').node());
+                var width = name && textWidth(name, fontSize, labelsNode);
                 var p = null;
 
                 if (geometry === 'point' || geometry === 'vertex') {
@@ -349,7 +352,7 @@ export function svgLabels(projection, context) {
                     let charsRemaining = utilUnicodeCharsCount(name) - 1;
                     while (renderAs.isAddr && width > 36) {
                         name = `${utilUnicodeCharsTruncated(name.replace(/…$/, ''), charsRemaining--)}…`;
-                        width = textWidth(name, fontSize, selection.select('g.layer-osm.labels').node());
+                        width = textWidth(name, fontSize, labelsNode);
                     }
 
                     p = getPointLabel(entity, width, fontSize, renderAs);
@@ -794,21 +797,49 @@ export function svgLabels(projection, context) {
 
 
 const _textWidthCache = {};
+/** canvas context for measuring; undefined until first use, null without canvas support */
+let _measureContext;
+/** the font family the labels inherit, read once from the map */
+let _labelFontFamily;
+
+/**
+ * Width of `text` in bold at `size` px, in the font of `container` (an element of the map).
+ * Measured on a canvas: measuring an SVG `<text>` in the document forces a style and layout
+ * pass of the whole page, mid redraw, for every text not in the cache yet.
+ */
 export function textWidth(text, size, container) {
     _textWidthCache[size] ||= {};
     let c = _textWidthCache[size];
 
-    if (c[text]) {
+    if (c[text] !== undefined) {
         return c[text];
     }
+
+    if (_measureContext === undefined) {
+        _measureContext = document.createElement('canvas').getContext?.('2d') ?? null;
+    }
+    if (!_labelFontFamily && container) {
+        // empty while the map is not in the document yet: read again next time
+        _labelFontFamily = window.getComputedStyle(container).fontFamily;
+    }
+
+    if (_measureContext && _labelFontFamily) {
+        _measureContext.font = `bold ${size}px ${_labelFontFamily}`;
+        c[text] = _measureContext.measureText(text).width;
+        return c[text];
+    }
+
+    // no canvas (e.g. in tests) or no font yet: measure in the document
     const elem = document.createElementNS('http://www.w3.org/2000/svg', 'text');
     elem.style.fontSize = `${size}px`;
     elem.style.fontWeight = 'bold';
     elem.textContent = text;
     container.appendChild(elem);
-    c[text] = elem.getComputedTextLength();
+    const width = elem.getComputedTextLength();
     elem.remove();
-    return c[text];
+    // only cache what was measured in the map's font
+    if (_labelFontFamily) c[text] = width;
+    return width;
 }
 
 

@@ -1209,6 +1209,12 @@ export default {
     },
 
 
+    // Used by live touched (`modules/live_touched/`) to identify the user at its backend
+    getAccessToken: function() {
+        return oauth.getAccessToken();
+    },
+
+
     /** @param {import('osm-auth').LoginOptions} options */
     authenticate: function(callback, options) {
         var that = this;

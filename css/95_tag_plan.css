@@ -1,0 +1,58 @@
+/* Tag plan: proposed tag changes with a reason each and one apply button
+   (TILDA section, traffic sign suggestions; modules/ui/tag_plan.ts) */
+
+.tag-plan {
+    font-size: 12px;
+}
+.tag-plan ul {
+    margin: 6px 0;
+}
+.tag-plan li {
+    margin: 4px 0;
+}
+.tag-plan li.tag-plan-add code::before { content: '+ '; }
+.tag-plan li.tag-plan-change code::before { content: '~ '; }
+.tag-plan li.tag-plan-remove code::before { content: '− '; }
+.tag-plan li.tag-plan-remove code { text-decoration: line-through; }
+.tag-plan .tag-plan-reason {
+    display: block;
+    color: var(--passive-text-color);
+}
+.tag-plan-conflict-text {
+    margin: 4px 0;
+    padding: 8px 10px;
+    border-left: 4px solid #e06d5f;
+    border-radius: 4px;
+    background: var(--bg-color-2);
+    line-height: 1.5;
+}
+.tag-plan button.tag-plan-apply {
+    height: auto;
+    padding: 4px 10px;
+}
+.tag-plan button.tag-plan-apply.hide {
+    display: none;
+}
+
+/* diff mode: iD's tag diff, as in the "suggested" changes of the outdated tags issue (.issue-info) */
+.tag-plan .tagDiff-table {
+    width: 100%;
+    margin: 6px 0;
+    border: 1px solid var(--border-color);
+}
+.tag-plan .tagDiff-row {
+    border: 1px solid var(--border-color);
+}
+.tag-plan .tagDiff-cell {
+    padding: 2px 10px;
+    font-family: monospace;
+    font-size: 11px;
+    border: 1px solid var(--border-color);
+    overflow-wrap: anywhere;
+}
+.tag-plan .tagDiff-cell-add {
+    background: var(--valid-bg-color);
+}
+.tag-plan .tagDiff-cell-remove {
+    background: var(--error-bg-color);
+}

@@ -307,7 +307,9 @@ export function uiFieldText(field, context) {
 
         const now = new Date();
         const today = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().split('T')[0];
-        if ((field.key === 'check_date' || field.key === 'survey:date') && date !== today) {
+        // Radnetz Berlin: also `check_date:surface` (related tags, feature 25)
+        const isCheckDate = field.key === 'check_date' || field.key === 'survey:date' || field.key.startsWith('check_date:');
+        if (isCheckDate && date !== today) {
             wrap.selectAll('.date-set-today')
                 .data([0])
                 .enter()

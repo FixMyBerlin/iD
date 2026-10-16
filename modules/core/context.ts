@@ -7,6 +7,8 @@ import packageJSON from '../../package.json';
 import type { EntityId, NoteId, osmChangeset, OsmEntity } from '../osm';
 import { t, localizer } from './localizer';
 import { fileFetcher, type AssetMap } from './file_fetcher';
+import { prefs } from './preferences';
+import { applyLens, LENS_PREF, readLensFromHash, UPLOADED_LENSES_PREF, writeLensToHash } from './lenses';
 import { coreHistory } from './history';
 import { coreValidator } from './validator';
 import { coreUploader } from './uploader';
@@ -67,6 +69,11 @@ interface LoadedData {
     data: OsmEntity[];
 }
 
+export type DirectionalComboIndicatorState = {
+    side: 'left' | 'right';
+    entityIDs: string[];
+};
+
 export interface coreContext extends Pick<Dispatch<object, EventMap>, 'on'> {
     version: string;
     privacyVersion: string;
@@ -112,6 +119,9 @@ export interface coreContext extends Pick<Dispatch<object, EventMap>, 'on'> {
 
     selectedIDs(): EntityId[];
     activeID(): EntityId | undefined;
+    /** Side of the selected ways that the focused directional combo row describes */
+    directionalComboIndicator(): DirectionalComboIndicatorState | null;
+    setDirectionalComboIndicator(val: DirectionalComboIndicatorState | null): coreContext;
     selectedNoteID: GetSet<coreContext, NoteId | null>;
     selectedErrorID: GetSet<coreContext, string | null>;
 
@@ -484,6 +494,20 @@ export function coreContext(this: object): coreContext {
   context.selectedIDs = () => (_mode && _mode.selectedIDs && _mode.selectedIDs()) || [];
   context.activeID = () => _mode && _mode.activeID && _mode.activeID();
 
+  let _directionalComboIndicator: DirectionalComboIndicatorState | null = null;
+  context.directionalComboIndicator = () => _directionalComboIndicator;
+  context.setDirectionalComboIndicator = (val: DirectionalComboIndicatorState | null) => {
+    const previous = _directionalComboIndicator;
+    const unchanged = previous === val ||
+      (!!previous && !!val && previous.side === val.side && previous.entityIDs.join() === val.entityIDs.join());
+    if (unchanged) return context;
+
+    _directionalComboIndicator = val;
+    // only the ways with the arrows; a full redraw on every hover in the sidebar is too slow
+    _map.redrawEntities([...new Set([...(previous?.entityIDs ?? []), ...(val?.entityIDs ?? [])])]);
+    return context;
+  };
+
   let _selectedNoteID: NoteId | null;
   context.selectedNoteID = function(noteID) {
     if (!arguments.length) return _selectedNoteID;
@@ -748,6 +772,20 @@ export function coreContext(this: object): coreContext {
       _map.init();
       _validator.init();
       _features.init();
+
+      // apply the active CSS lens (injected CSS + tag classes), and re-apply +
+      // redraw whenever the selected lens or the stored lenses change
+      // a link can name a bundled lens (`lens=radnetz-qa`); the active one is written to the URL
+      readLensFromHash();
+      applyLens();
+      writeLensToHash();
+      const onLensChange = () => {
+        applyLens();
+        writeLensToHash();
+        if (_map) _map.pan([0, 0]);   // force a redraw so classes are recomputed
+      };
+      prefs.onChange(LENS_PREF, onLensChange);
+      prefs.onChange(UPLOADED_LENSES_PREF, onLensChange);
 
       // Migrate history data from localStorage to IndexedDB
       _history.migrateHistoryData();

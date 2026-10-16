@@ -1,0 +1,166 @@
+/* Multiple custom data layers: Map Data pane section and settings modal */
+
+.layer-list-custom-data label > span.custom-data-swatch {
+    display: block;
+    flex: 0 0 12px;
+    width: 12px;
+    height: 12px;
+    margin-inline: 4px 8px;
+    border-radius: 2px;
+    vertical-align: middle;
+}
+
+.layer-list-custom-data label > span.custom-data-name {
+    flex: 1 1 auto;
+    width: auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+/* "(key=value)" after the name */
+.layer-list-custom-data .custom-data-filter {
+    margin-inline-start: 4px;
+    font-size: 11px;
+    opacity: 0.7;
+}
+
+.custom-data-layers-empty {
+    margin: 0 0 10px 0;
+    font-size: 12px;
+}
+
+.settings-custom-data-layer label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+.settings-custom-data-layer input.field-name,
+.settings-custom-data-layer textarea.field-url {
+    display: block;
+    width: 100%;
+    margin: 0 0 5px 0;
+}
+.settings-custom-data-layer input.field-name {
+    margin-bottom: 20px;
+}
+.settings-custom-data-layer .instructions-formats,
+.settings-custom-data-layer .instructions-filter {
+    font-size: 12px;
+    margin: 0 0 20px 0;
+}
+.settings-custom-data-layer .filter-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 5px;
+}
+.settings-custom-data-layer .filter-row input {
+    flex: 1 1 0;
+    min-width: 0;
+}
+.settings-custom-data-layer input.field-color {
+    width: 60px;
+    height: 30px;
+    padding: 2px;
+}
+
+/* a layer that is not selectable ignores the pointer, so clicks reach the OSM data below */
+.layer-custom-data.not-selectable,
+.layer-custom-data.not-selectable path,
+.layer-custom-data.not-selectable text {
+    /* iD's rules for area fills are more specific */
+    pointer-events: none !important;
+}
+.custom-data-filter-tooltip {
+    margin-top: 6px;
+}
+
+/* minimap: thin outlines and a light fill, no interaction */
+.map-in-map-data .layer-custom-data {
+    pointer-events: none;
+}
+.map-in-map-data .layer-custom-data path.stroke {
+    stroke-width: 1.5;
+    fill: none;
+}
+.map-in-map-data .layer-custom-data path.Point.stroke,
+.map-in-map-data .layer-custom-data path.MultiPoint.stroke {
+    fill: var(--custom-data-color);
+}
+.map-in-map-data .layer-custom-data path.fill {
+    stroke: none;
+    fill: var(--custom-data-color);
+    fill-opacity: 0.25;
+}
+
+/* progress tracking: radio buttons in the layer settings */
+.settings-custom-data-layer .tracker-options {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 5px;
+}
+.settings-custom-data-layer .tracker-options label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: normal;
+}
+.settings-custom-data-layer .tracker-options input {
+    width: auto;
+    margin: 0;
+}
+
+/* progress tracking: a red casing around every tracked line, green when it is done */
+.layer-custom-data path.casing {
+    fill: none;
+    stroke: #e5484d;
+    stroke-width: 9;
+    stroke-opacity: 0.85;
+    stroke-linecap: round;
+    pointer-events: none;
+}
+.layer-custom-data path.casing.progress-done {
+    stroke: #2fb344;
+}
+.map-in-map-data .layer-custom-data path.casing {
+    display: none;
+}
+
+/* progress tracking in the sidebar */
+.progress-tracking {
+    margin: 0 20px 10px;
+    padding: 8px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+.progress-tracking-title {
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+.progress-tracking-buttons {
+    display: flex;
+    gap: 6px;
+}
+.ideditor .progress-tracking-buttons button {
+    flex: 1 1 0;
+    height: 30px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-color-2);
+    color: var(--text-color);
+}
+.ideditor .progress-tracking-buttons button:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+.ideditor .progress-tracking-buttons button.progress-done.active {
+    background: #2fb344;
+    border-color: #2fb344;
+    color: #fff;
+    opacity: 1;
+}
+.progress-tracking-byline:not(:empty) {
+    margin-top: 6px;
+    font-size: 12px;
+}

@@ -1,0 +1,329 @@
+/* TILDA bike infrastructure section in the inspector.
+   Cards look like iD fields: a header bar like `.field-label`, a bordered body below. */
+
+.section-tilda-bike-infra {
+    line-height: 1.4;
+}
+
+/* plain text like the info text of fields and presets (.tag-reference-body) */
+.tilda-callout {
+    padding-bottom: 10px;
+    color: var(--text-color);
+    font-size: 12px;
+}
+
+.tilda-card {
+    margin-bottom: 10px;
+}
+/* one line: side, category (cut with an ellipsis), target, edit button */
+.tilda-card-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 26px;
+    padding: 4px 4px 4px 10px;
+    font-weight: bold;
+    color: var(--text-color);
+    background: var(--bg-color-2);
+    border: 1px solid var(--border-color);
+    border-radius: 4px 4px 0 0;
+}
+.tilda-card-body {
+    padding: 8px 10px;
+    border: 1px solid var(--border-color);
+    border-top: 0;
+    border-radius: 0 0 4px 4px;
+    background: var(--bg-color);
+}
+
+/* the way itself, collapsed when its bike infrastructure is on the sides */
+.tilda-card.collapsible .tilda-card-header {
+    cursor: pointer;
+}
+.tilda-card.collapsible .tilda-card-header::before {
+    content: '▾';
+    display: inline-block;
+    width: 1em;
+    color: var(--link-color);
+}
+.tilda-card.collapsed .tilda-card-header::before {
+    content: '▸';
+}
+.tilda-card.collapsed .tilda-card-header {
+    border-radius: 4px;
+}
+.tilda-card.collapsed .tilda-card-body {
+    display: none;
+}
+/* nothing to show (e.g. no bike infrastructure and nothing missing): only the header */
+.tilda-card-body:not(:has(> :not(:empty))) {
+    display: none;
+}
+.tilda-card:has(.tilda-card-body:not(:has(> :not(:empty)))) .tilda-card-header {
+    border-radius: 4px;
+}
+.tilda-card-hint:not(:empty) {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-weight: normal;
+    font-size: 12px;
+    color: var(--muted-text-color);
+}
+
+.tilda-side {
+    flex: none;
+    white-space: nowrap;
+}
+.tilda-headline {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    font-weight: normal;
+}
+.tilda-category,
+.tilda-target-name {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+.tilda-target-name:not(:empty) {
+    flex: 0 1 auto;
+    font-size: 12px;
+}
+/* like the buttons in fields: own background and border, so it is easy to find */
+.tilda-card button.tilda-edit {
+    flex: none;
+    width: 26px;
+    height: 26px;
+    margin-inline-start: auto;
+    padding: 0;
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-color);
+}
+.tilda-card button.tilda-edit:hover {
+    background: var(--active-bg-color);
+}
+.tilda-card button.tilda-edit.active {
+    background: var(--link-focus-color);
+    border-color: var(--link-focus-color);
+    color: var(--bg-color);
+}
+.tilda-card button.tilda-edit .icon {
+    width: 14px;
+    height: 14px;
+}
+.tilda-card.collapsed .tilda-headline {
+    display: none;
+}
+.tilda-category {
+    flex: 0 1 auto;
+    padding: 2px 8px;
+    border-radius: 3px;
+    background: #2e7d32;
+    color: #fff;
+    cursor: help;
+}
+.tilda-category.incomplete { background: #b27c00; }
+.tilda-category.needs-clarification { background: #c62828; }
+.tilda-category.absent { background: #666; }
+
+.tilda-subheading {
+    margin: 4px 0;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.tilda-gap {
+    margin-bottom: 8px;
+    padding: 6px 8px;
+    border-left: 3px solid #b27c00;
+    font-size: 12px;
+}
+.tilda-gap code {
+    margin-inline-end: 4px;
+}
+.tilda-buttons {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin: 4px 0 0 0;
+}
+.tilda-card button.tilda-value {
+    height: auto;
+    padding: 2px 8px;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.tilda-target-label {
+    display: block;
+    margin: 4px 0;
+}
+.tilda-target select {
+    width: 100%;
+    height: 30px;
+}
+.tilda-attributes-header {
+    margin: 10px 0 4px 0;
+    font-size: 12px;
+    font-weight: bold;
+}
+.tilda-attribute {
+    display: grid;
+    grid-template-columns: 1.2em 1fr;
+    align-items: baseline;
+    column-gap: 6px;
+    padding: 4px 0;
+    font-size: 12px;
+    border-top: 1px solid var(--border-color);
+}
+.tilda-attribute:first-of-type {
+    border-top: 0;
+}
+.tilda-attribute-state {
+    text-align: center;
+    font-weight: bold;
+}
+.tilda-attribute.state-ok .tilda-attribute-state,
+.tilda-attribute.state-inherited .tilda-attribute-state { color: #2e9d3a; }
+.tilda-attribute.state-inherited .tilda-attribute-state { opacity: 0.6; }
+/* assumed default: a notice, not a request (no color, also not on the field title) */
+.tilda-attribute.state-assumed .tilda-attribute-state {
+    font-family: serif;
+    font-style: italic;
+    color: var(--link-color);
+}
+
+/* missing tags: orange = needed, yellow = only if it applies (or TILDA guesses);
+   the field titles below get the same color (preset_fields.js `fieldStatus`) */
+.ideditor {
+    --tilda-required-color: #e07b00;
+    --tilda-optional-color: #a88a00;
+}
+@media (prefers-color-scheme: dark) {
+    .ideditor {
+        --tilda-required-color: #ff9d3b;
+        --tilda-optional-color: #e8cc4a;
+    }
+}
+.tilda-attribute.severity-required .tilda-attribute-state,
+.tilda-attribute.severity-required .tilda-attribute-missing {
+    color: var(--tilda-required-color);
+}
+.tilda-attribute.severity-optional .tilda-attribute-state,
+.tilda-attribute.severity-optional .tilda-attribute-missing {
+    color: var(--tilda-optional-color);
+}
+.entity-editor .wrap-form-field.field-status-required .field-label .label-text,
+.entity-editor .field-related-editor.field-status-required .field-label .label-text {
+    color: var(--tilda-required-color);
+}
+.entity-editor .wrap-form-field.field-status-optional .field-label .label-text,
+.entity-editor .field-related-editor.field-status-optional .field-label .label-text {
+    color: var(--tilda-optional-color);
+}
+.tilda-attribute-missing a.tilda-reveal {
+    color: inherit;
+    text-decoration: underline;
+}
+/* "add below": the field lights up when the link brings it into view */
+.entity-editor .wrap-form-field.field-reveal {
+    animation: tilda-field-reveal 1.6s ease-out;
+}
+@keyframes tilda-field-reveal {
+    0%, 30% { background-color: color-mix(in srgb, var(--link-color) 30%, transparent); }
+    100% { background-color: transparent; }
+}
+
+.tilda-attribute-main {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+.tilda-attribute-tags code,
+.tilda-attribute-missing code {
+    padding: 0;
+    background: none;
+    font-family: monospace;
+    overflow-wrap: anywhere;
+}
+.tilda-attribute-tags > code {
+    display: block;
+}
+.tilda-attribute-note:not(:empty) {
+    color: var(--passive-text-color);
+}
+.tilda-attribute.state-ignored .tilda-attribute-note,
+.tilda-attribute.state-guess .tilda-attribute-note {
+    color: inherit;
+}
+.tilda-attribute-inputs {
+    grid-column: 2;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    margin-top: 2px;
+}
+.tilda-attribute input.tilda-attribute-input {
+    width: 8em;
+    height: 24px;
+    padding: 0 4px;
+    font-size: 12px;
+}
+
+/* "Checked" / "Verified": stored for the project, not in OSM (WORKDOC feature 33) */
+.tilda-card button.tilda-check,
+.tilda-verified button.tilda-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: auto;
+    padding: 2px 8px 2px 6px;
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 1.4;
+}
+.tilda-card button.tilda-check:hover:not([disabled]),
+.tilda-verified button.tilda-check:hover:not([disabled]) {
+    background: var(--active-bg-color);
+}
+.tilda-card button.tilda-check[disabled],
+.tilda-verified button.tilda-check[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+button.tilda-check .icon {
+    width: 12px;
+    height: 12px;
+    opacity: 0.25;
+}
+button.tilda-check.active .icon {
+    opacity: 1;
+    color: #2e9d3a;
+}
+.tilda-attribute.state-assumed.checked .tilda-attribute-state {
+    font-family: inherit;
+    font-style: normal;
+    color: #2e9d3a;
+}
+.tilda-verified {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+    font-size: 12px;
+}
+.tilda-verified-status {
+    color: var(--passive-text-color);
+}

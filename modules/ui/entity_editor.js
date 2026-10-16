@@ -13,10 +13,12 @@ import { utilCleanTags, utilCombinedTags, utilRebind } from '../util';
 import { uiSectionEntityIssues } from './sections/entity_issues';
 import { uiSectionFeatureType } from './sections/feature_type';
 import { uiSectionPresetFields } from './sections/preset_fields';
+import { uiSectionTildaBikeInfra } from './sections/tilda_bike_infra';
 import { uiSectionRawMemberEditor } from './sections/raw_member_editor';
 import { uiSectionRawMembershipEditor } from './sections/raw_membership_editor';
 import { uiSectionRawTagEditor } from './sections/raw_tag_editor';
 import { uiSectionSelectionList } from './sections/selection_list';
+import { presetFieldsOf, removeUnmetSideValues } from './fields/side_prerequisite';
 
 export function uiEntityEditor(context) {
     var dispatch = d3_dispatch('choose');
@@ -88,13 +90,20 @@ export function uiEntityEditor(context) {
             .merge(bodyEnter);
 
         if (!_sections) {
+            // Radnetz Berlin: TILDA helper right below the preset, it is the main task in this editor.
+            // Its checklist colors the field titles and links to the fields.
+            var tildaSection = uiSectionTildaBikeInfra(context).on('change', changeTags);
+            var presetFieldsSection = uiSectionPresetFields(context).on('change', changeTags).on('revert', revertTags)
+                .fieldStatus(tildaSection.fieldStatus);
+            tildaSection.on('reveal', presetFieldsSection.revealField);
             _sections = [
                 uiSectionSelectionList(context),
                 uiSectionFeatureType(context).on('choose', function(presets) {
                     dispatch.call('choose', this, presets);
                 }),
+                tildaSection,
                 uiSectionEntityIssues(context),
-                uiSectionPresetFields(context).on('change', changeTags).on('revert', revertTags),
+                presetFieldsSection,
                 uiSectionRawTagEditor('raw-tag-editor', context).on('change', changeTags),
                 uiSectionRawMemberEditor(context),
                 uiSectionRawMembershipEditor(context)
@@ -183,6 +192,8 @@ export function uiEntityEditor(context) {
 
             if (!onInput) {
                 tags = utilCleanTags(tags);
+                // e.g. `cycleway:right=lane` → `no` also removes `cycleway:right:lane` (side_prerequisite.ts)
+                tags = removeUnmetSideValues(presetFieldsOf(context, entityID), entity.tags, tags);
             }
 
             if (!deepEqual(entity.tags, tags)) {

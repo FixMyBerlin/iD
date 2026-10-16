@@ -1,0 +1,178 @@
+/* Internal TILDA notes (WORKDOC feature 29).
+   The markers and the editor reuse the OSM note styles; these rules give them TILDA's colours,
+   so the internal notes are not taken for the public OSM notes. */
+
+.data-layer.tilda-notes * {
+    pointer-events: none;
+}
+
+.ideditor.mode-add-tilda-note .main-map {
+    cursor: crosshair; /* Opera */
+    cursor: url(img/cursor/draw.png) 9 9, crosshair; /* FF */
+}
+.ideditor.mode-select-tilda-note .note {
+    cursor: pointer;
+}
+
+/* open: teal with a white question mark; resolved: white with a teal check (as in TILDA) */
+.note-header-icon.tilda-note .note-fill,
+.layer-tilda-notes .tilda-note .note-fill {
+    color: #0f766e;
+    stroke: #fff;
+    stroke-width: 40px;
+}
+.note-header-icon.tilda-note.closed .note-fill,
+.layer-tilda-notes .tilda-note.closed .note-fill {
+    color: #fff;
+    stroke: #0f766e;
+}
+.note-header-icon.tilda-note.new .note-fill,
+.layer-tilda-notes .tilda-note.new .note-fill {
+    color: #99f6e4;
+    stroke: #0f766e;
+}
+.layer-tilda-notes .tilda-note .icon-annotation,
+.note-header-icon.tilda-note .icon-annotation {
+    color: #0f766e;
+}
+.layer-tilda-notes .tilda-note-annotation {
+    fill: #fff;
+    font-size: 11px;
+    font-weight: bold;
+    pointer-events: none;
+}
+.note-header-icon span.tilda-note-annotation {
+    color: #fff;
+    font-size: 15px;
+    font-weight: bold;
+    line-height: 15px;
+    display: block;
+    width: 15px;
+    text-align: center;
+}
+g.tilda-note .shadow {
+    stroke: #14b8a6;
+}
+
+/* toolbar: one button per kind of note */
+button.add-tilda-note svg.icon {
+    height: 15px;
+    width: 15px;
+    color: #0f766e;
+    stroke: #fff;
+    stroke-width: 40px;
+    margin-top: 3px;
+    margin-right: 4px;
+}
+.toolbar-item.notes .item-content {
+    display: flex;
+}
+.toolbar-item.notes button.add-button:not(:last-child) {
+    border-radius: 4px 0 0 4px;
+    margin-right: 1px;
+}
+.toolbar-item.notes button.add-button:not(:first-child) {
+    border-radius: 0 4px 4px 0;
+}
+.toolbar-item.notes button.add-button:only-child {
+    border-radius: 4px;
+}
+
+/* editor */
+.tilda-note-private {
+    background: #ccfbf1;
+    color: #134e4a;
+    border: 1px solid #5eead4;
+    border-radius: 5px;
+    padding: 6px 10px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.tilda-note-private .icon {
+    flex: 0 0 auto;
+    width: 14px;
+    height: 14px;
+}
+.tilda-note-header .note-header-label {
+    padding-top: 8px;
+    padding-bottom: 8px;
+    overflow-wrap: anywhere;
+}
+.tilda-note-meta {
+    font-weight: normal;
+    color: var(--muted-text-color);
+}
+.tilda-note-status.open {
+    color: #0f766e;
+    font-weight: bold;
+}
+.tilda-note-editor .comment-main {
+    padding: 10px;
+}
+.tilda-note-markdown p,
+.tilda-note-markdown ul,
+.tilda-note-markdown ol {
+    margin-bottom: 8px;
+}
+.tilda-note-markdown ul,
+.tilda-note-markdown ol {
+    padding-left: 20px;
+}
+.tilda-note-markdown ul li {
+    list-style: disc;
+}
+.tilda-note-markdown ol li {
+    list-style: decimal;
+}
+.tilda-note-markdown blockquote {
+    border-left: 3px solid var(--border-color);
+    padding-left: 8px;
+}
+.tilda-note-markdown hr {
+    margin: 8px 0;
+}
+.tilda-note-markdown > :last-child {
+    margin-bottom: 0;
+}
+.tilda-note-notice {
+    margin-top: 15px;
+}
+.tilda-note-notice a {
+    margin-left: 5px;
+}
+.tilda-note-editor .note-save h4 {
+    padding-bottom: 4px;
+}
+.tilda-note-editor .tilda-note-subject-input {
+    width: 100%;
+    margin-bottom: 12px;
+}
+.tilda-note-prose {
+    margin: 10px 0;
+    color: var(--muted-text-color);
+}
+
+/* layer list */
+.layer-list li.list-item-tilda-notes {
+    flex-wrap: wrap;
+}
+.layer-list .tilda-notes-access {
+    flex: 0 0 100%;
+    padding: 0 10px 6px 35px;
+    color: var(--muted-text-color);
+    font-size: 12px;
+    white-space: normal;
+}
+.layer-list .tilda-notes-access.hide {
+    display: none;
+}
+
+/* the short label ("OSM" / "TILDA") tells the two note buttons apart, also on a narrow toolbar */
+.top-toolbar.narrow .toolbar-item.notes button.bar-button .label {
+    display: inline;
+}
+.top-toolbar.narrow .toolbar-item.notes button.bar-button {
+    padding: 0 8px;
+}
