@@ -208,6 +208,12 @@ describe('roadAttributes', () => {
         expect(byId(roadAttributes({ highway: 'residential', 'cycleway:left': 'no', 'cycleway:right': 'lane' })).cycleway.value).toBe('left=no, right=lane');
     });
 
+    it('mixed traffic: no width and no width source (Leistungsbeschreibung, attribute 15)', () => {
+        const attributes = byId(roadAttributes({ highway: 'residential', width: '7.5' }, new Set(['width'])));
+        expect(attributes.width).toBeUndefined();
+        expect(attributes.source_width).toBeUndefined();
+    });
+
     it('not for paths', () => {
         expect(roadAttributes({ highway: 'cycleway' })).toEqual([]);
     });

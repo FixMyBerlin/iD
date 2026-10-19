@@ -451,8 +451,7 @@ const ROAD: Rule[] = [
     { id: 'dual_carriageway', key: 'dual_carriageway', feeds: ['verkehrsri'], options: ['yes', 'no'], strict: true, optional: true,
         assumed: () => 'no', note: 'dual_carriageway',
         when: ctx => ctx.value('oneway') === 'yes' },
-    { id: 'width', key: 'width', feeds: ['breite'], options: [] },
-    SOURCE_WIDTH,
+    // no width: infraVelo leaves `breite` empty for "Mischverkehr mit KFZ" (Leistungsbeschreibung, attribute 15)
     { id: 'surface', key: 'surface', feeds: ['ofm'], options: SURFACE_OPTIONS },
     { id: 'sett_length', key: 'sett:length', feeds: ['ofm'], options: SETT_LENGTH_OPTIONS,
         when: ctx => ctx.value('surface') === 'sett' },
