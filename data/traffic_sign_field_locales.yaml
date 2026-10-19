@@ -135,6 +135,13 @@ de:
         title: Das ist hier richtig
   inspector:
     tilda:
+      reminder:
+        damage_signs:
+          title: "Auf Schadenschilder prüfen."
+          text: "Steht auf diesem Weg ein Schild „Radwegschäden“, „Gehwegschäden“ oder „Geh- und Radwegschäden“ (z. B. in Mapillary oder im Infra3D-Viewer)? Dann in traffic_sign eintragen."
+        barrier:
+          title: "Auf Absperrbaken prüfen."
+          text: "Ist der Radweg durch eine Absperrbake versperrt, sodass er nicht nutzbar ist? Dann an der Stelle einen TILDA-Hinweis anlegen (Ebene „TILDA-Hinweise“). Es ist kein OSM-Tag."
       default:
         generic: "Nicht getaggt = {tag}. Nur taggen, wenn es hier anders ist."
         surface_colour: "Nicht getaggt = nicht eingefärbt. Nur taggen, wenn die Oberfläche rot oder grün ist."
@@ -323,6 +330,13 @@ de-CH:
         title: Das ist hier richtig
   inspector:
     tilda:
+      reminder:
+        damage_signs:
+          title: "Auf Schadenschilder prüfen."
+          text: "Steht auf diesem Weg ein Schild „Radwegschäden“, „Gehwegschäden“ oder „Geh- und Radwegschäden“ (z. B. in Mapillary oder im Infra3D-Viewer)? Dann in traffic_sign eintragen."
+        barrier:
+          title: "Auf Absperrbaken prüfen."
+          text: "Ist der Radweg durch eine Absperrbake versperrt, sodass er nicht nutzbar ist? Dann an der Stelle einen TILDA-Hinweis anlegen (Ebene „TILDA-Hinweise“). Es ist kein OSM-Tag."
       default:
         generic: "Nicht getaggt = {tag}. Nur taggen, wenn es hier anders ist."
         surface_colour: "Nicht getaggt = nicht eingefärbt. Nur taggen, wenn die Oberfläche rot oder grün ist."

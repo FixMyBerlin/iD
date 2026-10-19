@@ -327,3 +327,20 @@ button.tilda-check.active .icon {
 .tilda-verified-status {
     color: var(--passive-text-color);
 }
+
+/* reminders: something to look for that no tag shows */
+.tilda-reminders {
+    margin-top: 8px;
+}
+.tilda-reminder {
+    padding: 4px 8px;
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--text-color);
+    background: var(--bg-color-2);
+    border-left: 3px solid var(--border-color);
+}
+.tilda-reminder-title {
+    font-weight: bold;
+    margin-inline-end: 4px;
+}

@@ -16,6 +16,7 @@ import { svgIcon } from '../../svg/icon';
 import { utilRebind } from '../../util/rebind';
 import { categoryForSide, planCategory, type Side, type TildaTagPlan } from '../../tilda/category_plan';
 import { categoryGroupLabel, categoryLabel, groupCategories } from '../../tilda/category_labels';
+import { reminders, type ReminderId } from '../../tilda/reminders';
 import { tildaChecks, VERIFIED, type TildaCheck } from '../../tilda/checks';
 import { requiredAttributes, roadAttributes, type RequiredAttribute } from '../../tilda/required_attributes';
 import { trafficSignTagKeysFromTags } from '../../presets/traffic_sign_fields';
@@ -36,6 +37,8 @@ type SideCard = {
     attributes: RequiredAttribute[];
     /** mixed traffic checklist, for a way that is not bike infrastructure itself */
     roadAttributes: RequiredAttribute[];
+    /** things to look for that have no tag to check */
+    reminders: ReminderId[];
     /** can be collapsed: the way itself when its bike infrastructure is mapped on the sides */
     collapsible: boolean;
     collapsed: boolean;
@@ -44,6 +47,8 @@ type SideCard = {
 const SIDE_ORDER: Side[] = ['self', 'left', 'right'];
 
 const MAX_BUTTONS = 6;
+/** mixed traffic checklist: a missing tag that gets a one-click answer (no cycleway on either side) */
+const MIXED_TRAFFIC_QUICK_VALUES: Record<string, string> = { 'cycleway:both': 'no' };
 
 const STATE_ICON: Record<RequiredAttribute['state'], string> = {
     ok: '✓',
@@ -65,7 +70,7 @@ function stateNote(attribute: RequiredAttribute) {
         return attribute.note ? t(`inspector.tilda.default.${attribute.note}`)
             : t('inspector.tilda.default.generic', { tag: attribute.default });
     }
-    if (state === 'ignored') return t('inspector.tilda.state.ignored');
+    if (state === 'ignored') return t('inspector.tilda.state.ignored', { value });
     if (state === 'ok' && tilda !== undefined && tilda !== value) {
         // another tag decides (`oneway:bicycle` over `oneway`): name it, "reads it as yes" alone misleads
         return attribute.source ? t('inspector.tilda.state.derived', { value: tilda, tag: attribute.source })
@@ -237,6 +242,7 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
                 plan,
                 attributes: requiredAttributes(result, _tags, target !== result.category ? target : undefined, edited),
                 roadAttributes: side === 'self' && !selfIsInfrastructure ? roadAttributes(_tags, edited) : [],
+                reminders: reminders(result, _tags, target !== result.category ? target : undefined),
                 collapsible,
                 collapsed: collapsible && !(_selfExpanded ?? !!target)
             };
@@ -306,6 +312,7 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
         bodyEnter.append('div').attr('class', 'tilda-target');
         bodyEnter.append('div').attr('class', 'tilda-attributes');
         bodyEnter.append('div').attr('class', 'tilda-road-attributes');
+        bodyEnter.append('div').attr('class', 'tilda-reminders');
 
         cardSelection = cardSelection.merge(cardEnter)
             .classed('collapsible', d => d.collapsible)
@@ -346,10 +353,29 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
         });
         cardSelection.select<HTMLDivElement>('.tilda-road-attributes').each(function(d) {
             // no header: "mixed traffic" is the category above, why the data is needed is in the info text
-            drawAttributes(d3_select(this), d.roadAttributes);
+            drawAttributes(d3_select(this), d.roadAttributes, undefined, MIXED_TRAFFIC_QUICK_VALUES);
         });
 
+        cardSelection.select<HTMLDivElement>('.tilda-reminders').each(function(d) { drawReminders(d3_select(this), d.reminders); });
+
         drawVerified(selection);
+    }
+
+
+    /** Hints without an indicator in the tags: look for it, so it is not forgotten */
+    function drawReminders(selection: d3.Selection<HTMLDivElement>, ids: ReminderId[]) {
+        const rows = selection.selectAll<HTMLDivElement, ReminderId>('.tilda-reminder')
+            .data(ids, d => d);
+        rows.exit().remove();
+        rows.enter()
+            .append('div')
+            .attr('class', d => `tilda-reminder tilda-reminder-${d}`)
+            .each(function(d) {
+                const row = d3_select(this);
+                row.append('span').attr('class', 'tilda-reminder-title').call(t.append(`inspector.tilda.reminder.${d}.title`));
+                row.append('span').call(t.append(`inspector.tilda.reminder.${d}.text`));
+            });
+        selection.style('display', ids.length ? '' : 'none');
     }
 
 
@@ -504,7 +530,8 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
      * the attribute name as tooltip. A missing tag links to its field below; only tags without a
      * field get the values TILDA accepts as buttons (plus a free input).
      */
-    function drawAttributes(selection: d3.Selection<HTMLDivElement>, attributes: RequiredAttribute[], headerText?: string) {
+    function drawAttributes(selection: d3.Selection<HTMLDivElement>, attributes: RequiredAttribute[], headerText?: string,
+        quickValues: Record<string, string> = {}) {
         const header = selection.selectAll<HTMLDivElement, string>('.tilda-attributes-header')
             .data(attributes.length && headerText ? [headerText] : []);
         header.exit().remove();
@@ -605,11 +632,13 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
 
         // values as buttons only where no field below can edit the tag
         const needsInputs = (d: RequiredAttribute) => d.state !== 'ok' && d.state !== 'inherited' && !hasField(d);
+        // one click for the usual answer of a missing tag, even where a field below can edit it
+        const quickValue = (d: RequiredAttribute) => !needsInputs(d) && d.state === 'missing' ? quickValues[d.key] : undefined;
         rows.select<HTMLSpanElement>('.tilda-attribute-inputs')
-            .style('display', d => needsInputs(d) || d.state === 'assumed' ? null : 'none');
+            .style('display', d => needsInputs(d) || d.state === 'assumed' || quickValue(d) ? null : 'none');
         // a default: only the listed values say something else, no free value
         rows.select<HTMLInputElement>('input.tilda-attribute-input')
-            .style('display', d => d.state === 'assumed' ? 'none' : null);
+            .style('display', d => d.state === 'assumed' || quickValue(d) ? 'none' : null);
 
         // many options: the first few as buttons, all of them as suggestions in the input
         const datalistID = (d: RequiredAttribute) => `tilda-options-${d.key.replace(/[^\w-]/g, '_')}`;
@@ -622,7 +651,7 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
 
         const buttons = rows.select('.tilda-buttons')
             .selectAll<HTMLButtonElement, string>('button')
-            .data(d => needsInputs(d) ? d.options.slice(0, MAX_BUTTONS) : [], d => d);
+            .data(d => needsInputs(d) ? d.options.slice(0, MAX_BUTTONS) : quickValue(d) ? [quickValue(d)!] : [], d => d);
         buttons.exit().remove();
         buttons.enter()
             .append('button')

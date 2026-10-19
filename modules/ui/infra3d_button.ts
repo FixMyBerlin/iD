@@ -18,7 +18,7 @@ export function uiInfra3dButton(context: iD.Context) {
 
     const tooltip = (uiTooltip() as any)
         .title(() => t.append('infra3d.tooltip_feature'))
-        .placement('bottom');
+        .placement('left');
 
     function infra3dButton(selection: d3.Selection) {
         const button = selection.selectAll<HTMLButtonElement, string>('.infra3d-button')

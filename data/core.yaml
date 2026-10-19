@@ -840,8 +840,15 @@ en:
         inherited: "TILDA takes {value} from other tags (e.g. of the road)"
         derived: "TILDA reads {value} from {tag}"
         guess: "TILDA assumes {value}; please tag it"
-        ignored: TILDA does not accept this value
+        ignored: "TILDA cannot use “{value}”: choose another value"
         normalized: "TILDA reads it as {value}"
+      reminder:
+        damage_signs:
+          title: "Check for damage signs."
+          text: "Is there a sign “Radwegschäden”, “Gehwegschäden” or “Geh- und Radwegschäden” on this path (e.g. in Mapillary or the Infra3D viewer)? If so, add it to traffic_sign."
+        barrier:
+          title: "Check for barriers."
+          text: "Is the cycle track blocked by a barrier (Absperrbake) so that it cannot be used? If so, add a TILDA note on the spot (TILDA Notes layer). It is not an OSM tag."
       default:
         generic: "Not tagged = {tag}. Tag it only if it is different here."
         surface_colour: "Not tagged = not coloured. Tag it only if the surface is red or green."
