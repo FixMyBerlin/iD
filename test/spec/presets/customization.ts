@@ -29,6 +29,14 @@ describe('applyPresetCustomization', () => {
         expect(raw.presets['highway/primary'].fields).toEqual(['name']);
     });
 
+    it('patches a schema field and keeps its other properties', () => {
+        const input = { fields: { cycleway: { key: 'cycleway', keys: ['cycleway:left', 'cycleway:right'], type: 'directionalCombo' } } as any };
+        const result = applyPresetCustomization({ fieldPatches: { cycleway: { key: 'cycleway:both' } } }, input);
+        expect(result.fields!.cycleway.key).toBe('cycleway:both');
+        expect(result.fields!.cycleway.keys).toEqual(['cycleway:left', 'cycleway:right']);
+        expect(input.fields.cycleway.key).toBe('cycleway');
+    });
+
     it('appends moreFields without duplicates', () => {
         const result = applyPresetCustomization({ addMoreFields: { 'highway/primary': ['lit', 'width'] } }, raw);
         expect(result.presets!['highway/primary'].moreFields).toEqual(['dual_carriageway', 'lit', 'width']);

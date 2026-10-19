@@ -12,6 +12,8 @@ import type { Field, Fields, Preset, Presets } from '@openstreetmap/id-tagging-s
 export interface PresetCustomization {
     /** New fields (or replacements), like in id-tagging-schema's `fields.json`. `label` is used as is, not translated. */
     fields?: Record<string, Field>;
+    /** field id → properties that replace those of the schema's field (its strings stay) */
+    fieldPatches?: Record<string, Partial<Field>>;
     /** preset id → field ids to append to the preset's `fields` (shown by default) */
     addFields?: Record<string, string[]>;
     /** preset id → field ids to append to the preset's `moreFields` */
@@ -33,6 +35,9 @@ export function applyPresetCustomization(
     if (!customization) return raw;
 
     const fields = raw.fields && { ...raw.fields, ...customization.fields };
+    for (const [fieldID, patch] of Object.entries(customization.fieldPatches ?? {})) {
+        if (fields?.[fieldID]) fields[fieldID] = { ...fields[fieldID], ...patch } as Field;
+    }
 
     let presets = raw.presets;
     if (presets) {

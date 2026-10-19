@@ -279,6 +279,8 @@ const PRESETS: Record<string, Preset> = {
 
 export const RADNETZ_PRESET_CUSTOMIZATION: PresetCustomization = {
     fields: FIELDS,
+    // equal sides are tagged `cycleway:both=no`, not `cycleway=no` (the schema's key)
+    fieldPatches: { cycleway: { key: 'cycleway:both' } },
     presets: PRESETS,
     setFields: {
         ...Object.fromEntries(Object.entries(ROAD_PRESETS).map(([id, extraMore]) => [id, {
