@@ -124,7 +124,7 @@ const TRAFFIC_MODE_OPTIONS = ['no', 'motor_vehicle', 'parking', 'psv', 'bicycle'
 const BUFFER_OPTIONS = ['no', '0.25', '0.5', '0.75', '1'];
 
 /** Signs about damaged paths; mapped as `traffic_sign` too (Radinfra FAQ), wherever they are on the way */
-const DAMAGE_SIGNS = ['Radwegschäden', 'Gehwegschäden', 'Geh- und Radwegschäden'];
+export const DAMAGE_SIGNS = ['Radwegschäden', 'Gehwegschäden', 'Geh- und Radwegschäden'];
 
 /** Traffic signs that set the infraVelo type (`fuehr`) or mandatory use (`pflicht`), then the damage signs */
 function trafficSignOptions(ctx: RuleContext): string[] {
@@ -139,7 +139,8 @@ function categoryTrafficSigns(ctx: RuleContext): string[] {
     if (category.startsWith('footwayBicycleYes')) return ['DE:239,1022-10', 'none'];
     if (category === 'pedestrianAreaBicycleYes') return ['DE:242.1,1022-10'];
     if (category === 'sharedBusLaneBusWithBike') return ['DE:245,1022-10'];
-    if (category === 'sharedBusLaneBikeWithBus') return ['DE:237,1024-14'];
+    // "Linienverkehr frei" (Leistungsbeschreibung); TILDA also reads the older 1024-14
+    if (category === 'sharedBusLaneBikeWithBus') return ['DE:237,1026-32'];
     return ['DE:237', 'none'];
 }
 
@@ -163,6 +164,11 @@ function sidepathFromCategory(category: string) {
 
 function field(name: keyof BikelaneResult) {
     return (ctx: RuleContext) => ctx.result?.[name] as string | number | null | undefined;
+}
+
+/** TILDA has no `no` for marking: it drops the value, which means the same as untagged, so `no` is valid */
+function markingField(side: 'left' | 'right') {
+    return (ctx: RuleContext) => ctx.result?.[`marking_${side}`] ?? (ctx.value(`marking:${side}`) === 'no' ? 'no' : undefined);
 }
 
 /** Values of `parking:*` TILDA reads (`derive-traffic-mode.ts`) */
@@ -189,7 +195,16 @@ function trafficModeFromParking(parkingSide: (ctx: RuleContext) => string) {
 
 /** `traffic_mode` on this side is parking (tagged, or inferred from `parking:*` by TILDA) */
 function parkingOn(side: 'left' | 'right') {
-    return (ctx: RuleContext) => (ctx.value(`traffic_mode:${side}`) ?? ctx.result?.[`traffic_mode_${side}`]) === 'parking';
+    return (ctx: RuleContext) => (ctx.value(`traffic_mode:${side}`)
+        ?? (side === 'right' ? trafficModeFromParking(c => c.side)(ctx)?.tilda : undefined)
+        ?? ctx.result?.[`traffic_mode_${side}`]) === 'parking';
+}
+
+/** `traffic_mode` is set on both sides (tagged, or taken from `parking:*`), so the delimitation can be asked */
+function trafficModesSet(ctx: RuleContext) {
+    const set = (side: 'left' | 'right') => ctx.value(`traffic_mode:${side}`) !== undefined
+        || (side === 'right' && trafficModeFromParking(c => c.side)(ctx) !== undefined);
+    return set('left') && set('right');
 }
 
 
@@ -284,14 +299,32 @@ const NEXT_TO_PARKING: Rule[] = [
         assumed: () => 'no' }
 ];
 
-const PROTECTION: Rule[] = (['left', 'right'] as const).flatMap(side => [
-    { id: `separation_${side}`, key: `separation:${side}`, feeds: ['protek'], options: SEPARATION_OPTIONS, strict: true, tilda: field(`separation_${side}`) },
-    { id: `marking_${side}`, key: `marking:${side}`, feeds: ['protek', 'trennstreifen'], options: MARKING_OPTIONS, strict: true, tilda: field(`marking_${side}`) },
-    { id: `buffer_${side}`, key: `buffer:${side}`, feeds: ['protek', 'trennstreifen'], options: BUFFER_OPTIONS, tilda: field(`buffer_${side}`) },
-    // only parking or foot next to it matter (Radinfra FAQ); TILDA reads parking on the outer side from `parking:*`
-    { id: `traffic_mode_${side}`, key: `traffic_mode:${side}`, feeds: ['protek', 'trennstreifen'], options: TRAFFIC_MODE_OPTIONS, strict: true, tilda: field(`traffic_mode_${side}`),
-        derivedFrom: side === 'right' ? trafficModeFromParking(ctx => ctx.side) : undefined, assumed: () => 'no' }
-] as Rule[]);
+/**
+ * Protected lane: `traffic_mode` on both sides first. The delimitation to the carriageway (left) is always needed;
+ * with parking on the right, the one to the parking (right) as well, so both sides together.
+ * The buffer (`trennstreifen`) is only recorded towards parking. All of it is asked only once `traffic_mode` is set.
+ */
+function delimitation(): Rule[] {
+    return [
+        // only parking or foot next to it matter (Radinfra FAQ); TILDA reads parking on the outer side from `parking:*`
+        // no default: the mapper decides first, the delimitation below is asked afterwards
+        ...(['left', 'right'] as const).map(side => ({
+            id: `traffic_mode_${side}`, key: `traffic_mode:${side}`, feeds: ['protek', 'trennstreifen'], options: TRAFFIC_MODE_OPTIONS, strict: true, tilda: field(`traffic_mode_${side}`),
+            derivedFrom: side === 'right' ? trafficModeFromParking(ctx => ctx.side) : undefined
+        }) as Rule),
+        ...(['left', 'right'] as const).flatMap(side => [
+            { id: `separation_${side}`, key: `separation:${side}`, feeds: ['protek'], options: SEPARATION_OPTIONS, strict: true, tilda: field(`separation_${side}`),
+                when: side === 'left' ? trafficModesSet : (ctx: RuleContext) => trafficModesSet(ctx) && parkingOn('right')(ctx) },
+            { id: `marking_${side}`, key: `marking:${side}`, feeds: ['protek', 'trennstreifen'], options: MARKING_OPTIONS, strict: true, tilda: markingField(side),
+                when: side === 'left' ? trafficModesSet : (ctx: RuleContext) => trafficModesSet(ctx) && parkingOn('right')(ctx) },
+            // the buffer exists only towards parking
+            { id: `buffer_${side}`, key: `buffer:${side}`, feeds: ['protek', 'trennstreifen'], options: BUFFER_OPTIONS, tilda: field(`buffer_${side}`),
+                when: (ctx: RuleContext) => trafficModesSet(ctx) && parkingOn(side)(ctx) }
+        ] as Rule[])
+    ];
+}
+
+const PROTECTION = delimitation();
 
 /** One-way roads: only `oneway:bicycle=no` says something; without the tag bicycles follow the one-way */
 const ONEWAY_BICYCLE: Rule = {
@@ -307,10 +340,13 @@ function lineMarking(side: 'left' | 'right') {
 
 const BICYCLE_ROAD: Rule[] = [
     ONEWAY_BICYCLE,
+    // the width inside the marking, without the buffer; infraVelo takes it for `breite` before `width`
+    // (then the whole carriageway, kerb to kerb). Only where there is a marking, so optional.
+    { id: 'width_effective', key: 'width:effective', feeds: ['breite'], options: [], optional: true },
     ...(['left', 'right'] as const).flatMap(side => [
         { id: `traffic_mode_${side}`, key: `traffic_mode:${side}`, feeds: ['trennstreifen'], options: TRAFFIC_MODE_OPTIONS, strict: true, tilda: field(`traffic_mode_${side}`), optional: true,
             derivedFrom: trafficModeFromParking(() => side), assumed: () => 'no' },
-        { id: `marking_${side}`, key: `marking:${side}`, feeds: ['trennstreifen'], options: MARKING_OPTIONS, strict: true, tilda: field(`marking_${side}`) },
+        { id: `marking_${side}`, key: `marking:${side}`, feeds: ['trennstreifen'], options: MARKING_OPTIONS, strict: true, tilda: markingField(side) },
         { id: `buffer_${side}`, key: `buffer:${side}`, feeds: ['trennstreifen'], options: BUFFER_OPTIONS, tilda: field(`buffer_${side}`), when: lineMarking(side) }
     ] as Rule[])
 ];

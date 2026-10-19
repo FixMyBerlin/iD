@@ -911,6 +911,7 @@ en:
         other: Other
       attribute:
         width: "Width"
+        width_effective: "Usable width (inside the marking)"
         source_width: "Width source"
         surface: "Surface"
         sett_length: "Sett stone size (m)"

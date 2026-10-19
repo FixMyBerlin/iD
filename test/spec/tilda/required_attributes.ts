@@ -82,9 +82,56 @@ describe('requiredAttributes', () => {
 
     it('lists the attributes of the target category', () => {
         const tags = { highway: 'cycleway', cycleway: 'track', is_sidepath: 'yes' };
-        const attributes = byId(requiredAttributes(resultFor(tags, 'self'), tags, 'cyclewayOnHighwayProtected'));
-        expect(Object.keys(attributes)).toEqual(expect.arrayContaining(['separation_left', 'separation_right', 'buffer_left', 'marking_right', 'traffic_mode_left']));
+        const modes = { ...tags, 'traffic_mode:left': 'no', 'traffic_mode:right': 'no' };
+        const attributes = byId(requiredAttributes(resultFor(modes, 'self'), modes, 'cyclewayOnHighwayProtected'));
+        expect(Object.keys(attributes)).toEqual(expect.arrayContaining(['separation_left', 'marking_left', 'traffic_mode_left', 'traffic_mode_right']));
         expect(attributes.is_sidepath).toBeUndefined();
+    });
+
+    describe('protected lane: delimitation depends on the parking side', () => {
+        const base = { highway: 'cycleway', cycleway: 'track', is_sidepath: 'yes' };
+        const modes = { 'traffic_mode:left': 'no', 'traffic_mode:right': 'no' };
+        const idsFor = (extra: Record<string, string>, withModes = true) => {
+            const tags = { ...base, ...(withModes ? modes : {}), ...extra };
+            return Object.keys(byId(requiredAttributes(resultFor(tags, 'self'), tags, 'cyclewayOnHighwayProtected')));
+        };
+
+        it('shows the delimitation only once traffic_mode is set on both sides', () => {
+            for (const extra of <Record<string, string>[]>[{}, { 'traffic_mode:left': 'no' }, { 'traffic_mode:right': 'parking' }]) {
+                const ids = idsFor(extra, false);
+                expect(ids).toEqual(expect.arrayContaining(['traffic_mode_left', 'traffic_mode_right']));
+                for (const id of ['separation_left', 'marking_left', 'buffer_left', 'separation_right', 'marking_right', 'buffer_right'])
+                    expect(ids).not.toContain(id);
+            }
+        });
+
+        it('asks for traffic_mode on both sides first', () => {
+            const ids = idsFor({});
+            expect(ids.indexOf('traffic_mode_right')).toBeGreaterThan(ids.indexOf('traffic_mode_left'));
+            expect(ids.indexOf('traffic_mode_right')).toBeLessThan(ids.indexOf('separation_left'));
+        });
+
+        it('without parking on the right only the left side is needed', () => {
+            for (const extra of <Record<string, string>[]>[{}, { 'traffic_mode:left': 'parking' }, { 'traffic_mode:left': 'no', 'traffic_mode:right': 'no' }]) {
+                const ids = idsFor(extra);
+                expect(ids).toEqual(expect.arrayContaining(['separation_left', 'marking_left']));
+                expect(ids).not.toEqual(expect.arrayContaining(['separation_right']));
+                expect(ids).not.toEqual(expect.arrayContaining(['marking_right']));
+                expect(ids).not.toEqual(expect.arrayContaining(['buffer_right']));
+            }
+        });
+
+        it('with parking on the right both sides are needed, the buffer only on the right', () => {
+            const ids = idsFor({ 'traffic_mode:right': 'parking' });
+            expect(ids).toEqual(expect.arrayContaining(['separation_left', 'marking_left', 'separation_right', 'marking_right', 'buffer_right']));
+            expect(ids).not.toContain('buffer_left');
+        });
+
+        it('the buffer is only asked towards parking', () => {
+            expect(idsFor({})).not.toContain('buffer_left');
+            expect(idsFor({ 'traffic_mode:left': 'parking' })).toContain('buffer_left');
+            expect(idsFor({ 'traffic_mode:left': 'parking' })).not.toContain('buffer_right');
+        });
     });
 });
 
@@ -136,6 +183,49 @@ describe('defaults (WORKDOC feature 32)', () => {
     });
 });
 
+describe('traffic signs', () => {
+    it('bike lane shared with buses: 237 with "Linienverkehr frei" (1026-32)', () => {
+        const tags = { highway: 'secondary', 'cycleway:right': 'lane', 'cycleway:right:traffic_sign': 'DE:237,1026-32' };
+        const result = resultFor(tags, 'right');
+        expect(result.category).toBe('sharedBusLaneBikeWithBus');
+        expect(byId(requiredAttributes(result, tags)).traffic_sign.options).toContain('DE:237,1026-32');
+        expect(byId(requiredAttributes(result, tags)).traffic_sign.options).not.toContain('DE:237,1024-14');
+    });
+});
+
+describe('bicycle roads', () => {
+    it('width:effective is asked for, but optional', () => {
+        const tags = { highway: 'residential', bicycle_road: 'yes', traffic_sign: 'DE:244.1' };
+        const attributes = byId(requiredAttributes(resultFor(tags, 'self'), tags));
+        expect(attributes.width_effective.key).toBe('width:effective');
+        expect(attributes.width_effective.state).toBe('missing');
+        expect(attributes.width_effective.optional).toBe(true);
+
+        const tagged = { ...tags, 'width:effective': '3.5' };
+        expect(byId(requiredAttributes(resultFor(tagged, 'self'), tagged)).width_effective.state).toBe('ok');
+    });
+
+    it('marking=no is valid although TILDA drops it; other unknown values are ignored', () => {
+        const tags = { highway: 'residential', bicycle_road: 'yes', traffic_sign: 'DE:244.1' };
+        const no = { ...tags, 'marking:both': 'no' };
+        const attributes = byId(requiredAttributes(resultFor(no, 'self'), no));
+        expect(attributes.marking_left.state).toBe('ok');
+        expect(attributes.buffer_left).toBeUndefined();
+
+        const protectedTags = { highway: 'cycleway', cycleway: 'track', is_sidepath: 'yes', 'traffic_mode:left': 'no', 'traffic_mode:right': 'no', 'marking:left': 'no' };
+        const protectedAttributes = byId(requiredAttributes(resultFor(protectedTags, 'self'), protectedTags, 'cyclewayOnHighwayProtected'));
+        expect(protectedAttributes.marking_left.state).toBe('ok');
+
+        const unknown = { ...tags, 'marking:both': 'foo' };
+        expect(byId(requiredAttributes(resultFor(unknown, 'self'), unknown)).marking_left.state).toBe('ignored');
+    });
+
+    it('not for other categories', () => {
+        const tags = { highway: 'cycleway', is_sidepath: 'yes' };
+        expect(byId(requiredAttributes(resultFor(tags, 'self'), tags)).width_effective).toBeUndefined();
+    });
+});
+
 describe('roadAttributes', () => {
     it('lane without parking tags: nothing next to it is assumed', () => {
         const tags = { highway: 'secondary', 'cycleway:right': 'lane', 'cycleway:right:lane': 'exclusive' };
@@ -183,6 +273,11 @@ describe('roadAttributes', () => {
         const tags = { highway: 'residential', bicycle_road: 'yes', traffic_sign: 'DE:244.1' };
         const attributes = byId(requiredAttributes(resultFor(tags, 'self'), tags));
         expect(attributes.marking_left.state).toBe('missing');
+        // on the road itself, never as `cycleway:<side>:…`; there is no separation
+        expect(attributes.separation_left).toBeUndefined();
+        expect(attributes.separation_right).toBeUndefined();
+        expect(attributes.marking_left.key).toBe('marking:left');
+        expect(attributes.marking_right.key).toBe('marking:right');
         expect(attributes.buffer_left).toBeUndefined();
 
         const dashed = { ...tags, 'marking:both': 'dashed_line' };
