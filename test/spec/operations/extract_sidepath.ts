@@ -1,5 +1,6 @@
 import { select as d3_select } from 'd3-selection';
 import { operationsExtractSidepath } from '../../../modules/operations/extract_sidepath';
+import { operationsExtractMergeSidepaths } from '../../../modules/operations/extract_merge_sidepaths';
 import { operationsMergeSidepaths } from '../../../modules/operations/merge_sidepaths';
 import { loadSignRecommender, loadedSignRecommender } from '../../../modules/traffic_sign/recommender';
 import type { Operation } from '../../../modules/core/history';
@@ -120,6 +121,23 @@ describe('sidepath operations: keyboard shortcuts', () => {
             const operations = operationsExtractSidepath(fake, ['w1']);
             await keyOperation(operations).interrupts!.choose();
             expect(showEditMenu.mock.calls[0][0]).toEqual([100, 100]);
+        });
+    });
+
+    describe('extract and merge', () => {
+        it('binds ⌘G once, through the first entry, for a road with a cycle track on both sides', () => {
+            const { fake } = context(roadGraph({ highway: 'residential', 'cycleway:both': 'track' }));
+            const operations = operationsExtractMergeSidepaths(fake, ['w1']);
+            expect(operations.map(operation => operation.id)).toEqual(Array(3).fill('extract_merge_sidepaths'));
+            expect(operations.every(operation => operation.keys.length === 0)).toBe(true);
+            expect(keyOperation(operations).keys).toEqual([iD.uiCmd('⌘G')]);
+        });
+
+        it('offers one side for a road with one cycle track, and nothing for a protected lane', () => {
+            const { fake } = context(roadGraph({ highway: 'residential', 'cycleway:right': 'track' }));
+            expect(operationsExtractMergeSidepaths(fake, ['w1'])).toHaveLength(1);
+            const protectedLane = context(roadGraph({ highway: 'residential', 'cycleway:right': 'lane' }));
+            expect(operationsExtractMergeSidepaths(protectedLane.fake, ['w1'])).toEqual([]);
         });
     });
 

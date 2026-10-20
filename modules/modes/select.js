@@ -23,6 +23,7 @@ import { osmNode, osmWay } from '../osm';
 import * as Operations from '../operations/index';
 import { operationsExtractSidepath } from '../operations/extract_sidepath';
 import { operationsMergeSidepaths } from '../operations/merge_sidepaths';
+import { operationsExtractMergeSidepaths } from '../operations/extract_merge_sidepaths';
 import { uiCmd } from '../ui/cmd';
 import {
     utilArrayIntersection, utilArrayUnion, utilDeepMemberIDs, utilEntityAndDeepMemberIDs,
@@ -213,8 +214,12 @@ export function modeSelect(context, selectedIDs) {
 
         // Radnetz Berlin: "Extract right cycle track" etc., after iD's "Extract"
         var extractIndex = _operations.findIndex(function(operation) { return operation.id === 'extract'; });
+        // "Extract right cycle track and merge with the sidewalk": both steps in one click
         // and "Merge into a foot and cycle path" for a cycleway plus footway(s)
-        _operations.splice(extractIndex + 1, 0, ...operationsExtractSidepath(context, selectedIDs), ...operationsMergeSidepaths(context, selectedIDs));
+        _operations.splice(extractIndex + 1, 0,
+            ...operationsExtractSidepath(context, selectedIDs),
+            ...operationsExtractMergeSidepaths(context, selectedIDs),
+            ...operationsMergeSidepaths(context, selectedIDs));
 
         _operations
             .filter(operation => operation.available())

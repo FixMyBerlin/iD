@@ -301,6 +301,11 @@
             "text": "shortcuts.editing.operations.merge_sidepaths"
           },
           {
+            "modifiers": ["⌘"],
+            "shortcuts": ["G"],
+            "text": "shortcuts.editing.operations.extract_merge_sidepaths"
+          },
+          {
             "shortcuts": ["operations.split.key"],
             "text": "shortcuts.editing.operations.split"
           },

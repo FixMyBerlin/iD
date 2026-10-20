@@ -1556,8 +1556,22 @@ What was slow, all from this fork:
 
 Left as it is (iD in general): a full redraw at z17 costs 250–500 ms and runs every 750 ms while panning; iD validates newly loaded data in the background; switching on the Mapillary layer redraws the whole map once.
 
+### 38. Extract and merge in one click — 🟡 (built 2026-10-20; not tried by hand in the browser)
+
+**Goal.** Feature 17 (extract a cycle track from the centerline) and feature 28 (merge cycleway and footway into one path) in one click, for roads whose sidewalk is a separate way already. The mapper chooses the side: right, left or both.
+
+- Menu entries after the extract entries: "Extract right cycle track and merge with sidewalk", "… left …", "Extract both cycle tracks and merge with sidewalks" (only for sides with `cycleway:<side>=track`; protected lanes are not offered).
+- **Shortcut ⌘G** (one enabled entry runs, several open the menu at the pointer, like ⌘E for extract).
+- **Merge stays on ⌘M** (decided 2026-10-20): a key for the left hand was tried, but ⌘D, ⌘A, ⌘Y, ⌘⇧E and ⌘X did not work in the browser, and ⌘B is iD's background switch. ⌘E extract, ⌘M merge, ⌘G both.
+- Per side: extract variant A, then look for the footway: `highway=footway` or a foot-designated path (`partKind`), at least half of it within 7 m of the new cycleway, or running along a third of the cycle track (long sidewalk beside a short road piece); the part along must stretch 5 m (a crossing footway does not). The footways found are merged with the extracted cycleway by feature 28 (same tags, same cut of the longer way). The older way survives, so the existing sidewalk keeps its line and its history.
+- This reverses the earlier decision of feature 28 not to search the sidewalk automatically: the mapper now asks for it with the click, and the entry is disabled with the reason when it does not fit.
+- Nothing runs half: if one side has no sidewalk way (`no_sidewalk`) or the merge is not possible (`lengths`, `apart`, `mixed`, `different_values`), the entry is disabled and says why, also for "both".
+- Hover preview: the footways that become the path. One undo step; the paths stay selected.
+- Code: `modules/sidepath/find_sidewalk.ts`, `modules/actions/extract_merge_sidepaths.ts`, `modules/operations/extract_merge_sidepaths.ts` (the shared key operation is `sidepathKeyOperation` in `operations/extract_sidepath.ts`), hooked into `modules/modes/select.js`; strings `operations.extract_merge_sidepaths.*`. Tests: `test/spec/actions/extract_merge_sidepaths.ts`, `test/spec/operations/extract_sidepath.ts`.
+
 ## Progress log
 
+- 2026-10-20: Extract and merge in one click (feature 38, ⌘G).
 - 2026-10-15: Local performance harness (feature 37) and four performance fixes found with it: read-only styling without per-element transparency, read-only targets with an inline style, no full redraw from iD's empty data layer on our vector tiles, no double vertex draw with a selection.
 - 2026-10-14: Tester feedback and a check of the progress marks.
   - Read-only features: since 2026-10-13 all touch targets were checked, also midpoints, whose datum is no OSM entity. The check threw on every redraw while read-only categories were set; that stopped the listeners after it. Effects seen: the right-click menu of a way did not open (no split), and very likely the sidebar and the Mapillary bar did not update after a click (TILDA value buttons, "No sign here", the image buttons). Fixed; the right-click was reproduced and checked in Firefox.

@@ -92,6 +92,31 @@ en:
       closed: This can't be extracted because it is a closed way.
       too_short: This can't be extracted because the way is too short.
       not_eligible: This can't be extracted.
+    extract_merge_sidepaths:
+      title:
+        right: Extract right cycle track and merge with sidewalk
+        left: Extract left cycle track and merge with sidewalk
+        both: Extract both cycle tracks and merge with sidewalks
+      annotation:
+        right: Extracted the right cycle track and merged it with the sidewalk into a foot and cycle path.
+        left: Extracted the left cycle track and merged it with the sidewalk into a foot and cycle path.
+        both: Extracted both cycle tracks and merged them with the sidewalks into foot and cycle paths.
+      description:
+        right: "Extract the right cycle track and merge it with the sidewalk way next to it into one highway=path. The sidewalk keeps its line and gets the tags of both."
+        left: "Extract the left cycle track and merge it with the sidewalk way next to it into one highway=path. The sidewalk keeps its line and gets the tags of both."
+        both: "Extract both cycle tracks and merge each with the sidewalk way next to it into one highway=path. The sidewalks keep their lines and get the tags of both."
+      flash: "Extracted and merged into a foot and cycle path. This road: {changes}"
+      flash_dropped: "Extracted and merged into a foot and cycle path. This road: {changes}. Not taken over from the deleted cycleway: {dropped}"
+      loading: Loading the traffic sign rules, try again in a moment.
+      no_sidewalk: This can't be merged because no sidewalk way runs along that cycle track. Extract it and merge by hand, or map the sidewalk first.
+      incomplete: This can't be extracted because not all of its nodes are downloaded.
+      closed: This can't be extracted because it is a closed way.
+      too_short: This can't be extracted because the way is too short.
+      mixed: These can't be merged because several cycleways and several footways would be merged. Split the sidewalk first.
+      lengths: These can't be merged because the lengths of the sidewalk pieces and the cycle track differ too much. Split the sidewalk first.
+      apart: These can't be merged because the sidewalk does not run side by side with the cycle track (more than 25 m apart somewhere). Split the sidewalk first.
+      different_values: "These can't be merged because the sidewalk pieces have different values of {key}. Split the way first."
+      not_eligible: This can't be extracted and merged.
     merge_sidepaths:
       title: Merge into a foot and cycle path
       annotation: Merged a cycleway and a footway into one foot and cycle path.
@@ -2838,6 +2863,7 @@ en:
         extract_without_relations: "Extract a point from a feature, without extracting its relations"
         extract_sidepath: "Extract a cycle track or sidewalk from a road (several choices: pick one from a menu)"
         merge_sidepaths: "Merge a cycleway and a footway into one foot and cycle path"
+        extract_merge_sidepaths: "Extract the cycle track of a road and merge it with the sidewalk way next to it, in one step (several choices: pick one from a menu)"
         split: "Split features at the selected points"
         reverse: "Reverse selected features"
         move: "Move selected features"

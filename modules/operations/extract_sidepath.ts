@@ -16,7 +16,7 @@ function titleID(option: ExtractOption) {
 
 
 /** What changes on the road: tags set (`key=value`) and how many tags are removed (they move to the new way) */
-function roadChanges(before: Tags, after: Tags) {
+export function roadChanges(before: Tags, after: Tags) {
     const keys = new Set([...Object.keys(before), ...Object.keys(after)]);
     const changed = [...keys].filter(key => before[key] !== after[key]);
     return {
@@ -114,10 +114,13 @@ function extractSidepathOperation(context: iD.Context, wayID: WayId, option: Ext
 
 
 /**
- * ⌘E for the extract entries of the edit menu: one enabled entry runs, several open a menu with
- * all of them next to the pointer. The entries have no key of their own: the key does not pick one.
+ * A key for a group of entries of the edit menu (⌘E for the extract entries, ⌘G for extract and
+ * merge): one enabled entry runs, several open a menu with all of them next to the pointer. The
+ * entries have no key of their own: the key does not pick one.
  */
-function extractSidepathKeyOperation(context: iD.Context, wayID: WayId, operations: Operation[]): Operation {
+export function sidepathKeyOperation(
+    context: iD.Context, wayID: WayId, operations: Operation[], id: string, key: string
+): Operation {
     const enabled = () => operations.filter(operation => !operation.disabled());
 
     function showChoices() {
@@ -148,8 +151,8 @@ function extractSidepathKeyOperation(context: iD.Context, wayID: WayId, operatio
     operation.tooltip = () => current().tooltip();
     operation.annotation = () => current().annotation();
 
-    operation.id = 'extract_sidepath';
-    operation.keys = [uiCmd('⌘E')];
+    operation.id = id;
+    operation.keys = [key];
     operation.title = operations[0].title;
 
     return operation;
@@ -173,7 +176,7 @@ export function operationsExtractSidepath(context: iD.Context, selectedIDs: stri
     const operations = extractOptions(way.tags).map(option => extractSidepathOperation(context, wayID, option));
     // the behavior is installed and removed with the operation list: hang it on the first entry
     if (operations.length) {
-        operations[0].behavior = behaviorOperation(context).which(extractSidepathKeyOperation(context, wayID, operations));
+        operations[0].behavior = behaviorOperation(context).which(sidepathKeyOperation(context, wayID, operations, 'extract_sidepath', uiCmd('⌘E')));
     }
     return operations;
 }
