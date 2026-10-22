@@ -57,6 +57,18 @@ function extractMergeOperation(context: iD.Context, wayID: WayId, choice: Choice
 
         const { changes } = roadChanges(before, context.entity(wayID).tags);
         const dropped = act.dropped();
+        const stopped = act.partialProblem();
+        if (stopped) {
+            // the extraction stays; the message says what did not work
+            const reason = t(`operations.extract_merge_sidepaths.${stopped.reason}`, { key: stopped.key ?? '' });
+            showError(t(`operations.extract_merge_sidepaths.partial.${stopped.step}`, {
+                side: t(`operations.extract_sidepath.side.${stopped.side}`),
+                changes,
+                reason
+            }));
+            context.enter(modeSelect(context, [...act.survivorIds(), ...act.extractedIds()]));
+            return;
+        }
         (context.ui().flash as any)
             .duration(4000)
             .iconName('#iD-operation-extract')

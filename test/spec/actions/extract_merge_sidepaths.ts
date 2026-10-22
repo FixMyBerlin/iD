@@ -53,15 +53,18 @@ describe('iD.actionExtractMergeSidepaths', () => {
         expect(after.entity('w1').tags['cycleway:both']).toBe('separate');
     });
 
-    it('does not run when a side has no sidewalk way, and leaves the road alone', () => {
+    it('keeps the extraction when a side has no sidewalk way, and reports the failed merge', () => {
         const before = graph(road, { 2: [-8.5, 0, 100] });
         const both = actionExtractMergeSidepaths('w1', ['right', 'left'], undefined, undefined, nearby(before));
-        expect(both.disabled!(before)).toBe('no_sidewalk');
-        expect(both.problem(before)).toMatchObject({ reason: 'no_sidewalk', step: 'merge' });
-        expect(both(before)).toBe(before);
+        expect(both.disabled!(before)).toBe(false);
+        expect(both.problem(before)).toBeUndefined();
 
-        const right = actionExtractMergeSidepaths('w1', ['right'], undefined, undefined, nearby(before));
-        expect(right.disabled!(before)).toBe(false);
+        const after = both(before);
+        expect(after).not.toBe(before);
+        expect(both.partialProblem()).toMatchObject({ reason: 'no_sidewalk', step: 'merge', side: 'left' });
+        expect(both.survivorIds()).toHaveLength(1);
+        expect(both.extractedIds()).toHaveLength(1);
+        expect(after.entity(both.extractedIds()[0]).tags.highway).toBe('cycleway');
     });
 
     it('cuts a sidewalk that runs on past the road', () => {

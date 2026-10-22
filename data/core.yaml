@@ -120,6 +120,9 @@ en:
       failed:
         extract: "Nothing was changed. Step 1 (extract, {side} side) doesn't work: {reason}"
         merge: "Nothing was changed. Step 2 (merge with the sidewalk, {side} side) doesn't work: {reason}"
+      partial:
+        extract: "Only partly done. Step 1 (extract, {side} side) doesn't work, what was done before stays: {reason}"
+        merge: "Extracted, but not merged: step 2 (merge with the sidewalk, {side} side) didn't work, the extracted cycle track stays a separate way. This road: {changes}. {reason}"
       error: "Extract and merge failed, nothing was changed: {message}"
     merge_sidepaths:
       title: Merge into a foot and cycle path

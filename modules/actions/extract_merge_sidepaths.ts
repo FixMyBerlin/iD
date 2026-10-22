@@ -19,8 +19,12 @@ export interface ActionExtractMergeSidepaths extends Action {
     survivorIds(): WayId[];
     /** `key=value` tags that were not taken over from the deleted cycleways */
     dropped(): string[];
-    /** the problem the action would run into on this graph, if any */
+    /** the problem that stops the action on this graph before it can change anything, if any */
     problem(graph: coreGraph): ExtractMergeProblem | undefined;
+    /** the problem that stopped the action half way: what was done stays (known after the action ran once) */
+    partialProblem(): ExtractMergeProblem | undefined;
+    /** the extracted cycleways that were not merged (known after the action ran once) */
+    extractedIds(): WayId[];
 }
 
 /** Footways are looked for this far around the road: its stacked lanes and the sidewalk fit in */
@@ -41,13 +45,16 @@ export function actionExtractMergeSidepaths(
 ): ActionExtractMergeSidepaths {
     let _survivorIds: WayId[] = [];
     let _dropped: string[] = [];
+    let _partial: ExtractMergeProblem | undefined;
+    let _extractedIds: WayId[] = [];
 
-    /** All sides in turn; stops at the first side that can't be extracted and merged */
+    /** All sides in turn; stops at the first step that fails, what was done before it stays */
     function run(graph: coreGraph) {
         const road = graph.entity(wayID);
         // found once, before anything changes: the first merge deletes a way the second side doesn't need
         const found = nearby(graph, road.extent(graph).padByMeters(SEARCH_METERS));
         const survivors: WayId[] = [];
+        const extracted: WayId[] = [];
         const dropped = new Set<string>();
         let problem: ExtractMergeProblem | undefined;
 
@@ -60,6 +67,7 @@ export function actionExtractMergeSidepaths(
             }
             graph = extract(graph);
             const bikeID = extract.getWayId();
+            extracted.push(bikeID);
 
             const footIDs = sidewalkCandidates(graph, bikeID, found);
             if (!footIDs.length) {
@@ -79,22 +87,31 @@ export function actionExtractMergeSidepaths(
             }
             const merge = actionMergeSidepaths(wayIDs, recommend, joinSigns);
             graph = merge(graph);
+            extracted.pop();
             survivors.push(...merge.survivorIds());
             for (const tag of merge.dropped()) dropped.add(tag);
         }
-        return { graph, survivors, dropped: [...dropped], problem };
+        return { graph, survivors, extracted, dropped: [...dropped], problem };
     }
 
     const action: ActionExtractMergeSidepaths = function(graph: coreGraph) {
         const result = run(graph);
-        // never half done: a side that can't be merged leaves the road as it was
-        if (result.problem) return graph;
+        // nothing could be done: the road stays as it was
+        if (result.graph === graph) return graph;
+        // a cycle track that was extracted stays extracted, also if its merge failed
         _survivorIds = result.survivors;
+        _extractedIds = result.extracted;
         _dropped = result.dropped;
+        _partial = result.problem;
         return result.graph;
     };
 
-    action.problem = graph => run(graph).problem;
+    action.problem = graph => {
+        const result = run(graph);
+        return result.graph === graph ? result.problem : undefined;
+    };
+    action.partialProblem = () => _partial;
+    action.extractedIds = () => _extractedIds;
 
     action.disabled = function(graph: coreGraph) {
         const road = graph.hasEntity(wayID);
