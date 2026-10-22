@@ -35,10 +35,24 @@ function extractMergeOperation(context: iD.Context, wayID: WayId, choice: Choice
         return _checked.problem;
     }
 
+    function showError(label: string) {
+        (context.ui().flash as any)
+            .duration(4000)
+            .iconName('#iD-operation-extract')
+            .iconClass('operation disabled')
+            .label(label)();
+    }
+
     const operation: Operation = function() {
         const act = action();
         const before = context.entity(wayID).tags;
-        context.perform(act, operation.annotation());
+        try {
+            context.perform(act, operation.annotation());
+        } catch (error) {
+            // the history was not touched: a throwing action puts nothing on its stack
+            showError(t('operations.extract_merge_sidepaths.error', { message: String((error as Error)?.message ?? error) }));
+            return;
+        }
         context.validator().validate();
 
         const { changes } = roadChanges(before, context.entity(wayID).tags);
@@ -69,7 +83,16 @@ function extractMergeOperation(context: iD.Context, wayID: WayId, choice: Choice
 
     operation.tooltip = function() {
         const disabled = operation.disabled();
-        if (disabled) return t.append(`operations.extract_merge_sidepaths.${disabled}`, { key: problem()?.key ?? '' });
+        if (disabled) {
+            const found = problem();
+            const reason = t(`operations.extract_merge_sidepaths.${disabled}`, { key: found?.key ?? '' });
+            // which of the two steps stopped, and on which side: the message of the step alone does not say
+            if (!found) return t.append(`operations.extract_merge_sidepaths.${disabled}`);
+            return t.append(`operations.extract_merge_sidepaths.failed.${found.step}`, {
+                side: t(`operations.extract_sidepath.side.${found.side}`),
+                reason
+            });
+        }
         return t.append(`operations.extract_merge_sidepaths.description.${choice}`);
     };
 

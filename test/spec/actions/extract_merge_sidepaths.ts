@@ -57,6 +57,7 @@ describe('iD.actionExtractMergeSidepaths', () => {
         const before = graph(road, { 2: [-8.5, 0, 100] });
         const both = actionExtractMergeSidepaths('w1', ['right', 'left'], undefined, undefined, nearby(before));
         expect(both.disabled!(before)).toBe('no_sidewalk');
+        expect(both.problem(before)).toMatchObject({ reason: 'no_sidewalk', step: 'merge' });
         expect(both(before)).toBe(before);
 
         const right = actionExtractMergeSidepaths('w1', ['right'], undefined, undefined, nearby(before));

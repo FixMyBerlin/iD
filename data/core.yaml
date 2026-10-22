@@ -117,6 +117,10 @@ en:
       apart: These can't be merged because the sidewalk does not run side by side with the cycle track (more than 25 m apart somewhere). Split the sidewalk first.
       different_values: "These can't be merged because the sidewalk pieces have different values of {key}. Split the way first."
       not_eligible: This can't be extracted and merged.
+      failed:
+        extract: "Nothing was changed. Step 1 (extract, {side} side) doesn't work: {reason}"
+        merge: "Nothing was changed. Step 2 (merge with the sidewalk, {side} side) doesn't work: {reason}"
+      error: "Extract and merge failed, nothing was changed: {message}"
     merge_sidepaths:
       title: Merge into a foot and cycle path
       annotation: Merged a cycleway and a footway into one foot and cycle path.

@@ -11,8 +11,8 @@ import type { osmWay, WayId } from '../osm';
 /** The ways of the map near an extent, e.g. from the history's tree */
 export type NearbyWays = (graph: coreGraph, extent: geoExtent) => osmWay[];
 
-/** Why the action can't run; `key` names the tag of `different_values` */
-export type ExtractMergeProblem = { reason: string; key?: string };
+/** Why the action can't run, for which side and in which step; `key` names the tag of `different_values` */
+export type ExtractMergeProblem = { reason: string; key?: string; side: Side; step: 'extract' | 'merge' };
 
 export interface ActionExtractMergeSidepaths extends Action {
     /** the ways that carry the foot and cycle path now (known after the action ran once) */
@@ -55,7 +55,7 @@ export function actionExtractMergeSidepaths(
             const extract = actionExtractSidepath(wayID, 'cycleway', side, recommend, joinSigns);
             const extractProblem = extract.disabled!(graph);
             if (extractProblem) {
-                problem = { reason: extractProblem };
+                problem = { reason: extractProblem, side, step: 'extract' };
                 break;
             }
             graph = extract(graph);
@@ -63,7 +63,7 @@ export function actionExtractMergeSidepaths(
 
             const footIDs = sidewalkCandidates(graph, bikeID, found);
             if (!footIDs.length) {
-                problem = { reason: 'no_sidewalk' };
+                problem = { reason: 'no_sidewalk', side, step: 'merge' };
                 break;
             }
             const wayIDs = [bikeID, ...footIDs];
@@ -71,7 +71,9 @@ export function actionExtractMergeSidepaths(
             if (!selection || selection.disabled) {
                 problem = {
                     reason: selection ? selection.disabled as string : 'no_sidewalk',
-                    key: selection && 'key' in selection ? selection.key as string : undefined
+                    key: selection && 'key' in selection ? selection.key as string : undefined,
+                    side,
+                    step: 'merge'
                 };
                 break;
             }
