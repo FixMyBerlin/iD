@@ -1,0 +1,57 @@
+/* Lens section (Map Data pane) and the import/edit modal */
+
+.layer-list-lenses li.lens-item label > span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.settings-lens .settings-lens-callout {
+    margin-bottom: 20px;
+    padding: 8px 10px;
+    border-radius: 4px;
+    border-left: 4px solid var(--warning-text, #d97706);
+    background: rgba(217, 119, 6, 0.12);
+}
+.settings-lens label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+.settings-lens .settings-lens-file {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 5px;
+}
+.settings-lens .settings-lens-file button {
+    flex: 0 0 auto;
+    width: auto;
+    padding: 0 12px;
+}
+.settings-lens .instructions {
+    font-size: 12px;
+    margin-bottom: 20px;
+}
+.settings-lens input.field-name {
+    display: block;
+    width: 100%;
+    margin-bottom: 20px;
+}
+.settings-lens .settings-lens-shortcut {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.settings-lens input.field-shortcut {
+    width: 3em;
+    text-align: center;
+    text-transform: lowercase;
+}
+.settings-lens input.field-shortcut.invalid {
+    border-color: #e06d5f;
+}
+.settings-lens .settings-lens-shortcut-error {
+    font-size: 12px;
+    color: #e06d5f;
+}

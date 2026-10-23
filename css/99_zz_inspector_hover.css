@@ -1,0 +1,35 @@
+/* Hover preview of a feature in the sidebar (nothing selected, `.inspector-hover`): read-only.
+   iD hides or greys its own controls there; the same for the controls of this fork. */
+
+/* hidden, but they keep their place */
+.ideditor .inspector-hover .disclosure-header-option,
+.ideditor .inspector-hover .tilda-card button.tilda-edit,
+.ideditor .inspector-hover .preset-list-button-wrap button.infra3d-button,
+.ideditor[dir] .inspector-hover .form-field > .field-label > button.traffic-sign-toggle,
+.ideditor .inspector-hover .field-related button.field-related-button,
+.ideditor .inspector-hover .form-field-input-traffic-sign .traffic-sign-row__drag,
+.ideditor .inspector-hover .form-field-input-traffic-sign .traffic-sign-row__remove {
+    visibility: hidden;
+}
+
+/* removed: inputs and buttons that only make sense while editing */
+.ideditor .inspector-hover .tilda-attribute-inputs,
+.ideditor .inspector-hover .tilda-gaps,
+.ideditor .inspector-hover .tilda-target,
+.ideditor .inspector-hover .tilda-verified button.tilda-check,
+.ideditor .inspector-hover .form-field-input-traffic-sign .traffic-sign-add-row,
+.ideditor .inspector-hover .form-field-button.measure-tape-button {
+    display: none !important;
+}
+
+/* greyed like iD's inputs */
+.ideditor .inspector-hover .tilda-card-header,
+.ideditor .inspector-hover .tilda-card-body,
+.ideditor .inspector-hover .form-field-input-traffic-sign .traffic-sign-row,
+.ideditor .inspector-hover .form-field-input-traffic-sign input {
+    background: var(--bg-color-3) !important;
+}
+.ideditor .inspector-hover .surface-smoothness-field,
+.ideditor .inspector-hover .form-field-input-surface-smoothness {
+    opacity: 0.75;
+}

@@ -14,6 +14,8 @@ import { uiFeatureList } from './feature_list';
 import { uiInspector } from './inspector';
 import { uiOsmoseEditor } from './osmose_editor';
 import { uiNoteEditor } from './note_editor';
+import { uiTildaNoteEditor } from './tilda_note_editor';
+import { TildaNote } from '../tilda_notes/note';
 import { localizer } from '../core/localizer';
 
 
@@ -21,6 +23,7 @@ export function uiSidebar(context) {
     var inspector = uiInspector(context);
     var dataEditor = uiDataEditor(context);
     var noteEditor = uiNoteEditor(context);
+    var tildaNoteEditor = uiTildaNoteEditor(context);
     var osmoseEditor = uiOsmoseEditor(context);
     var _current;
     var _wasData = false;
@@ -197,6 +200,18 @@ export function uiSidebar(context) {
 
                 sidebar
                     .show(noteEditor.note(datum));
+
+                selection.selectAll('.sidebar-component')
+                    .classed('inspector-hover', true);
+
+            } else if (datum instanceof TildaNote) {
+                _wasNote = true;
+
+                // marker may contain stale data - get latest
+                datum = services.tildaNotes.getNote(datum.id) || datum;
+
+                sidebar
+                    .show(tildaNoteEditor.note(datum));
 
                 selection.selectAll('.sidebar-component')
                     .classed('inspector-hover', true);

@@ -49,6 +49,19 @@
             "text": "shortcuts.browsing.display_options.map_data"
           },
           {
+            "modifiers": ["⇧"],
+            "shortcuts": ["map_display.key"],
+            "text": "shortcuts.browsing.display_options.map_display"
+          },
+          {
+            "shortcuts": ["photos_pane.key"],
+            "text": "shortcuts.browsing.display_options.photos"
+          },
+          {
+            "shortcuts": ["way_table.key"],
+            "text": "shortcuts.browsing.display_options.way_table"
+          },
+          {
             "shortcuts": ["issues.key"],
             "text": "shortcuts.browsing.display_options.issues"
           },
@@ -276,6 +289,21 @@
             "modifiers": ["⇧"],
             "shortcuts": ["operations.extract.key"],
             "text": "shortcuts.editing.operations.extract_without_relations"
+          },
+          {
+            "modifiers": ["⌘"],
+            "shortcuts": ["E"],
+            "text": "shortcuts.editing.operations.extract_sidepath"
+          },
+          {
+            "modifiers": ["⌘"],
+            "shortcuts": ["M"],
+            "text": "shortcuts.editing.operations.merge_sidepaths"
+          },
+          {
+            "modifiers": ["⌘"],
+            "shortcuts": ["G"],
+            "text": "shortcuts.editing.operations.extract_merge_sidepaths"
           },
           {
             "shortcuts": ["operations.split.key"],

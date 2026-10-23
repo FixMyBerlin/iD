@@ -8,6 +8,7 @@ import { uiTooltip } from './tooltip';
 import { geoExtent } from '../geo/extent';
 import { uiFieldHelp } from './field_help';
 import { uiFields } from './fields';
+import { isSidePrerequisite, sidePrerequisiteAllowed } from './fields/side_prerequisite';
 import { LANGUAGE_SUFFIX_REGEX } from './fields/localized';
 import { uiTagReference } from './tag_reference';
 import { utilRebind, utilUniqueDomId } from '../util';
@@ -66,6 +67,8 @@ export function uiField(context, presetField, entityIDs, options) {
 
 
     function allKeys(tags) {
+        // The access field shows a dynamic key list at runtime and sets field.effectiveKeys
+        if (field.effectiveKeys && field.effectiveKeys.length) return field.effectiveKeys;
         return field.allKeys(tags);
     }
 
@@ -92,6 +95,8 @@ export function uiField(context, presetField, entityIDs, options) {
 
     function tagsContainFieldKey() {
         return allKeys(_tags).some(function(key) {
+            // Radnetz Berlin: keys shown below another field (related tags) don't count
+            if (field.hiddenKeys && field.hiddenKeys.has(key)) return false;
             if (field.type === 'multiCombo') {
                 for (var tagKey in _tags) {
                     if (tagKey.indexOf(key) === 0) {
@@ -161,13 +166,19 @@ export function uiField(context, presetField, entityIDs, options) {
         var enter = container.enter()
             .append('div')
             .attr('class', function(d) { return 'form-field form-field-' + d.safeid; })
-            .classed('nowrap', !options.wrap);
+            .classed('nowrap', !options.wrap)
+            // a detail of another field's sides, drawn as part of the field above it
+            .classed('has-side-prerequisite', isSidePrerequisite(field.prerequisiteTag));
 
         if (options.wrap) {
             var labelEnter = enter
                 .append('label')
                 .attr('class', 'field-label')
-                .attr('for', function(d) { return d.domId; });
+                .attr('for', function(d) { return d.domId; })
+                // Radnetz Berlin: the title is not clickable (only some fields reacted), its buttons are
+                .on('click.title', function(d3_event) {
+                    if (!d3_event.target.closest('button')) d3_event.preventDefault();
+                });
 
             var textEnter = labelEnter
                 .append('span')
@@ -355,6 +366,12 @@ export function uiField(context, presetField, entityIDs, options) {
         }
 
         var prerequisiteTag = field.prerequisiteTag;
+
+        // `{side}` in the key: allowed when it holds on at least one side (see side_prerequisite.ts)
+        if (entityIDs && !tagsContainFieldKey() && isSidePrerequisite(prerequisiteTag)) {
+            return sidePrerequisiteAllowed(prerequisiteTag, field.keys || [],
+                entityIDs.map(entityID => context.graph().entity(entityID).tags));
+        }
 
         if (entityIDs &&
             !tagsContainFieldKey() && // ignore tagging prerequisites if a value is already present
