@@ -303,6 +303,20 @@ describe('roadAttributes', () => {
         expect(byId(roadAttributes({ highway: 'residential', 'cycleway:left': 'no', 'cycleway:right': 'lane' })).cycleway.value).toBe('left=no, right=lane');
     });
 
+    it('segregated foot and cycleway: the width of the cycleway part, an existing width is the whole way', () => {
+        const tags = { highway: 'path', bicycle: 'designated', foot: 'designated', segregated: 'yes', is_sidepath: 'yes', width: '4' };
+        const attributes = byId(requiredAttributes(resultFor(tags, 'self'), tags));
+        expect(attributes.width).toBeUndefined();
+        expect(attributes.cycleway_width.key).toBe('cycleway:width');
+        expect(attributes.cycleway_width.state).toBe('missing');
+
+        const tagged = { ...tags, 'cycleway:width': '2' };
+        const edited = byId(requiredAttributes(resultFor(tagged, 'self'), tagged, undefined, new Set(['cycleway:width'])));
+        expect(edited.cycleway_width.state).toBe('ok');
+        expect(edited.source_cycleway_width.key).toBe('source:cycleway:width');
+        expect(edited.source_cycleway_width.state).toBe('missing');
+    });
+
     it('mixed traffic: no width and no width source (Leistungsbeschreibung, attribute 15)', () => {
         const attributes = byId(roadAttributes({ highway: 'residential', width: '7.5' }, new Set(['width'])));
         expect(attributes.width).toBeUndefined();

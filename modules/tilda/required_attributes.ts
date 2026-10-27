@@ -102,6 +102,8 @@ type Rule = {
     /** The tag TILDA reads instead of this key when both are there (`oneway:bicycle` wins over `oneway`) */
     overriddenBy?: (ctx: RuleContext) => string | undefined;
     when?: (ctx: RuleContext) => boolean;
+    /** the rule does not apply here (another rule replaces it) */
+    unless?: (ctx: RuleContext) => boolean;
     optional?: boolean | ((ctx: RuleContext) => boolean);
 };
 
@@ -244,21 +246,37 @@ function assumedOneway(ctx: RuleContext) {
 
 
 /** The width was tagged in this session: then say where the value comes from (not for existing widths) */
-function widthEdited(ctx: RuleContext) {
-    return lookupKeys('width', ctx.side, ctx.prefix).some(key => ctx.tags[key] !== undefined && ctx.edited.has(key));
+function widthEdited(key: string) {
+    return (ctx: RuleContext) => lookupKeys(key, ctx.side, ctx.prefix).some(k => ctx.tags[k] !== undefined && ctx.edited.has(k));
 }
+
+const WIDTH_SOURCE_OPTIONS = ['Luftbild 2026', 'Luftbild 2025', 'Messung aus Punktwolke (Infra3DViewer)', 'survey'];
 
 const SOURCE_WIDTH: Rule = {
     id: 'source_width', key: 'source:width', sourceFor: 'width', feeds: ['breite'],
-    options: ['Luftbild 2026', 'Luftbild 2025', 'Messung aus Punktwolke (Infra3DViewer)', 'survey'], when: widthEdited
+    options: WIDTH_SOURCE_OPTIONS, when: widthEdited('width')
 };
+
+/**
+ * Footway and cycleway as separate parts of one way: we only measure the cycleway part. An existing `width`
+ * is usually the whole way, so `cycleway:width` is asked for in any case, and `width` is not.
+ */
+const SEGREGATED_WIDTH: Rule[] = [
+    { id: 'cycleway_width', key: 'cycleway:width', feeds: ['breite'], options: [] },
+    { id: 'source_cycleway_width', key: 'source:cycleway:width', sourceFor: 'cycleway:width', feeds: ['breite'],
+        options: WIDTH_SOURCE_OPTIONS, when: widthEdited('cycleway:width') }
+];
+
+function isSegregatedWay(ctx: RuleContext) {
+    return ctx.side === 'self' && ctx.category.startsWith('footAndCyclewaySegregated');
+}
 
 const COMMON: Rule[] = [
     { id: 'traffic_sign', key: 'traffic_sign', feeds: ['pflicht', 'fuehr', 'nutz_beschr'], options: trafficSignOptions, tilda: field('traffic_sign') },
     { id: 'width', key: 'width', feeds: ['breite'], options: [], tilda: field('width'),
         // shared bus lanes: the lane width is only a side benefit (Radinfra FAQ)
-        optional: ctx => ctx.category.startsWith('sharedBusLane') },
-    SOURCE_WIDTH,
+        optional: ctx => ctx.category.startsWith('sharedBusLane'), unless: isSegregatedWay },
+    { ...SOURCE_WIDTH, unless: isSegregatedWay },
     { id: 'surface', key: 'surface', feeds: ['ofm'], options: SURFACE_OPTIONS, tilda: field('surface') },
     { id: 'sett_length', key: 'sett:length', feeds: ['ofm'], options: SETT_LENGTH_OPTIONS,
         when: ctx => ctx.value('surface') === 'sett' },
@@ -272,6 +290,7 @@ const COMMON: Rule[] = [
 ];
 
 const SEPARATE_WAY: Rule[] = [
+    ...SEGREGATED_WIDTH.map(rule => ({ ...rule, when: (ctx: RuleContext) => isSegregatedWay(ctx) && (rule.when?.(ctx) ?? true) })),
     { id: 'is_sidepath', key: 'is_sidepath', feeds: ['fuehr'], options: ['yes', 'no'], strict: true,
         // TILDA derives it from `footway=sidewalk` and similar; a chosen target category is no source
         tilda: ctx => ctx.isTarget ? undefined : sidepathFromCategory(ctx.category),
@@ -391,7 +410,7 @@ function summary(ctx: RuleContext, keys: string[]) {
 
 function evaluate(rules: Rule[], ctx: RuleContext): RequiredAttribute[] {
     return rules
-        .filter(rule => !rule.when || rule.when(ctx))
+        .filter(rule => (!rule.when || rule.when(ctx)) && !rule.unless?.(ctx))
         .map(rule => {
             const ownKeys = [rule.key, ...(rule.alsoKeys ?? [])];
             const keysFor = (key: string) => rule.sourceFor

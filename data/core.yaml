@@ -952,6 +952,8 @@ en:
         width: "Width"
         width_effective: "Usable width (inside the marking)"
         source_width: "Width source"
+        cycleway_width: "Width of the cycleway part"
+        source_cycleway_width: "Width source of the cycleway part"
         surface: "Surface"
         sett_length: "Sett stone size (m)"
         surface_colour: "Surface colour"
