@@ -29,6 +29,8 @@ export function uiFieldTrafficSignGroup(field: { key: string; signGroup?: SignGr
     const rowFields = new Map<string, ReturnType<typeof uiFieldTrafficSign>>();
     /** the switch as the user set it while this feature is selected; `undefined`: follow the tags */
     let _showDirections: boolean | undefined;
+    /** the sign for both directions was tagged when the switch went on: its row stays while it is edited */
+    let _wholeKept = false;
     let _tags: TagsMulti = {};
     let _entityIDs: string[] = [];
     let _selection: d3.Selection | null = null;
@@ -113,7 +115,12 @@ export function uiFieldTrafficSignGroup(field: { key: string; signGroup?: SignGr
 
     function wayRows(): SignRow[] {
         const state = wayState();
-        const rows: SignRow[] = [{ key: 'traffic_sign' }];
+        const rows: SignRow[] = [];
+        // with directions, `traffic_sign` for both is no way to start a sign in OSM: only shown
+        // when it is tagged
+        if (!state.directions || _wholeKept || isTagged('traffic_sign') || !!state.signs.whole) {
+            rows.push({ key: 'traffic_sign' });
+        }
         if (state.directions) {
             rows.push({ key: 'traffic_sign:forward', direction: 'forward' });
             rows.push({ key: 'traffic_sign:backward', direction: 'backward' });
@@ -151,6 +158,7 @@ export function uiFieldTrafficSignGroup(field: { key: string; signGroup?: SignGr
                 const now = wayState();
                 if (now.locked) return;
                 _showDirections = !now.directions;
+                _wholeKept = _showDirections && isTagged('traffic_sign');
                 render();
             })
             .merge(toggle)
@@ -189,7 +197,7 @@ export function uiFieldTrafficSignGroup(field: { key: string; signGroup?: SignGr
     function render() {
         if (!_selection) return;
         const rows = group === 'way' ? wayRows() : signRows(_tags, group);
-        const labelled = rows.length > 1 || group !== 'way' || rows[0]?.key !== 'traffic_sign';
+        const labelled = rows.length !== 1 || group !== 'way' || rows[0]?.key !== 'traffic_sign';
         const tags = rowTags();
 
         renderToggle();
@@ -249,6 +257,7 @@ export function uiFieldTrafficSignGroup(field: { key: string; signGroup?: SignGr
         if (val === undefined) return _entityIDs;
         if (val.join() !== _entityIDs.join()) {
             _showDirections = undefined;
+            _wholeKept = false;
         }
         _entityIDs = val;
         for (const instance of rowFields.values()) instance.entityIDs(val);
