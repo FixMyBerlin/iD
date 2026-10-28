@@ -82,6 +82,8 @@ type Rule = {
     strict?: boolean;
     /** other keys that also count as tagged; the value shows all of them (`left=no, right=lane`) */
     alsoKeys?: string[];
+    /** other keys TILDA reads for the same value, after `key` (`surface:colour` for `cycleway:surface:colour`); not written */
+    readKeys?: string[];
     /** what TILDA reads for this attribute */
     tilda?: (ctx: RuleContext) => string | number | null | undefined;
     /** TILDA values that are only a guess, not tagged information */
@@ -281,7 +283,10 @@ const COMMON: Rule[] = [
     { id: 'sett_length', key: 'sett:length', feeds: ['ofm'], options: SETT_LENGTH_OPTIONS,
         when: ctx => ctx.value('surface') === 'sett' },
     { id: 'surface_colour', key: 'surface:colour', feeds: ['farbe'], options: SURFACE_COLOUR_OPTIONS, strict: true, tilda: field('surface_color'), optional: true,
-        assumed: () => 'no', note: 'surface_colour' },
+        assumed: () => 'no', note: 'surface_colour', unless: isSegregatedWay },
+    // footway and cycleway apart: TILDA reads the colour of the cycleway part (`cycleway:surface:colour`), else `surface:colour`
+    { id: 'surface_colour', key: 'cycleway:surface:colour', readKeys: ['surface:colour'], feeds: ['farbe'], options: SURFACE_COLOUR_OPTIONS, strict: true,
+        tilda: field('surface_color'), optional: true, assumed: () => 'no', note: 'surface_colour', when: isSegregatedWay },
     { id: 'oneway', key: 'oneway', feeds: ['verkehrsri'], options: ['yes', 'no', '-1'], tilda: field('oneway'), guesses: ['assumed_no', 'implicit_yes'],
         // lanes on the road run with the traffic, bicycle roads are two-way: TILDA's default is reliable there
         assumed: assumedOneway, overriddenBy: onewayBicycleTag,
@@ -415,7 +420,7 @@ function evaluate(rules: Rule[], ctx: RuleContext): RequiredAttribute[] {
             const ownKeys = [rule.key, ...(rule.alsoKeys ?? [])];
             const keysFor = (key: string) => rule.sourceFor
                 ? lookupKeys(rule.sourceFor, ctx.side, ctx.prefix).map(k => `source:${k}`)
-                : lookupKeys(key, ctx.side, ctx.prefix);
+                : [key, ...(key === rule.key ? rule.readKeys ?? [] : [])].flatMap(k => lookupKeys(k, ctx.side, ctx.prefix));
             const value = rule.alsoKeys ? summary(ctx, [rule.key, ...rule.alsoKeys])
                 : keysFor(rule.key).map(k => ctx.tags[k]).find(v => v !== undefined);
             const lookup = [...new Set(ownKeys.flatMap(keysFor))];

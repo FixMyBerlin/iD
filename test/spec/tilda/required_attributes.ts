@@ -136,6 +136,25 @@ describe('requiredAttributes', () => {
 });
 
 describe('defaults (WORKDOC feature 32)', () => {
+    it('surface:colour on a segregated way: cycleway:surface:colour counts (way 951489119)', () => {
+        const tags = {
+            bicycle: 'designated', foot: 'designated', highway: 'path', is_sidepath: 'yes', segregated: 'yes', oneway: 'no',
+            surface: 'paving_stones', traffic_sign: 'none', 'cycleway:width': '1.5', 'cycleway:surface:colour': 'red'
+        };
+        const colour = byId(requiredAttributes(resultFor(tags, 'self'), tags)).surface_colour;
+        expect(colour.state).toBe('ok');
+        expect(colour.value).toBe('red');
+        expect(colour.key).toBe('cycleway:surface:colour');
+
+        const { 'cycleway:surface:colour': _, ...rest } = tags;
+        const plainTags = { ...rest, 'surface:colour': 'green' };
+        expect(byId(requiredAttributes(resultFor(plainTags, 'self'), plainTags)).surface_colour.state).toBe('ok');
+
+        const missing = byId(requiredAttributes(resultFor(rest, 'self'), rest)).surface_colour;
+        expect(missing.state).toBe('assumed');
+        expect(missing.default).toBe('cycleway:surface:colour=no');
+    });
+
     it('surface:colour: not coloured is the default, only the colours are offered', () => {
         const tags = { highway: 'cycleway', is_sidepath: 'yes' };
         const colour = byId(requiredAttributes(resultFor(tags, 'self'), tags)).surface_colour;
