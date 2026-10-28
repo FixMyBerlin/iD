@@ -1834,6 +1834,7 @@ en:
       closed: resolved
     replies: "{count} replies"
     loading: Loading the note…
+    save_failed: "The TILDA note was not saved. {reason}"
     not_loaded: The note could not be loaded.
     no_body: Only a subject was given.
     subject: Subject

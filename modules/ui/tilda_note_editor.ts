@@ -343,6 +343,19 @@ export function uiTildaNoteEditor(context: iD.Context) {
         _saving = false;
         _error = err;
         if (note) _note = note;
+        // the sidebar moved on while saving, so the notice below would not be seen
+        if (err && service.selectedID() !== _note.id) {
+            const known = ACCESS_ERRORS.includes(err.code) || err.code === 'network';
+            const reason = known
+                ? t('tilda_notes.errors.' + err.code)
+                : t('tilda_notes.errors.other', { message: err.message || err.code });
+            (context.ui() as any).flash()
+                .duration(6000)
+                .iconName('#iD-icon-no')
+                .iconClass('disabled')
+                .label(t('tilda_notes.save_failed', { reason }))();
+            return;
+        }
         // on an error the input stays in the cached note, so nothing is lost
         dispatch.call('change', undefined, err ? service.getNote(_note.id) || _note : note);
     }
