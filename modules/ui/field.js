@@ -211,6 +211,15 @@ export function uiField(context, presetField, entityIDs, options) {
         }
 
 
+        // Radnetz Berlin: a short note below the title (`hint` of the field), above the input
+        if (options.wrap && field.hint) {
+            var hint = t('inspector.radnetz_field.' + field.safeid + '.hint', { 'default': field.hint });
+            enter
+                .append('div')
+                .attr('class', 'field-hint')
+                .text(hint);
+        }
+
         // Update
         container = container
             .merge(enter);

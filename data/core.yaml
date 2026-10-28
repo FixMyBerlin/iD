@@ -806,6 +806,12 @@ en:
       add_category: "Add: {category} ({key})"
       close_category: "Close: {category}"
       editor_label: "{category} – {field}"
+    radnetz_field:
+      width_effective:
+        label: "Width Between the Markings (Meters)"
+        hint: "Measure it between the white markings."
+      source_width_effective:
+        label: "Usable Width Source"
     mapillary_images:
       label: "Mapillary images"
       image_id: "Image ID"

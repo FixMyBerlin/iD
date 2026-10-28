@@ -65,9 +65,11 @@ export function presetField(fieldID: string, field: Field) {
 
   _this.hasTextForStringId = (scope) => localizer.hasTextForStringId(`_tagging.presets.fields.${fieldID}.${scope}`) || _ownString(scope) !== undefined;
 
-  // Radnetz Berlin: fields from a preset customization have an untranslated `label`
-  _this.title = () => _this.t('label', { 'default': field.label ?? fieldID });
-  _this.label = () => _this.t.append('label', { 'default': field.label ?? fieldID });
+  // Radnetz Berlin: fields from a preset customization have an untranslated `label`, translated
+  // by `inspector.radnetz_field.<safeid>.label` where that exists (data/core.yaml)
+  const _ownLabel = () => t(`inspector.radnetz_field.${_this.safeid}.label`, { 'default': field.label ?? fieldID });
+  _this.title = () => _this.t('label', { 'default': _ownLabel() });
+  _this.label = () => _this.t.append('label', { 'default': _ownLabel() });
   if ((field.type as string) === 'mapillaryImages') {
     // replaces the schema's `mapillary` field, whose translated label would win
     _this.title = () => t('inspector.mapillary_images.label');

@@ -288,6 +288,16 @@
 .entity-editor .form-field.has-side-prerequisite {
     padding-top: 0;
 }
+/* The usable width above the width (bicycle roads): one group, the width follows close below */
+.entity-editor .wrap-form-field:has(> .form-field-width_effective) + .wrap-form-field > .form-field-width {
+    padding-top: 0;
+}
+.entity-editor .form-field > .field-hint {
+    margin-bottom: 4px;
+    font-size: 11px;
+    color: var(--text-color-secondary, var(--text-color));
+    opacity: .75;
+}
 /* a side where the field above says there is nothing to detail */
 .entity-editor .form-field ul.rows li.side-prerequisite-unmet input:disabled {
     background: var(--bg-color-2);

@@ -104,10 +104,12 @@ const FIELDS: Record<string, Field> = {
     'width/effective': {
         key: 'width:effective',
         type: 'number',
-        label: 'Usable Width (Meters)',
+        label: 'Width Between the Markings (Meters)',
+        // shown below the title (field.js); German in data/core.yaml
+        hint: 'Measure it between the white markings.',
         geometry: ['line'],
         minValue: 0
-    } as Field,
+    } as unknown as Field,
     'source/width': {
         key: 'source:width',
         type: 'combo',
@@ -117,6 +119,16 @@ const FIELDS: Record<string, Field> = {
         // Not in a field list: the editor below the width field (related tags) takes its options, also for side widths
         options: ['Luftbild 2026', 'Luftbild 2025', 'Messung aus Punktwolke (Infra3DViewer)', 'survey'],
         prerequisiteTag: { key: 'width' }
+    } as Field,
+    'source/width/effective': {
+        key: 'source:width:effective',
+        type: 'combo',
+        label: 'Usable Width Source',
+        geometry: ['line'],
+        // the values the Radinfra mappers use (FAQ); the measuring tape writes `Luftbild <year>` itself.
+        // Not in a field list: the editor below the width field (related tags) takes its options, also for side widths
+        options: ['Luftbild 2026', 'Luftbild 2025', 'Messung aus Punktwolke (Infra3DViewer)', 'survey'],
+        prerequisiteTag: { key: 'width:effective' }
     } as Field,
     separation: sideField('separation', 'Separation', SEPARATION_OPTIONS),
     marking: sideField('marking', 'Marking', MARKING_OPTIONS),
@@ -187,11 +199,14 @@ const ROAD_MORE_FIELDS = [
     'bicycle/direction', 'lane_markings', 'parking/side/orientation', 'traffic_calming_road', ...WAY_DETAILS_MORE
 ];
 
+// the usable width sits right above the width, drawn as one group with it (css/99_sidebar_compact.css)
 const BICYCLE_ROAD_FIELDS = [
     'name', 'traffic_sign', 'access', 'oneway', 'oneway/bicycle', 'maxspeed',
-    'surface_smoothness', 'width', 'parking/side/parking', 'traffic_mode', 'marking', 'buffer',
+    'surface_smoothness', 'width/effective', 'width', 'parking/side/parking', 'traffic_mode', 'marking', 'buffer',
     'sidewalk', 'cycleway', 'structure'
 ];
+
+const BICYCLE_ROAD_DETAILS_MORE = WAY_DETAILS_MORE.filter(id => id !== 'width/effective');
 
 const SEPARATE_WAY_FIELDS = [
     'name', 'is_sidepath', 'oneway', ...WAY_DETAILS, 'separation', 'structure', 'access'
@@ -249,7 +264,7 @@ const PRESETS: Record<string, Preset> = {
         geometry: ['line'],
         icon: 'fas-biking',
         fields: BICYCLE_ROAD_FIELDS,
-        moreFields: ['lit', 'dual_carriageway', 'lane_markings', ...WAY_DETAILS_MORE]
+        moreFields: ['lit', 'dual_carriageway', 'lane_markings', ...BICYCLE_ROAD_DETAILS_MORE]
     } as Preset,
     'highway/residential/bicycle_road/vehicle_destination': {
         name: 'Bicycle Road, Motor Vehicles Allowed (Kfz frei / Anlieger frei)',
@@ -262,7 +277,7 @@ const PRESETS: Record<string, Preset> = {
         geometry: ['line'],
         icon: 'fas-biking',
         fields: BICYCLE_ROAD_FIELDS,
-        moreFields: ['lit', 'dual_carriageway', 'lane_markings', ...WAY_DETAILS_MORE]
+        moreFields: ['lit', 'dual_carriageway', 'lane_markings', ...BICYCLE_ROAD_DETAILS_MORE]
     } as Preset,
     'highway/cycleway/bicycle_road': {
         name: 'Bicycle Road on a Cycleway (Fahrradstraße)',
@@ -272,7 +287,7 @@ const PRESETS: Record<string, Preset> = {
         geometry: ['line'],
         icon: 'fas-biking',
         fields: BICYCLE_ROAD_FIELDS,
-        moreFields: ['is_sidepath', 'lit', ...WAY_DETAILS_MORE]
+        moreFields: ['is_sidepath', 'lit', ...BICYCLE_ROAD_DETAILS_MORE]
     } as Preset
 };
 

@@ -134,6 +134,12 @@ de:
       cycleway_oneway_correct:
         title: Das ist hier richtig
   inspector:
+    radnetz_field:
+      width_effective:
+        label: Breite zwischen den Markierungen (Meter)
+        hint: Zwischen den weißen Markierungen messen.
+      source_width_effective:
+        label: Quelle der nutzbaren Breite
     tilda:
       reminder:
         damage_signs:
