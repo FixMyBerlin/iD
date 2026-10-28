@@ -1,0 +1,114 @@
+/* Measuring tape (Maßband) for width fields */
+
+.data-layer.measure-tape {
+    pointer-events: none;
+}
+
+.measure-tape-hit {
+    stroke: transparent;
+    stroke-width: 20px;
+    pointer-events: stroke;
+    cursor: move;
+    touch-action: none;
+}
+.measure-tape-line {
+    stroke: #2f6bff;
+    stroke-width: 2px;
+    pointer-events: none;
+}
+.measure-tape-handle {
+    /* a thin cursor: the move cursor would hide the measured point */
+    cursor: crosshair;
+    touch-action: none;
+}
+.measure-tape-handle-hit {
+    fill: transparent;
+    stroke: none;
+    pointer-events: all;
+}
+.measure-tape-ring {
+    fill: none;
+    stroke: #2f6bff;
+    stroke-width: 2px;
+    pointer-events: none;
+}
+.measure-tape-cross {
+    fill: none;
+    stroke: #2f6bff;
+    stroke-width: 1px;
+    pointer-events: none;
+}
+.measure-tape-label {
+    fill: #fff;
+    stroke: #000;
+    stroke-width: 3px;
+    paint-order: stroke;
+    font-size: 12px;
+    font-weight: bold;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    pointer-events: none;
+}
+
+button.form-field-button.measure-tape-button.active {
+    background: var(--active-bg-color, #dfe9ff);
+}
+
+/* Magnifier while dragging a tape end */
+.measure-loupe {
+    position: absolute;
+    width: 160px;
+    height: 160px;
+    z-index: 5;
+    pointer-events: none;
+}
+.measure-loupe-lens {
+    position: absolute;
+    inset: 0;
+    /* keeps the cloned background layer's z-index inside the lens, below the crosshair */
+    isolation: isolate;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #222;
+    /* a ring outside the lens: a border would shift the image against the crosshair */
+    box-shadow: 0 0 0 3px #fff, 0 0 0 4px #000, 0 2px 10px 4px rgba(0, 0, 0, 0.5);
+}
+.measure-loupe-image {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 0;
+    height: 0;
+    transform-origin: 0 0;
+}
+.measure-loupe-overlay {
+    position: absolute;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    overflow: hidden;
+    border-radius: 50%;
+}
+.measure-loupe-tape {
+    stroke: #2f6bff;
+    stroke-width: 2;
+    stroke-dasharray: 6 4;
+    opacity: 0.9;
+}
+.measure-loupe-cross-halo {
+    fill: none;
+    stroke: #fff;
+    stroke-width: 4;
+    stroke-linecap: round;
+}
+.measure-loupe-cross {
+    fill: none;
+    stroke: #2f6bff;
+    stroke-width: 2;
+    stroke-linecap: round;
+}
+.measure-loupe-dot {
+    fill: #ff2f6b;
+    stroke: #fff;
+    stroke-width: 1;
+}

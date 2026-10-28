@@ -70,7 +70,14 @@ async function buildData() {
     'fas-user-cog',
     'fas-calendar-days',
     'fas-rotate',
-    'fas-eye-dropper'
+    'fas-eye-dropper',
+    'fas-arrow-pointer',   // custom data layers: selectable toggle
+    'fas-eye-slash',       // map data: layer mode toggle (with fas-arrow-pointer, fas-lock)
+    'fas-book-open',       // related tags: add a source (feature 25)
+    'far-image',           // Mapillary sign bar: images of a capture day (feature 26)
+    'fas-comment',         // related tags: add a note
+    'fas-palette',         // Map Display pane button
+    'fas-camera'           // Photos pane button
   ]);
   // add icons for QA integrations
   readQAIssueIcons(faIcons);
@@ -85,6 +92,7 @@ async function buildData() {
 
   // Save individual data files
   let tasks = [
+    mergeTrafficSignFieldLocales(),
     minifyJSON('data/address_formats.json', 'dist/data/address_formats.min.json'),
     minifyJSON('data/imagery.json', 'dist/data/imagery.min.json'),
     minifyJSON('data/intro_graph.json', 'dist/data/intro_graph.min.json'),
@@ -258,6 +266,39 @@ function writeFaIcons(faIcons) {
       throw (error);
     }
   });
+}
+
+
+function mergeDeep(target, source) {
+  for (const [key, value] of Object.entries(source)) {
+    if (value && typeof value === 'object' && target[key] && typeof target[key] === 'object') {
+      mergeDeep(target[key], value);
+    } else {
+      target[key] = value;
+    }
+  }
+}
+
+
+function mergeTrafficSignFieldLocales() {
+  const overridesPath = 'data/traffic_sign_field_locales.yaml';
+  if (!fs.existsSync(overridesPath)) return Promise.resolve();
+
+  const overrides = loadYaml(fs.readFileSync(overridesPath, 'utf8'));
+  for (const locale of Object.keys(overrides)) {
+    const localePath = `dist/locales/${locale}.min.json`;
+    if (!fs.existsSync(localePath)) continue;
+
+    const data = JSON.parse(fs.readFileSync(localePath, 'utf8'));
+    const localeData = data[locale];
+    if (!localeData) continue;
+
+    mergeDeep(localeData, overrides[locale]);
+
+    fs.writeFileSync(localePath, JSON.stringify(data));
+  }
+
+  return Promise.resolve();
 }
 
 

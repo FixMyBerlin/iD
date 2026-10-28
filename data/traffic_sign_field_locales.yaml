@@ -1,0 +1,853 @@
+# Fork-local translations until strings are on Transifex (core resource).
+# Merged deeply over the built locale files, so single strings can be overridden.
+de:
+  traffic_sign_field:
+    order_hint: Schilder werden von oben nach unten gelesen. Das oberste Schild ist das Hauptschild.
+    open_tool: Im Verkehrszeichen-Tool öffnen
+    drag: Zum Umsortieren ziehen oder Pfeiltasten nutzen
+    empty: Noch keine Schilder. Unten nach Name oder Zeichen-ID suchen, um eines hinzuzufügen.
+    add_sign: Schild hinzufügen…
+    unknown_sign: Unbekanntes Schild
+    no_sign: Unbeschildert
+    no_sign_description: Hier steht explizit kein Verkehrsschild (traffic_sign=none)
+  map_display:
+    title: Kartendarstellung
+    description: Kartendarstellung
+  photos_pane:
+    title: Fotos
+    description: Fotos
+  pane_tooltips:
+    background: Luftbilder, Helligkeit und Bildversatz.
+    map-data: OpenStreetMap-Daten und -Hinweise, QA-Ebenen, eigene Datenebenen, Überlagerungen und Live-Bearbeitungen.
+    map-display: Flächenfüllung, Linse und welche Objektarten angezeigt werden.
+    photos: Straßenfotos, ihre Filter und die Verkehrszeichen.
+    issues: Fehler und Warnungen in deinen Änderungen und in der Karte.
+    preferences: Werkzeugleisten-Beschriftung, optionale Schaltflächen, Info-Felder, Datenschutz, Favoriten und OpenStreetMap-Server.
+    help: Dokumentation, Einführung, Tastaturkürzel und Version des Editors.
+  tilda_notes:
+    title: TILDA-Hinweis
+    private: "Interner Hinweis: Nur Mitglieder dieser Region in TILDA sehen ihn."
+    new: Neuer TILDA-Hinweis
+    status:
+      open: offen
+      closed: erledigt
+    replies: "{count} Antworten"
+    loading: Hinweis wird geladen …
+    not_loaded: Der Hinweis konnte nicht geladen werden.
+    no_body: Es wurde nur ein Betreff angegeben.
+    subject: Betreff
+    body: Hinweis
+    body_placeholder: "Beschreibe, was dir aufgefallen ist (Markdown)."
+    reply: Antwort
+    reply_placeholder: "Schreibe eine Antwort (Markdown)."
+    save_explanation: "Wird sofort in TILDA gespeichert, nicht mit deinen OpenStreetMap-Änderungen. Nicht öffentlich."
+    save: Hinweis speichern
+    save_reply: Antwort speichern
+    resolve: Als erledigt markieren
+    resolve_reply: Antworten und erledigen
+    reopen: Wieder öffnen
+    reopen_reply: Antworten und wieder öffnen
+    open_in_tilda: In TILDA öffnen
+    open_tilda: TILDA öffnen
+    add:
+      title: TILDA
+      osm_title: OSM
+      description: "Internen TILDA-Hinweis hinzufügen. Nur Mitglieder des Projekts sehen ihn."
+    errors:
+      login: "Melde dich bei OpenStreetMap an, um TILDA-Hinweise zu sehen und zu schreiben."
+      invalid_osm_token: "OpenStreetMap hat deine Anmeldung nicht akzeptiert. Melde dich neu an."
+      no_tilda_user: "Dein OpenStreetMap-Konto hat noch kein TILDA-Konto. Melde dich einmal bei TILDA an."
+      not_member: "Du bist in TILDA kein Mitglied dieser Region. Bitte um Zugang."
+      network: "TILDA ist nicht erreichbar."
+      other: "TILDA: {message}"
+    save_failed: "Der TILDA-Hinweis wurde nicht gespeichert. {reason}"
+  map_data:
+    layers:
+      notes:
+        title: OpenStreetMap-Hinweise (öffentlich)
+        tooltip: Öffentliche Hinweise von OpenStreetMap. Jede:r kann sie lesen.
+      tilda-notes:
+        title: TILDA-Hinweise (intern)
+        tooltip: Interne Hinweise des Projekts aus TILDA. Nur Mitglieder der Region sehen sie.
+    custom_data_layers:
+      title: Eigene Datenebenen
+      add: Eigene Datenebene hinzufügen
+      empty: Noch keine eigenen Datenebenen. Füge eine mit der Plus-Schaltfläche hinzu.
+      edit_tooltip: Diese Datenebene bearbeiten
+      filter_tooltip: "Nur Objekte mit {filter}"
+      delete:
+        tooltip: Diese Datenebene löschen
+        header: Datenebene löschen
+        message: "„{name}“ löschen? Das lässt sich nicht rückgängig machen."
+        confirm: Löschen
+      settings:
+        header_add: Eigene Datenebene hinzufügen
+        header_edit: Eigene Datenebene bearbeiten
+        name: Name (optional)
+        url: URL
+        url_placeholder: https://example.com/data.pmtiles
+        color: Farbe
+        formats: "Unterstützt: GeoJSON-Dateien (.geojson, .json), PMTiles-Archive (.pmtiles) und Vektorkachel-URL-Vorlagen (z, x, y). Der Server muss Cross-Origin-Anfragen erlauben (CORS)."
+        filter: Filter (optional)
+        filter_key: Schlüssel
+        filter_value: Wert
+        filter_help: Zeigt nur Objekte mit dieser Eigenschaft. Lass den Wert leer, um alle Objekte mit dem Schlüssel zu zeigen.
+        tracker:
+          label: Fortschrittsverfolgung
+          none: Keine Verfolgung
+          mapping: Kartierfortschritt verfolgen
+          track: Kartierfortschritt der „track“-Trennung verfolgen
+          help: Mit Verfolgung lassen sich die Linien in der Seitenleiste anklicken und als erledigt markieren (ein zweiter Klick nimmt die Markierung weg). Erledigte Linien bekommen einen grünen Rand, die anderen einen roten. Die Markierungen liegen mit deinem OSM-Benutzernamen in unserer Key-Value-Datenbank, nicht in OpenStreetMap.
+    lens:
+      title: Linse
+      select: Linse
+      default: Standard
+      default_tooltip: Der normale Kartenstil von iD
+      bundled:
+        radnetz_qa:
+          name: Radnetz-QA
+          tooltip: "Wie vollständig die Tags für den Radnetz-Datensatz sind (TILDA-Checkliste). Grün: vollständig. Orange: Tags fehlen. Rot: TILDA kann die Kategorie nicht bestimmen. Breit: Radinfrastruktur, dünn: Straßen."
+      select_tooltip: Die Karte mit dieser Linse zeigen
+      add: Eine Linse importieren
+      edit_tooltip: Name und Kürzel bearbeiten
+      header_add: Eine Linse importieren
+      header_edit: Linse bearbeiten
+      name: Name
+      choose_file: CSS-Datei wählen
+      no_file: Keine Datei gewählt
+      delete:
+        header: Linse löschen
+        message: "„{name}“ löschen? Das lässt sich nicht rückgängig machen."
+        confirm: Löschen
+      upload: CSS-Datei
+      upload_description: Die Linse wird in deinem Browser gespeichert.
+      upload_warning: Importiere Linsen nur aus vertrauenswürdigen Quellen. Das CSS einer Linse kann das Aussehen des Editors verändern.
+      remove: Linse entfernen
+      shortcut:
+        label: Kürzelbuchstabe (aktiviert mit Alt + Buchstabe)
+        placeholder: Taste
+        reserved: Dieser Buchstabe ist für ein anderes Kürzel reserviert.
+        invalid: Gib einen einzelnen Buchstaben (a–z) ein.
+        flash: "Linse: {name}"
+    layer_mode:
+      feature:
+        interactive: "Bearbeitbar: sichtbar, kann ausgewählt und bearbeitet werden"
+        readonly: "Nur lesen: abgeblendet sichtbar, kann nicht ausgewählt werden"
+        hidden: "Ausgeblendet: nicht sichtbar"
+      custom_data:
+        interactive: "Auswählbar: sichtbar, Objekte können ausgewählt werden"
+        readonly: "Nur Überlagerung: sichtbar, kann nicht ausgewählt werden"
+        readonly_tracked: "Mit Fortschrittsverfolgung nicht verfügbar: Die Linien müssen auswählbar sein, um sie als erledigt zu markieren"
+        hidden: "Ausgeblendet: nicht sichtbar"
+  modes:
+    add_note:
+      description: "Öffentlichen OpenStreetMap-Hinweis hinzufügen. Jede:r kann ihn lesen."
+  account:
+    title: Konto
+    tooltip: "Angemeldet als {user}"
+  way_table:
+    title: Wege-Tabelle
+    tooltip: Vergleiche die Tags des ausgewählten Wegs mit dem vorherigen und dem nächsten Weg, unter der Karte.
+    empty: Wähle einen Weg aus, um seine Tags mit dem vorherigen und dem nächsten Weg zu vergleichen.
+    previous: Vorherigen Weg auswählen
+    next: Nächsten Weg auswählen
+    reversed: Dieser Weg zeigt in die Gegenrichtung. Seine left/right-Tags sind getauscht dargestellt.
+    edited: In dieser Sitzung geändert
+    junction:
+      backward: "Vor dem ersten Weg geht es mit mehreren Wegen weiter. Wähle einen:"
+      forward: "Nach dem letzten Weg geht es mit mehreren Wegen weiter. Wähle einen:"
+  preferences:
+    interface:
+      labels:
+        description: Beschriftung der Schaltflächen anzeigen
+        tooltip: Zeigt die Beschriftung unter den Schaltflächen der Werkzeugleiste.
+      scale:
+        description: Maßstab anzeigen
+        tooltip: Ein Maßstabsbalken unten in der Karte. Ein Klick wechselt zwischen metrischen und imperialen Einheiten.
+      zoom:
+        description: Zoom-Schaltflächen anzeigen
+        tooltip: "Die Schaltflächen + und − am Kartenrand. Die Tastenkürzel + und − funktionieren immer."
+      zoom-to-selection:
+        description: "„Auf Auswahl zoomen“ anzeigen"
+        tooltip: Die Schaltfläche, die auf die ausgewählten Objekte zoomt. Ihr Tastenkürzel funktioniert immer.
+      geolocate:
+        description: "„Meinen Standort anzeigen“ anzeigen"
+        tooltip: Die Schaltfläche, die die Karte auf deinen Standort zentriert.
+      help:
+        description: Hilfe-Schaltfläche anzeigen
+        tooltip: "Die Schaltfläche, die die Hilfe öffnet, mit der Version des Editors und den Links zum Melden von Fehlern. Ihr Tastenkürzel funktioniert immer."
+      title: Oberfläche
+    osm_server:
+      title: OpenStreetMap-Server
+      live: Live
+      dev: Entwicklungsserver
+      hint: Von welchem OpenStreetMap-Server der Editor liest und wohin er hochlädt. Beim Wechsel gehen ungespeicherte Änderungen verloren.
+    panels:
+      title: Info-Felder
+    favorite_presets:
+      title: Favorisierte Vorlagen und Kürzel
+      empty_message: Klicke auf den Stern einer Vorlage, um sie zu den Favoriten hinzuzufügen. Jeder Favorit hat ein Zahlenkürzel.
+      explanation: Klicke auf den Stern einer Vorlage, um sie zu den Favoriten hinzuzufügen. Jeder neue Favorit bekommt ein freies Zahlenkürzel, das gleich bleibt, bis du es hier änderst. Ziehe die Liste, um die Reihenfolge in der Vorlagenliste zu ändern.
+      add_tooltip: Zu den Favoriten hinzufügen
+      remove_tooltip: Aus den Favoriten entfernen
+      shortcut_label: Kürzelzahl
+      config_tooltip: Einstellungen öffnen, um Favoriten zu verwalten
+      heart_tooltip_active: Favorit entfernen; Rechtsklick öffnet die Einstellungen
+      heart_tooltip_inactive: Favorit hinzufügen; Rechtsklick öffnet die Einstellungen
+      flash:
+        draw: "Kürzel {shortcut}: hinzufügen "
+        apply:
+          one: "Kürzel {shortcut}: {n} Objekt geändert zu "
+          other: "Kürzel {shortcut}: {n} Objekte geändert zu "
+        switch: "Wechsel zu Kürzel {shortcut}"
+  issues:
+    cycleway_oneway_wrong:
+      title: Richtung der Radspur vermutlich falsch
+      tip: "Findet Straßen, bei denen das „oneway“-Tag einer Radspur oder eines Radwegs an der Seite sehr wahrscheinlich die falsche Richtung angibt."
+      message: "{feature}: {tag} ist vermutlich falsch"
+      two_way_road:
+        reference: "„oneway“ bezieht sich auf die Richtung, in der die Linie gezeichnet ist. Auf der linken Seite einer Straße mit Gegenverkehr fährt der Radverkehr gegen diese Richtung; „{tag}“ sagt also, er fährt dem Verkehr neben sich entgegen. Ohne das Tag gilt die übliche Richtung: auf jeder Seite mit dem Verkehr. Entferne das Tag, oder setze „no“, wenn Radfahrende hier in beide Richtungen fahren dürfen."
+      contraflow:
+        reference: "Radfahrende dürfen diese Einbahnstraße in Gegenrichtung befahren; die linke Seite ist damit die Seite für die Gegenrichtung. „{tag}“ sagt, dort wird in Richtung der Einbahnstraße gefahren. Ohne das Tag gilt die übliche Richtung. Entferne das Tag, oder setze „no“, wenn Radfahrende hier in beide Richtungen fahren dürfen."
+    cycleway_oneway_redundant:
+      title: Richtung der Radspur nicht nötig
+      tip: "Findet Straßen, bei denen das „oneway“-Tag einer Radspur oder eines Radwegs an der Seite nur den Standard wiederholt."
+      message: "{feature}: {tag} ist nicht nötig"
+      default:
+        reference: "Ohne „{key}“ gilt: Der Radverkehr fährt mit dem Verkehr auf seiner Seite. Genau das sagt „{tag}“. Das Tag ist nicht nötig und leicht falsch zu setzen, weil sich „oneway“ auf die Richtung der gezeichneten Linie bezieht."
+    fix:
+      cycleway_oneway_both_ways:
+        title: Radverkehr fährt hier in beide Richtungen
+        annotation: Radspur in beide Richtungen eingetragen.
+      cycleway_oneway_correct:
+        title: Das ist hier richtig
+      connect_features_manually:
+        title: Die Objekte von Hand verbinden
+        tooltip: Zum Beispiel, indem du fehlende Straßen- oder Wegabschnitte kartierst oder getrennte Kreuzungen korrigierst.
+  inspector:
+    radnetz_field:
+      width_effective:
+        label: Breite zwischen den Markierungen (Meter)
+        hint: Zwischen den weißen Markierungen messen.
+      source_width_effective:
+        label: Quelle der nutzbaren Breite
+    tilda:
+      reminder:
+        damage_signs:
+          title: "Auf Schadenschilder prüfen."
+          text: "Steht auf diesem Weg ein Schild „Radwegschäden“, „Gehwegschäden“ oder „Geh- und Radwegschäden“ (z. B. in Mapillary oder im Infra3D-Viewer)? Dann in traffic_sign eintragen."
+        barrier:
+          title: "Auf Absperrbaken prüfen."
+          text: "Ist der Radweg durch eine Absperrbake versperrt, sodass er nicht nutzbar ist? Dann an der Stelle einen TILDA-Hinweis anlegen (Ebene „TILDA-Hinweise“). Es ist kein OSM-Tag."
+      default:
+        generic: "Nicht getaggt = {tag}. Nur taggen, wenn es hier anders ist."
+        surface_colour: "Nicht getaggt = nicht eingefärbt. Nur taggen, wenn die Oberfläche rot oder grün ist."
+        oneway_bicycle: "Nicht getaggt = Radverkehr folgt der Einbahnstraße. Nur „no“ taggen, wenn er in Gegenrichtung fahren darf."
+        oneway_side: "Nicht getaggt = Radverkehr fährt mit dem Verkehr auf dieser Seite. Nur „no“ taggen, wenn er hier in beide Richtungen fahren darf."
+        oneway_road: "Nicht getaggt = Straße mit Gegenverkehr."
+        dual_carriageway: "Nicht getaggt = keine getrennte Richtungsfahrbahn. „yes“ taggen, wenn die Gegenrichtung eine eigene Linie ist."
+      checks:
+        check: Geprüft
+        check_tooltip: "Bestätige, dass du das angesehen hast und der Standard stimmt. Das wird für das Projekt gespeichert, nicht in OpenStreetMap, und braucht keinen Upload."
+        uncheck_tooltip: "Geprüft. Klicken, um die Prüfung zu entfernen."
+        checked_by: "Geprüft von {user}, {date}"
+        verify: Verifiziert
+        verify_tooltip: "Diesen Weg als verifiziert markieren (zweiter Blick durch eine andere Person). Das wird für das Projekt gespeichert, nicht in OpenStreetMap, und braucht keinen Upload."
+        unverify_tooltip: "Verifiziert. Klicken, um es zu entfernen."
+        verified_by: "Verifiziert von {user}, {date}"
+        not_verified: Noch nicht verifiziert
+        changed_since: der Weg wurde seitdem geändert
+        you: dir
+        save_failed: "Die Prüfung konnte nicht gespeichert werden."
+        disabled:
+          new_way: "Lade den Weg zuerst hoch; eine Prüfung braucht seine OpenStreetMap-ID."
+          unavailable: "Prüfungen sind von dieser Adresse aus nicht verfügbar."
+          loading: "Prüfungen werden geladen…"
+          logged_out: "Melde dich bei OpenStreetMap an, um Prüfungen zu speichern."
+      title: TILDA-Radinfrastruktur
+      info: Über diesen Bereich
+      intro: "So liest TILDA, der Datensatz zur Radinfrastruktur, diesen Weg. Prüfe die Kategorie des Wegs und jeder Seite. Passt sie nicht zu dem, was vor Ort ist, wähle unter „Ändern in“ die richtige und übernimm die Tags. Ergänze danach unten, was fehlt."
+      category_id: "TILDA-Kategorie: {id}"
+      mixed_traffic: Mischverkehr
+      no_category: Keine Kategorie
+      current: aktuell
+      current_group: Aktuelle Kategorie
+      collapsed_hint: die Radinfrastruktur liegt an den Seiten
+      target: Ändern in
+      edit: Die Kategorie ändern
+      apply_all: Diese Tags übernehmen
+      remove_reason: Ersetzt durch Tags je Seite
+      required: Für den Radnetz-Datensatz nötig
+      required_for: "Für den Radnetz-Datensatz als „{category}“ nötig"
+      feeds: "Genutzt für die infraVelo-Attribute: {attributes}"
+      enter_value: Wert, Eingabetaste
+      missing: fehlt
+      not_tagged: ist nicht getaggt
+      check_below: unten prüfen
+      add_below: unten ergänzen
+      add_below_optional: unten ergänzen, falls zutreffend
+      state:
+        inherited: "TILDA übernimmt {value} aus anderen Tags (z. B. der Straße)"
+        derived: "TILDA liest {value} aus {tag}"
+        guess: "TILDA nimmt {value} an; bitte tagge es"
+        ignored: "TILDA kann „{value}“ nicht verwenden: Wähle einen anderen Wert"
+        normalized: "TILDA liest es als {value}"
+      side:
+        self: Dieser Weg
+        left: Linke Seite
+        right: Rechte Seite
+      category:
+        data_no: Keine Radinfrastruktur
+        separate_geometry: Als eigener Weg kartiert
+        not_expected: Keine Radinfrastruktur zu erwarten
+      category_group:
+        track: Radwege
+        lane: Auf der Fahrbahn
+        foot: Gemeinsam mit Fußgängern
+        bus: Gemeinsam mit Bussen
+        bicycle_road: Fahrradstraßen
+        special: "Sonderfälle: Verbindungen und Querungen"
+        other: Sonstiges
+      attribute:
+        width: Breite
+        width_effective: Nutzbare Breite (innerhalb der Markierung)
+        source_width: Quelle der Breite
+        cycleway_width: Breite des Radwegteils
+        source_cycleway_width: Quelle der Breite des Radwegteils
+        surface: Oberfläche
+        sett_length: Größe der Pflastersteine (m)
+        surface_colour: Farbe der Oberfläche
+        traffic_sign: Verkehrsschild (oder keines)
+        oneway: Einbahnstraße
+        oneway_bicycle: Einbahn für Fahrräder
+        dual_carriageway: Getrennte Fahrbahnen
+        is_sidepath: An einer Straße (Sidepath)
+        segregated: Fuß- und Radverkehr getrennt
+        lane: Art des Streifens
+        cycleway: Radinfrastruktur an den Seiten
+        separation_left: Trennung links
+        separation_right: Trennung rechts
+        traffic_mode_left: Verkehr daneben, links
+        traffic_mode_right: Verkehr daneben, rechts
+        buffer_left: Sicherheitstrennstreifen links
+        buffer_right: Sicherheitstrennstreifen rechts
+        marking_left: Markierung links
+        marking_right: Markierung rechts
+    traffic_sign_group:
+      label:
+        way: Verkehrsschild
+        cycleway: Verkehrsschild (Radverkehrsanlage)
+        sidewalk: Verkehrsschild (Gehweg)
+      side:
+        left: Links
+        right: Rechts
+        both: Beide Seiten
+      direction:
+        forward: "In Wegrichtung (forward)"
+        backward: "Gegen die Wegrichtung (backward)"
+        both: "Ganzer Weg (beide Richtungen)"
+      toggle:
+        directions: Je Richtung
+        directions_tooltip: "Schilder ergänzen, die nur in einer Richtung des Wegs gelten („traffic_sign:forward“, „traffic_sign:backward“). Das Schild des ganzen Wegs wird als „traffic_sign“ getaggt, ohne Richtung. Richtungsschilder, die nur das Schild des ganzen Wegs wiederholen, werden als dieses angezeigt; so getaggt werden sie mit deiner nächsten Änderung an diesem Schild."
+        directions_locked_tooltip: "Dieser Weg hat Schilder je Richtung („traffic_sign:forward“, „traffic_sign:backward“). Entferne sie, um das auszuschalten."
+    hidden_preset:
+      manual: "{features} sind versteckt. Schalte sie im Bereich Kartendarstellung ein."
+    related:
+      source: Quelle
+      note: Hinweis
+      check_date: Geprüft
+      mapillary: Mapillary
+      traffic_sign: Verkehrsschild
+      side:
+        left: links
+        right: rechts
+        both: beide Seiten
+        forward: vorwärts
+        backward: rückwärts
+      empty: noch nicht gesetzt
+      edit: "{key} bearbeiten"
+      close: "Das Feld für {key} schließen"
+      add_category: "Hinzufügen: {category} ({key})"
+      close_category: "Schließen: {category}"
+      editor_label: "{category} – {field}"
+    mapillary_images:
+      label: Mapillary-Bilder
+      image_id: Bild-ID
+      view_on_mapillary: Dieses Bild auf Mapillary ansehen
+      show_in_viewer: Im Viewer zeigen
+      remove_image: Dieses Bild entfernen
+      add_to_key: Ein weiteres Bild zu diesem Schlüssel hinzufügen
+      add_image: Bild hinzufügen
+      choose_key: Tag für das Bild wählen…
+      panorama: 360°
+      flat: flach
+    traffic_sign_none:
+      label: Hier steht kein Schild
+      tooltip: "Setzt {tag}: geprüft, es steht kein Schild"
+    traffic_sign_plan:
+      header: "Das Verkehrsschild legt diese Tags nahe:"
+      apply: Diese Tags übernehmen
+      cause:
+        sign: "Folgt aus {sign}"
+        normalize: Die übliche Schreibweise für dieses Schild
+        previous_sign: "Folgte aus dem vorherigen Schild {sign}"
+        restore: "Folgte aus dem vorherigen Schild {sign}; zurück zum heruntergeladenen Wert"
+    measure_tape:
+      button: Auf der Karte messen
+      annotation: Breite gemessen
+    surface_smoothness:
+      photo: Foto
+      multiple_values: Mehrere Werte
+    side_prerequisite:
+      missing: "Setze zuerst „{field}“ für diese Seite"
+      other_value: "„{value}“: Ändere zuerst „{field}“"
+    side_width:
+      cycleway:
+        left: Radweg-Breite links (Meter)
+        right: Radweg-Breite rechts (Meter)
+        both: Radweg-Breite beidseitig (Meter)
+      sidewalk:
+        left: Gehweg-Breite links (Meter)
+        right: Gehweg-Breite rechts (Meter)
+        both: Gehweg-Breite beidseitig (Meter)
+  help:
+    streetlevel:
+      using: "Um Straßenfotos beim Bearbeiten zu benutzen, öffne den Bereich {photos_icon} **{photos}** am Rand der Karte und schalte dort die verfügbaren Bildquellen ein oder aus."
+  shortcuts:
+    browsing:
+      display_options:
+        map_display: "Kartendarstellung ein-/ausblenden"
+        photos: "Fotos ein-/ausblenden"
+        way_table: "Wege-Tabelle ein-/ausblenden"
+    editing:
+      operations:
+        extract_sidepath: "Einen Radweg oder Gehweg aus einer Straße herauslösen (mehrere Möglichkeiten: Auswahl aus einem Menü)"
+        merge_sidepaths: Einen Radweg und einen Fußweg zu einem Geh- und Radweg zusammenführen
+        extract_merge_sidepaths: "Den Radweg einer Straße herauslösen und in einem Schritt mit dem Gehweg daneben zusammenführen (mehrere Möglichkeiten: Auswahl aus einem Menü)"
+  presets:
+    favorites: Favoriten
+  operations:
+    extract_sidepath:
+      title:
+        cycleway:
+          right: Rechten Radweg herauslösen
+          left: Linken Radweg herauslösen
+        protected:
+          right: Rechten geschützten Radfahrstreifen herauslösen
+          left: Linken geschützten Radfahrstreifen herauslösen
+        sidewalk:
+          right: Rechten Gehweg herauslösen
+          left: Linken Gehweg herauslösen
+        path:
+          right: Rechten Radweg und Gehweg als einen Weg herauslösen
+          left: Linken Radweg und Gehweg als einen Weg herauslösen
+      side:
+        right: rechts
+        left: links
+      annotation:
+        cycleway: "Den Radweg ({side}) als eigenen Weg herausgelöst."
+        protected: "Den geschützten Radfahrstreifen ({side}) als eigenen Weg herausgelöst."
+        sidewalk: "Den Gehweg ({side}) als eigenen Weg herausgelöst."
+        path: "Den Radweg und Gehweg ({side}) als eigenen Weg herausgelöst."
+      description: "Erzeugt einen eigenen Weg highway={highway} etwa {meters} m {side} der Straße; {moved} Tags dieser Seite wandern dorthin. Diese Straße bekommt {changes}."
+      description_protected: "Bleibt meist an der Straße; nur mit gutem Grund herauslösen (z. B. bei einem langen, baulich getrennten Abschnitt). Erzeugt einen eigenen Weg highway={highway} etwa {meters} m {side} der Straße; {moved} Tags dieser Seite wandern dorthin. Diese Straße bekommt {changes}."
+      flash: "Als eigener Weg herausgelöst. Diese Straße: {changes}"
+      flash_kept: "Als eigener Weg herausgelöst. Diese Straße: {changes}. bicycle={bicycle} statt use_sidepath beibehalten."
+      loading: Die Verkehrszeichen-Regeln werden geladen, versuche es gleich noch einmal.
+      incomplete: Das lässt sich nicht herauslösen, weil nicht alle Knoten geladen sind.
+      closed: Das lässt sich nicht herauslösen, weil der Weg geschlossen ist.
+      too_short: Das lässt sich nicht herauslösen, weil der Weg zu kurz ist.
+      not_eligible: Das lässt sich nicht herauslösen.
+    extract_merge_sidepaths:
+      title:
+        right: Rechten Radweg herauslösen und mit dem Gehweg zusammenführen
+        left: Linken Radweg herauslösen und mit dem Gehweg zusammenführen
+        both: Beide Radwege herauslösen und mit den Gehwegen zusammenführen
+      annotation:
+        right: Den rechten Radweg herausgelöst und mit dem Gehweg zu einem Geh- und Radweg zusammengeführt.
+        left: Den linken Radweg herausgelöst und mit dem Gehweg zu einem Geh- und Radweg zusammengeführt.
+        both: Beide Radwege herausgelöst und mit den Gehwegen zu Geh- und Radwegen zusammengeführt.
+      description:
+        right: Den rechten Radweg herauslösen und mit dem Gehweg daneben zu einem highway=path zusammenführen. Der Gehweg behält seinen Verlauf und bekommt die Tags von beiden.
+        left: Den linken Radweg herauslösen und mit dem Gehweg daneben zu einem highway=path zusammenführen. Der Gehweg behält seinen Verlauf und bekommt die Tags von beiden.
+        both: Beide Radwege herauslösen und jeweils mit dem Gehweg daneben zu einem highway=path zusammenführen. Die Gehwege behalten ihren Verlauf und bekommen die Tags von beiden.
+      flash: "Herausgelöst und zu einem Geh- und Radweg zusammengeführt. Diese Straße: {changes}"
+      flash_dropped: "Herausgelöst und zu einem Geh- und Radweg zusammengeführt. Diese Straße: {changes}. Vom gelöschten Radweg nicht übernommen: {dropped}"
+      loading: Die Verkehrszeichen-Regeln werden geladen, versuche es gleich noch einmal.
+      no_sidewalk: Das lässt sich nicht zusammenführen, weil neben diesem Radweg kein Gehweg verläuft. Löse ihn heraus und führe ihn von Hand zusammen, oder zeichne zuerst den Gehweg.
+      incomplete: Das lässt sich nicht herauslösen, weil nicht alle Knoten geladen sind.
+      closed: Das lässt sich nicht herauslösen, weil der Weg geschlossen ist.
+      too_short: Das lässt sich nicht herauslösen, weil der Weg zu kurz ist.
+      mixed: Das lässt sich nicht zusammenführen, weil mehrere Radwege und mehrere Fußwege zusammengeführt würden. Teile zuerst den Gehweg.
+      lengths: Das lässt sich nicht zusammenführen, weil die Längen der Gehwegstücke und des Radwegs zu stark voneinander abweichen. Teile zuerst den Gehweg.
+      apart: Das lässt sich nicht zusammenführen, weil der Gehweg nicht neben dem Radweg verläuft (stellenweise mehr als 25 m Abstand). Teile zuerst den Gehweg.
+      different_values: "Das lässt sich nicht zusammenführen, weil die Gehwegstücke unterschiedliche Werte für {key} haben. Teile zuerst den Weg."
+      not_eligible: Das lässt sich nicht herauslösen und zusammenführen.
+      failed:
+        extract: "Nichts wurde geändert. Schritt 1 (Herauslösen, Seite {side}) funktioniert nicht: {reason}"
+        merge: "Nichts wurde geändert. Schritt 2 (mit dem Gehweg zusammenführen, Seite {side}) funktioniert nicht: {reason}"
+      partial:
+        extract: "Nur teilweise erledigt. Schritt 1 (Herauslösen, Seite {side}) funktioniert nicht, was vorher getan wurde, bleibt: {reason}"
+        merge: "Herausgelöst, aber nicht zusammengeführt: Schritt 2 (mit dem Gehweg zusammenführen, Seite {side}) hat nicht funktioniert, der herausgelöste Radweg bleibt ein eigener Weg. Diese Straße: {changes}. {reason}"
+      error: "Herauslösen und Zusammenführen fehlgeschlagen, nichts wurde geändert: {message}"
+    merge_sidepaths:
+      title: Zu einem Geh- und Radweg zusammenführen
+      annotation: Einen Radweg und einen Fußweg zu einem Geh- und Radweg zusammengeführt.
+      description:
+        foot: Macht aus diesen Wegen einen highway=path. Der Fußweg behält seinen Verlauf (der ältere Weg bleibt); er bekommt die Tags von beiden, mit cycleway:…- und footway:…-Schlüsseln, wo sie sich unterscheiden. Der Radweg (rot gestrichelt) wird gelöscht.
+        bike: Macht aus diesen Wegen einen highway=path. Der Radweg behält seinen Verlauf (der ältere Weg bleibt); er bekommt die Tags von beiden, mit cycleway:…- und footway:…-Schlüsseln, wo sie sich unterscheiden. Der Fußweg (rot gestrichelt) wird gelöscht.
+      description_cut:
+        foot: "Macht aus diesen Wegen einen highway=path. Der Fußweg ist länger: Er wird dort geteilt, wo der Radweg endet, der Rest bleibt ein Fußweg. Der ältere Weg behält seinen Verlauf und bekommt die Tags von beiden; der andere (rot gestrichelt) wird gelöscht."
+        bike: "Macht aus diesen Wegen einen highway=path. Der Radweg ist länger: Er wird dort geteilt, wo der Fußweg endet, der Rest bleibt ein Radweg. Der ältere Weg behält seinen Verlauf und bekommt die Tags von beiden; der andere (rot gestrichelt) wird gelöscht."
+      flash: Zu einem Geh- und Radweg zusammengeführt.
+      flash_dropped: "Zu einem Geh- und Radweg zusammengeführt. Vom gelöschten Weg nicht übernommen: {dropped}"
+      loading: Die Verkehrszeichen-Regeln werden geladen, versuche es gleich noch einmal.
+      mixed: Das lässt sich nicht zusammenführen, weil mehrere Radwege und mehrere Fußwege ausgewählt sind. Wähle einen Radweg mit seinen Fußwegen oder einen Fußweg mit seinen Radwegen.
+      lengths: Das lässt sich nicht zusammenführen, weil die Längen zu stark voneinander abweichen und mehr als zwei Wege ausgewählt sind. Teile zuerst die Wege oder wähle einen Radweg und einen Fußweg.
+      apart: Das lässt sich nicht zusammenführen, weil die Wege nicht nebeneinander verlaufen (stellenweise mehr als 25 m Abstand). Teile zuerst die Wege.
+      different_values: "Das lässt sich nicht zusammenführen, weil die Wege, die gelöscht würden, unterschiedliche Werte für {key} haben. Teile zuerst den Weg, der bleibt."
+      not_eligible: Das lässt sich nicht zu einem Geh- und Radweg zusammenführen.
+  preset_shortcut:
+    title: Tastaturkürzel festlegen
+    button_tooltip: Tastaturkürzel festlegen
+    button_tooltip_with_shortcut: "Tastaturkürzel: {shortcut}"
+    preset_label: "Kürzel festlegen für: {preset}"
+    instructions: Gib eine Zahl zwischen 8 und 999 ein (die Zahlen 1–7 sind reservierte Kürzel).
+    placeholder: z. B. 8, 22, 555
+    error_range: Das Kürzel muss zwischen 8 und 999 liegen (die Zahlen 1–7 sind reservierte Kürzel)
+    error_conflict: Das Kürzel {shortcut} wird schon verwendet
+    remove: Kürzel entfernen
+    inline_label: "Kürzel:"
+    none_display: keines
+    edit_tooltip: Kürzel bearbeiten
+    add_tooltip: Kürzel hinzufügen
+    save_tooltip: Kürzel speichern
+    cancel_tooltip: Abbrechen
+  background:
+    custom_label: "Eigener: {val}"
+    custom_add: Eigenen Hintergrund hinzufügen
+    custom_delete:
+      tooltip: Diesen eigenen Hintergrund löschen
+      header: Eigenen Hintergrund löschen
+      message: "„{name}“ löschen? Das lässt sich nicht rückgängig machen."
+      confirm: Löschen
+  live_touched:
+    title: Live-Bearbeitungen in der Nähe
+    toggle: Live-Bearbeitungen zeigen und teilen
+    unreachable: "Live-Bearbeitungen konnten nicht eingeschaltet werden: {reason}"
+    login: Live-Bearbeitungen brauchen deine OpenStreetMap-Anmeldung, damit andere sehen, wer gerade bearbeitet.
+    login_button: Bei OpenStreetMap anmelden
+    consent:
+      body: Solange das eingeschaltet ist, sehen andere Kartierende, die es ebenfalls nutzen, vor dem Hochladen mit deinem OSM-Benutzernamen, welche Objekte du bearbeitest. Geteilt werden nur Objekt-IDs, Versionen und ein grober Ort. Um deinen OSM-Benutzernamen zu bestätigen, wird dein OpenStreetMap-Anmeldetoken an den Live-Bearbeitungs-Server gesendet, der ihn nur nutzt, um deine Benutzer-ID und deinen Namen zu lesen. Alles wird spätestens nach 3 Stunden gelöscht.
+      accept: Einschalten
+      privacy: Datenschutzdetails
+    status:
+      touched: "{user} bearbeitet das, seit {minutes} Min."
+      stale: "{user} hat das vor {minutes} Min. bearbeitet"
+      saved: "{user} hat das vor {minutes} Min. als v{version} gespeichert"
+    hint:
+      parallel: Du hast das auch bearbeitet, das kann zu Konflikten führen
+      outdated: "Du bist bei v{local}, {user} hat v{remote} gespeichert. Speichere bald, um Konflikte zu vermeiden"
+      ok: Deine Version ist aktuell
+    zoomIn: Zoome hinein, um Live-Bearbeitungen zu sehen
+    empty: Gerade bearbeitet hier niemand sonst
+    nuke:
+      button: Meine Daten auf dem Server löschen
+      confirm: Alle deine Live-Bearbeitungs-Einträge auf dem Server löschen und das ausschalten?
+      done: "{count} Einträge gelöscht"
+  mapillary_sign_bar:
+    loading: Bilder werden geladen …
+    image_of: "Bild {n} von {count}, Klick für das nächste"
+    write_sign: "Das Schild nach {key} schreiben"
+    write_source: Dieses Bild als Quelle des Schilds hinzufügen
+    write_image: "Dieses Bild zu {key} hinzufügen"
+    suggested_image: "gelber Rahmen: die im Feld Mapillary-Bilder gewählte Bildzeile"
+    suggested: "gelber Rahmen: passt zur Richtung, in die das Schild zeigt"
+    write_tags: Diese Tags setzen
+    present: "grün: schon getaggt"
+    present_undo: in dieser Sitzung gesetzt, Klick nimmt es wieder weg
+    replaces: "orange: ersetzt {value}"
+    annotation: Ein Verkehrsschild von Mapillary gesetzt.
+    annotation_remove: Ein von Mapillary gesetztes Tag entfernt.
+    icon:
+      mapillary: "Von Mapillary erkannt: {value}"
+      sign: "Deutsches Verkehrsschild, das diese Erkennung meint (aus dem Verkehrszeichen-Tool): {sign} {name}"
+    direction:
+      forward: ↑ vorwärts
+      backward: ↓ rückwärts
+      tooltip: Die Richtung entlang des gewählten Wegs, für die das Schild gilt, abgeleitet aus der Richtung, in die das Schild zeigt
+  infra3d:
+    tooltip_feature: Infra3D mit Blick auf dieses Objekt öffnen (die Mitte einer Linie). Braucht ein Infra3D-Konto.
+    tooltip_image: Infra3D dort öffnen, wo dieses Bild aufgenommen wurde. Braucht ein Infra3D-Konto.
+    tooltip_sign: Infra3D mit Blick auf dieses Schild öffnen. Braucht ein Infra3D-Konto.
+  kv_errors:
+    origin_not_allowed: Die Projektdatenbank akzeptiert keine Anfragen von {origin}. Bitte die Administration, diese Adresse zuzulassen.
+    login: Deine OpenStreetMap-Anmeldung wurde nicht akzeptiert. Melde dich ab und wieder an.
+    rate_limited: Zu viele Anfragen an die Projektdatenbank. Versuche es in einer Minute erneut.
+    osm_unavailable: OpenStreetMap konnte deine Anmeldung gerade nicht bestätigen. Versuche es später erneut.
+    server: "Die Projektdatenbank hat mit einem Fehler geantwortet ({status} {code})."
+    network: "Die Projektdatenbank war von {origin} aus nicht erreichbar: offline, oder diese Adresse ist dort nicht zugelassen."
+  progress_tracking:
+    done: Erledigt
+    done_tooltip: Diese Linie als erledigt markieren
+    undo_tooltip: Die Markierung wieder wegnehmen
+    done_by: "Erledigt: {user}, {date}"
+    error: "Der Fortschritt konnte nicht gespeichert werden: {reason}"
+    already_done: "{user} hat diese Linie inzwischen als erledigt markiert."
+    already_open: Jemand hat die Markierung inzwischen weggenommen.
+    disabled:
+      logged_out: Melde dich bei OpenStreetMap an, um den Fortschritt zu ändern.
+      unavailable: Die Fortschrittsdatenbank war nicht erreichbar. Ein Klick versucht es erneut.
+      no_id: Diese Linie hat keine ID (id oder lfd_nr), deshalb lässt sie sich nicht verfolgen.
+  photo_overlays:
+    sign_groups:
+      label: Schilder zeigen
+      tooltip: "{count} der geladenen Schilder im Bildausschnitt"
+      bike:
+        title: Rad
+        tooltip: Radwege, gemeinsame und getrennte Wege, Radverkehr frei, Radverkehr verboten, Radfahrerfurten
+      speed:
+        title: Tempo
+        tooltip: Geschwindigkeitsbegrenzungen und deren Ende, 30er-Zonen, verkehrsberuhigte Bereiche, Ortsschilder
+      access:
+        title: Zufahrt & Einbahn
+        tooltip: Einfahrt verboten, Einbahnstraße, gesperrte Straßen, nur Bus und Bahn
+      other:
+        title: Sonstige
+        tooltip: Alle anderen Schilder, meist Park-, Halte- und Wegweiser
+    highlight_users_filter:
+      title: Nutzende hervorheben
+      tooltip: Bilder und Sequenzen dieser Mapillary-Nutzenden markieren (Benutzernamen, durch Komma getrennt)
+    highlight_orgs_filter:
+      title: Organisationen hervorheben
+      tooltip: Bilder und Sequenzen dieser Mapillary-Organisationen markieren (Organisationsnamen wie in der Mapillary-URL, durch Komma getrennt)
+    auto_show:
+      title: Bild bei Auswahl zeigen
+      tooltip: Wenn du ein Objekt mit einem Mapillary-Bild-Tag auswählst, die Mapillary-Ebene einschalten und sein Bild im Viewer zeigen
+    age_legend:
+      outdated: älter als {date}
+      old: ältestes Drittel
+      mid: mittleres Drittel
+      new: neuestes Drittel
+    age_cutoff_marker: "{date}"
+  settings:
+    custom_background:
+      name:
+        label: Name (optional)
+      template:
+        label: Kachel-URL-Vorlage
+  fields:
+    access:
+      add_type: Eine neue Verkehrsart hinzufügen
+  mapillary_map_features:
+    marking:
+      discrete:
+        arrow:
+          left: Fahrstreifenmarkierung - Pfeil (links)
+          right: Fahrstreifenmarkierung - Pfeil (rechts)
+          split_left_or_straight: Fahrstreifenmarkierung - Pfeil (geteilt links oder geradeaus)
+          split_right_or_straight: Fahrstreifenmarkierung - Pfeil (geteilt rechts oder geradeaus)
+          straight: Fahrstreifenmarkierung - Pfeil (geradeaus)
+        crosswalk_zebra: Fahrstreifenmarkierung - Zebrastreifen
+        give_way_row: Fahrstreifenmarkierung - Vorfahrt gewähren (Reihe)
+        give_way_single: Fahrstreifenmarkierung - Vorfahrt gewähren (einfach)
+        other_marking: Fahrstreifenmarkierung - Anderes
+        stop_line: Fahrstreifenmarkierung - Haltelinie
+        symbol:
+          bicycle: Fahrstreifenmarkierung - Symbol (Fahrrad)
+        text: Fahrstreifenmarkierung - Text
+de-CH:
+  traffic_sign_field:
+    order_hint: Schilder werden von oben nach unten gelesen. Das oberste Schild ist das Hauptschild.
+    open_tool: Im Verkehrszeichen-Tool öffnen
+    drag: Zum Umsortieren ziehen oder Pfeiltasten nutzen
+    empty: Noch keine Schilder. Unten nach Name oder Zeichen-ID suchen, um eines hinzuzufügen.
+    add_sign: Schild hinzufügen…
+    unknown_sign: Unbekanntes Schild
+    no_sign: Unbeschildert
+    no_sign_description: Hier steht explizit kein Verkehrsschild (traffic_sign=none)
+  map_display:
+    title: Kartendarstellung
+    description: Kartendarstellung
+  photos_pane:
+    title: Fotos
+    description: Fotos
+  pane_tooltips:
+    background: Luftbilder, Helligkeit und Bildversatz.
+    map-data: OpenStreetMap-Daten und -Hinweise, QA-Ebenen, eigene Datenebenen, Überlagerungen und Live-Bearbeitungen.
+    map-display: Flächenfüllung, Linse und welche Objektarten angezeigt werden.
+    photos: Straßenfotos, ihre Filter und die Verkehrszeichen.
+    issues: Fehler und Warnungen in deinen Änderungen und in der Karte.
+    preferences: Werkzeugleisten-Beschriftung, optionale Schaltflächen, Info-Felder, Datenschutz, Favoriten und OpenStreetMap-Server.
+    help: Dokumentation, Einführung, Tastaturkürzel und Version des Editors.
+  tilda_notes:
+    title: TILDA-Hinweis
+    private: "Interner Hinweis: Nur Mitglieder dieser Region in TILDA sehen ihn."
+    new: Neuer TILDA-Hinweis
+    status:
+      open: offen
+      closed: erledigt
+    replies: "{count} Antworten"
+    loading: Hinweis wird geladen …
+    not_loaded: Der Hinweis konnte nicht geladen werden.
+    no_body: Es wurde nur ein Betreff angegeben.
+    subject: Betreff
+    body: Hinweis
+    body_placeholder: "Beschreibe, was dir aufgefallen ist (Markdown)."
+    reply: Antwort
+    reply_placeholder: "Schreibe eine Antwort (Markdown)."
+    save_explanation: "Wird sofort in TILDA gespeichert, nicht mit deinen OpenStreetMap-Änderungen. Nicht öffentlich."
+    save: Hinweis speichern
+    save_reply: Antwort speichern
+    resolve: Als erledigt markieren
+    resolve_reply: Antworten und erledigen
+    reopen: Wieder öffnen
+    reopen_reply: Antworten und wieder öffnen
+    open_in_tilda: In TILDA öffnen
+    open_tilda: TILDA öffnen
+    add:
+      title: TILDA
+      osm_title: OSM
+      description: "Internen TILDA-Hinweis hinzufügen. Nur Mitglieder des Projekts sehen ihn."
+    errors:
+      login: "Melde dich bei OpenStreetMap an, um TILDA-Hinweise zu sehen und zu schreiben."
+      invalid_osm_token: "OpenStreetMap hat deine Anmeldung nicht akzeptiert. Melde dich neu an."
+      no_tilda_user: "Dein OpenStreetMap-Konto hat noch kein TILDA-Konto. Melde dich einmal bei TILDA an."
+      not_member: "Du bist in TILDA kein Mitglied dieser Region. Bitte um Zugang."
+      network: "TILDA ist nicht erreichbar."
+      other: "TILDA: {message}"
+  map_data:
+    layers:
+      notes:
+        title: OpenStreetMap-Hinweise (öffentlich)
+        tooltip: Öffentliche Hinweise von OpenStreetMap. Jede:r kann sie lesen.
+      tilda-notes:
+        title: TILDA-Hinweise (intern)
+        tooltip: Interne Hinweise des Projekts aus TILDA. Nur Mitglieder der Region sehen sie.
+  modes:
+    add_note:
+      description: "Öffentlichen OpenStreetMap-Hinweis hinzufügen. Jede:r kann ihn lesen."
+  account:
+    title: Konto
+    tooltip: "Angemeldet als {user}"
+  way_table:
+    title: Wege-Tabelle
+    tooltip: Vergleiche die Tags des ausgewählten Wegs mit dem vorherigen und dem nächsten Weg, unter der Karte.
+    empty: Wähle einen Weg aus, um seine Tags mit dem vorherigen und dem nächsten Weg zu vergleichen.
+    previous: Vorherigen Weg auswählen
+    next: Nächsten Weg auswählen
+    reversed: Dieser Weg zeigt in die Gegenrichtung. Seine left/right-Tags sind getauscht dargestellt.
+    edited: In dieser Sitzung geändert
+    junction:
+      backward: "Vor dem ersten Weg geht es mit mehreren Wegen weiter. Wähle einen:"
+      forward: "Nach dem letzten Weg geht es mit mehreren Wegen weiter. Wähle einen:"
+  preferences:
+    interface:
+      labels:
+        description: Beschriftung der Schaltflächen anzeigen
+        tooltip: Zeigt die Beschriftung unter den Schaltflächen der Werkzeugleiste.
+      scale:
+        description: Maßstab anzeigen
+        tooltip: Ein Maßstabsbalken unten in der Karte. Ein Klick wechselt zwischen metrischen und imperialen Einheiten.
+      zoom:
+        description: Zoom-Schaltflächen anzeigen
+        tooltip: "Die Schaltflächen + und − am Kartenrand. Die Tastenkürzel + und − funktionieren immer."
+      zoom-to-selection:
+        description: "„Auf Auswahl zoomen“ anzeigen"
+        tooltip: Die Schaltfläche, die auf die ausgewählten Objekte zoomt. Ihr Tastenkürzel funktioniert immer.
+      geolocate:
+        description: "„Meinen Standort anzeigen“ anzeigen"
+        tooltip: Die Schaltfläche, die die Karte auf deinen Standort zentriert.
+      help:
+        description: Hilfe-Schaltfläche anzeigen
+        tooltip: "Die Schaltfläche, die die Hilfe öffnet, mit der Version des Editors und den Links zum Melden von Fehlern. Ihr Tastenkürzel funktioniert immer."
+    osm_server:
+      title: OpenStreetMap-Server
+      live: Live
+      dev: Entwicklungsserver
+      hint: Von welchem OpenStreetMap-Server der Editor liest und wohin er hochlädt. Beim Wechsel gehen ungespeicherte Änderungen verloren.
+    panels:
+      title: Info-Felder
+  issues:
+    cycleway_oneway_wrong:
+      title: Richtung der Radspur vermutlich falsch
+      tip: "Findet Straßen, bei denen das „oneway“-Tag einer Radspur oder eines Radwegs an der Seite sehr wahrscheinlich die falsche Richtung angibt."
+      message: "{feature}: {tag} ist vermutlich falsch"
+      two_way_road:
+        reference: "„oneway“ bezieht sich auf die Richtung, in der die Linie gezeichnet ist. Auf der linken Seite einer Straße mit Gegenverkehr fährt der Radverkehr gegen diese Richtung; „{tag}“ sagt also, er fährt dem Verkehr neben sich entgegen. Ohne das Tag gilt die übliche Richtung: auf jeder Seite mit dem Verkehr. Entferne das Tag, oder setze „no“, wenn Radfahrende hier in beide Richtungen fahren dürfen."
+      contraflow:
+        reference: "Radfahrende dürfen diese Einbahnstraße in Gegenrichtung befahren; die linke Seite ist damit die Seite für die Gegenrichtung. „{tag}“ sagt, dort wird in Richtung der Einbahnstraße gefahren. Ohne das Tag gilt die übliche Richtung. Entferne das Tag, oder setze „no“, wenn Radfahrende hier in beide Richtungen fahren dürfen."
+    cycleway_oneway_redundant:
+      title: Richtung der Radspur nicht nötig
+      tip: "Findet Straßen, bei denen das „oneway“-Tag einer Radspur oder eines Radwegs an der Seite nur den Standard wiederholt."
+      message: "{feature}: {tag} ist nicht nötig"
+      default:
+        reference: "Ohne „{key}“ gilt: Der Radverkehr fährt mit dem Verkehr auf seiner Seite. Genau das sagt „{tag}“. Das Tag ist nicht nötig und leicht falsch zu setzen, weil sich „oneway“ auf die Richtung der gezeichneten Linie bezieht."
+    fix:
+      cycleway_oneway_both_ways:
+        title: Radverkehr fährt hier in beide Richtungen
+        annotation: Radspur in beide Richtungen eingetragen.
+      cycleway_oneway_correct:
+        title: Das ist hier richtig
+  inspector:
+    tilda:
+      reminder:
+        damage_signs:
+          title: "Auf Schadenschilder prüfen."
+          text: "Steht auf diesem Weg ein Schild „Radwegschäden“, „Gehwegschäden“ oder „Geh- und Radwegschäden“ (z. B. in Mapillary oder im Infra3D-Viewer)? Dann in traffic_sign eintragen."
+        barrier:
+          title: "Auf Absperrbaken prüfen."
+          text: "Ist der Radweg durch eine Absperrbake versperrt, sodass er nicht nutzbar ist? Dann an der Stelle einen TILDA-Hinweis anlegen (Ebene „TILDA-Hinweise“). Es ist kein OSM-Tag."
+      default:
+        generic: "Nicht getaggt = {tag}. Nur taggen, wenn es hier anders ist."
+        surface_colour: "Nicht getaggt = nicht eingefärbt. Nur taggen, wenn die Oberfläche rot oder grün ist."
+        oneway_bicycle: "Nicht getaggt = Radverkehr folgt der Einbahnstraße. Nur „no“ taggen, wenn er in Gegenrichtung fahren darf."
+        oneway_side: "Nicht getaggt = Radverkehr fährt mit dem Verkehr auf dieser Seite. Nur „no“ taggen, wenn er hier in beide Richtungen fahren darf."
+        oneway_road: "Nicht getaggt = Straße mit Gegenverkehr."
+        dual_carriageway: "Nicht getaggt = keine getrennte Richtungsfahrbahn. „yes“ taggen, wenn die Gegenrichtung eine eigene Linie ist."
+      checks:
+        check: Geprüft
+        check_tooltip: "Bestätige, dass du das angesehen hast und der Standard stimmt. Das wird für das Projekt gespeichert, nicht in OpenStreetMap, und braucht keinen Upload."
+        uncheck_tooltip: "Geprüft. Klicken, um die Prüfung zu entfernen."
+        checked_by: "Geprüft von {user}, {date}"
+        verify: Verifiziert
+        verify_tooltip: "Diesen Weg als verifiziert markieren (zweiter Blick durch eine andere Person). Das wird für das Projekt gespeichert, nicht in OpenStreetMap, und braucht keinen Upload."
+        unverify_tooltip: "Verifiziert. Klicken, um es zu entfernen."
+        verified_by: "Verifiziert von {user}, {date}"
+        not_verified: Noch nicht verifiziert
+        changed_since: der Weg wurde seitdem geändert
+        you: dir
+        save_failed: "Die Prüfung konnte nicht gespeichert werden."
+        disabled:
+          new_way: "Lade den Weg zuerst hoch; eine Prüfung braucht seine OpenStreetMap-ID."
+          unavailable: "Prüfungen sind von dieser Adresse aus nicht verfügbar."
+          loading: "Prüfungen werden geladen…"
+          logged_out: "Melde dich bei OpenStreetMap an, um Prüfungen zu speichern."
+    traffic_sign_group:
+      label:
+        way: Verkehrsschild
+        cycleway: Verkehrsschild (Radverkehrsanlage)
+        sidewalk: Verkehrsschild (Gehweg)
+      side:
+        left: Links
+        right: Rechts
+        both: Beide Seiten
+      direction:
+        forward: "In Wegrichtung (forward)"
+        backward: "Gegen die Wegrichtung (backward)"
+        both: "Ganzer Weg (beide Richtungen)"
+      toggle:
+        directions: Je Richtung
+        directions_tooltip: "Schilder ergänzen, die nur in einer Richtung des Wegs gelten („traffic_sign:forward“, „traffic_sign:backward“). Das Schild des ganzen Wegs wird als „traffic_sign“ getaggt, ohne Richtung. Richtungsschilder, die nur das Schild des ganzen Wegs wiederholen, werden als dieses angezeigt; so getaggt werden sie mit deiner nächsten Änderung an diesem Schild."
+        directions_locked_tooltip: "Dieser Weg hat Schilder je Richtung („traffic_sign:forward“, „traffic_sign:backward“). Entferne sie, um das auszuschalten."
+    hidden_preset:
+      manual: "{features} sind versteckt. Schalte sie im Bereich Kartendarstellung ein."
+  help:
+    streetlevel:
+      using: "Um Straßenfotos beim Bearbeiten zu benutzen, öffne den Bereich {photos_icon} **{photos}** am Rand der Karte und schalte dort die verfügbaren Bildquellen ein oder aus."
+  shortcuts:
+    browsing:
+      display_options:
+        map_display: "Kartendarstellung ein-/ausblenden"
+        photos: "Fotos ein-/ausblenden"
+        way_table: "Wege-Tabelle ein-/ausblenden"

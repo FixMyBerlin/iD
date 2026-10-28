@@ -61,6 +61,7 @@ export function helpHtml(id, replacements) {
         minus: icon('#iD-icon-minus', 'inline'),
         layers_icon: icon('#iD-icon-layers', 'inline'),
         data_icon: icon('#iD-icon-data', 'inline'),
+        photos_icon: icon('#fas-camera', 'inline'),
         inspect: icon('#iD-icon-inspect', 'inline'),
         help_icon: icon('#iD-icon-help', 'inline'),
         undo_icon: icon(localizer.textDirection() === 'rtl' ? '#iD-icon-redo' : '#iD-icon-undo', 'inline'),
@@ -135,6 +136,7 @@ export function helpHtml(id, replacements) {
         straighten: localizer.t_html('operations.straighten.title'),
 
         map_data: localizer.t_html('map_data.title'),
+        photos: localizer.t_html('photos_pane.title'),
         osm_notes: localizer.t_html('map_data.layers.notes.title'),
         fields: localizer.t_html('inspector.fields'),
         tags: localizer.t_html('inspector.tags'),

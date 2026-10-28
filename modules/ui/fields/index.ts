@@ -12,6 +12,9 @@ export * from './restrictions';
 export * from './textarea';
 export * from './wikidata';
 export * from './wikipedia';
+export * from './mapillary_images';
+export * from './surface_smoothness';
+export * from './traffic_sign';
 
 import {
     uiFieldCheck,
@@ -55,6 +58,10 @@ import { uiFieldRestrictions } from './restrictions';
 import { uiFieldTextarea } from './textarea';
 import { uiFieldWikidata } from './wikidata';
 import { uiFieldWikipedia } from './wikipedia';
+import { uiFieldMapillaryImages } from './mapillary_images';
+import { uiFieldSurfaceSmoothness } from './surface_smoothness';
+import { uiFieldTrafficSign } from './traffic_sign';
+import { uiFieldTrafficSignGroup } from './traffic_sign_group';
 
 export var uiFields = {
     access: uiFieldAccess,
@@ -85,6 +92,12 @@ export var uiFields = {
     tel: uiFieldTel,
     text: uiFieldText,
     textarea: uiFieldTextarea,
+    // Radnetz Berlin: the fields of this fork, grouped after iD's own
+    // eslint-disable-next-line sort-keys
+    mapillaryImages: uiFieldMapillaryImages,
+    surfaceSmoothness: uiFieldSurfaceSmoothness,
+    trafficSign: uiFieldTrafficSign,
+    trafficSignGroup: uiFieldTrafficSignGroup,
     typeCombo: uiFieldTypeCombo,
     url: uiFieldUrl,
     wikidata: uiFieldWikidata,

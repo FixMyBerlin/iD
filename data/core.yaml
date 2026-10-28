@@ -25,6 +25,8 @@ en:
     recent: Recent
     favorites: Favorites
     add_feature: Add Feature
+  presets:
+    favorites: Favorites
   title:
     format:
       context: "{base} – {context}"
@@ -49,7 +51,7 @@ en:
     add_note:
       title: Note
       label: Add Note
-      description: "Spotted an issue? Let other mappers know."
+      description: "Add a public OpenStreetMap note. Everyone can read it."
       key: N
     add_preset:
       title: "Add {feature}"
@@ -59,6 +61,86 @@ en:
     drag_node:
       connected_to_hidden: This can't be edited because it is connected to a hidden feature.
   operations:
+    extract_sidepath:
+      title:
+        cycleway:
+          right: Extract right cycle track
+          left: Extract left cycle track
+        protected:
+          right: Extract right protected bike lane
+          left: Extract left protected bike lane
+        sidewalk:
+          right: Extract right sidewalk
+          left: Extract left sidewalk
+        path:
+          right: Extract right cycle track and sidewalk as one path
+          left: Extract left cycle track and sidewalk as one path
+      side:
+        right: right
+        left: left
+      annotation:
+        cycleway: "Extracted the {side} cycle track into a separate way."
+        protected: "Extracted the {side} protected bike lane into a separate way."
+        sidewalk: "Extracted the {side} sidewalk into a separate way."
+        path: "Extracted the {side} cycle track and sidewalk into a separate path."
+      description: "Create a separate highway={highway} about {meters} m to the {side}; {moved} tags of that side move to it. This road gets {changes}."
+      description_protected: "Usually kept on the road; only extract with a good reason (e.g. a long kerb-separated section). Creates a separate highway={highway} about {meters} m to the {side}; {moved} tags of that side move to it. This road gets {changes}."
+      flash: "Extracted into a separate way. This road: {changes}"
+      flash_kept: "Extracted into a separate way. This road: {changes}. Kept bicycle={bicycle} instead of use_sidepath."
+      loading: Loading the traffic sign rules, try again in a moment.
+      incomplete: This can't be extracted because not all of its nodes are downloaded.
+      closed: This can't be extracted because it is a closed way.
+      too_short: This can't be extracted because the way is too short.
+      not_eligible: This can't be extracted.
+    extract_merge_sidepaths:
+      title:
+        right: Extract right cycle track and merge with sidewalk
+        left: Extract left cycle track and merge with sidewalk
+        both: Extract both cycle tracks and merge with sidewalks
+      annotation:
+        right: Extracted the right cycle track and merged it with the sidewalk into a foot and cycle path.
+        left: Extracted the left cycle track and merged it with the sidewalk into a foot and cycle path.
+        both: Extracted both cycle tracks and merged them with the sidewalks into foot and cycle paths.
+      description:
+        right: "Extract the right cycle track and merge it with the sidewalk way next to it into one highway=path. The sidewalk keeps its line and gets the tags of both."
+        left: "Extract the left cycle track and merge it with the sidewalk way next to it into one highway=path. The sidewalk keeps its line and gets the tags of both."
+        both: "Extract both cycle tracks and merge each with the sidewalk way next to it into one highway=path. The sidewalks keep their lines and get the tags of both."
+      flash: "Extracted and merged into a foot and cycle path. This road: {changes}"
+      flash_dropped: "Extracted and merged into a foot and cycle path. This road: {changes}. Not taken over from the deleted cycleway: {dropped}"
+      loading: Loading the traffic sign rules, try again in a moment.
+      no_sidewalk: This can't be merged because no sidewalk way runs along that cycle track. Extract it and merge by hand, or map the sidewalk first.
+      incomplete: This can't be extracted because not all of its nodes are downloaded.
+      closed: This can't be extracted because it is a closed way.
+      too_short: This can't be extracted because the way is too short.
+      mixed: These can't be merged because several cycleways and several footways would be merged. Split the sidewalk first.
+      lengths: These can't be merged because the lengths of the sidewalk pieces and the cycle track differ too much. Split the sidewalk first.
+      apart: These can't be merged because the sidewalk does not run side by side with the cycle track (more than 25 m apart somewhere). Split the sidewalk first.
+      different_values: "These can't be merged because the sidewalk pieces have different values of {key}. Split the way first."
+      not_eligible: This can't be extracted and merged.
+      failed:
+        extract: "Nothing was changed. Step 1 (extract, {side} side) doesn't work: {reason}"
+        merge: "Nothing was changed. Step 2 (merge with the sidewalk, {side} side) doesn't work: {reason}"
+      partial:
+        extract: "Only partly done. Step 1 (extract, {side} side) doesn't work, what was done before stays: {reason}"
+        merge: "Extracted, but not merged: step 2 (merge with the sidewalk, {side} side) didn't work, the extracted cycle track stays a separate way. This road: {changes}. {reason}"
+      error: "Extract and merge failed, nothing was changed: {message}"
+    merge_sidepaths:
+      title: Merge into a foot and cycle path
+      annotation: Merged a cycleway and a footway into one foot and cycle path.
+      description:
+        foot: "Make one highway=path of these ways. The footway keeps its line (the older way stays); it gets the tags of both, with cycleway:… and footway:… keys where they differ. The cycleway (dashed red) is deleted."
+        bike: "Make one highway=path of these ways. The cycleway keeps its line (the older way stays); it gets the tags of both, with cycleway:… and footway:… keys where they differ. The footway (dashed red) is deleted."
+      description_cut:
+        foot: "Make one highway=path of these ways. The footway is longer: it is cut where the cycleway ends, and the rest stays a footway. The older way keeps its line and gets the tags of both; the other one (dashed red) is deleted."
+        bike: "Make one highway=path of these ways. The cycleway is longer: it is cut where the footway ends, and the rest stays a cycleway. The older way keeps its line and gets the tags of both; the other one (dashed red) is deleted."
+      flash: Merged into one foot and cycle path.
+      flash_dropped: "Merged into one foot and cycle path. Not taken over from the deleted way: {dropped}"
+      loading: Loading the traffic sign rules, try again in a moment.
+      mixed: These can't be merged because several cycleways and several footways are selected. Select one cycleway with its footways, or one footway with its cycleways.
+      lengths: These can't be merged because their lengths differ too much and more than two ways are selected. Split the ways first, or select one cycleway and one footway.
+      apart: These can't be merged because they don't run side by side (more than 25 m apart somewhere). Split the ways first.
+      different_values: "These can't be merged because the ways that would be deleted have different values of {key}. Split the way that stays first."
+      not_eligible: These can't be merged into a foot and cycle path.
     _unavailable:
       Cannot perform “{operation}” on currently selected features.
     add:
@@ -581,6 +663,9 @@ en:
     localized_translation_name: Name
     language_and_code: "{language} ({code})"
   zoom_in_edit: Zoom in to edit
+  account:
+    title: Account
+    tooltip: "Logged in as {user}"
   login: Log In
   logout: Log Out
   loading_auth: "Connecting to OpenStreetMap..."
@@ -703,6 +788,215 @@ en:
     locating: "Locating, please wait..."
     location_unavailable: Your location is unavailable.
   inspector:
+    related:
+      source: Source
+      note: Note
+      check_date: Checked
+      mapillary: Mapillary
+      traffic_sign: traffic sign
+      side:
+        left: left
+        right: right
+        both: both sides
+        forward: forward
+        backward: backward
+      empty: not set yet
+      edit: "Edit {key}"
+      close: "Close the field for {key}"
+      add_category: "Add: {category} ({key})"
+      close_category: "Close: {category}"
+      editor_label: "{category} – {field}"
+    radnetz_field:
+      width_effective:
+        label: "Width Between the Markings (Meters)"
+        hint: "Measure it between the white markings."
+      source_width_effective:
+        label: "Usable Width Source"
+    mapillary_images:
+      label: "Mapillary images"
+      image_id: "Image ID"
+      view_on_mapillary: "View this image on Mapillary"
+      show_in_viewer: "Show in viewer"
+      remove_image: "Remove this image"
+      add_to_key: "Add another image to this key"
+      add_image: "Add image"
+      choose_key: "Choose the tag for the image…"
+      panorama: "360°"
+      flat: "flat"
+    traffic_sign_group:
+      label:
+        way: Traffic Sign
+        cycleway: Traffic Sign (Bike Lanes)
+        sidewalk: Traffic Sign (Sidewalks)
+      side:
+        left: Left
+        right: Right
+        both: Both sides
+      direction:
+        forward: "Forward (in the direction of the way)"
+        backward: "Backward (against the direction of the way)"
+        both: "Whole way (both directions)"
+      toggle:
+        directions: Per direction
+        directions_tooltip: "Add signs that apply in one direction of the way only (“traffic_sign:forward”, “traffic_sign:backward”). The sign of the whole way is tagged as “traffic_sign”, without a direction. Direction signs that only repeat the sign of the whole way are shown as that; they are tagged that way with your next change of that sign."
+        directions_locked_tooltip: "This way has signs per direction (“traffic_sign:forward”, “traffic_sign:backward”). Remove them to switch this off."
+    traffic_sign_none:
+      label: No sign here
+      tooltip: "Sets {tag}: checked, there is no sign"
+    traffic_sign_plan:
+      header: "The traffic sign suggests these tags:"
+      apply: Apply these tags
+      cause:
+        sign: "{sign} implies this"
+        normalize: The usual way to write this sign
+        previous_sign: "Was implied by the previous sign {sign}"
+        restore: "Was implied by the previous sign {sign}; back to the downloaded value"
+    tilda:
+      title: TILDA Bike Infrastructure
+      info: About this section
+      intro: "How TILDA, the bike infrastructure dataset, reads this way. Check the category of the way and of each side. If it does not match what is on the ground, choose the right one under “Change to” and apply the tags. Then fill in what is missing below."
+      category_id: "TILDA category: {id}"
+      mixed_traffic: Mixed traffic
+      no_category: No category
+      current: current
+      current_group: Current category
+      collapsed_hint: bike infrastructure is on the sides
+      target: Change to
+      edit: Change the category
+      apply_all: Apply these tags
+      remove_reason: Replaced by tags for each side
+      required: Needed for the Radnetz dataset
+      required_for: "Needed for the Radnetz dataset as “{category}”"
+      feeds: "Used for the infraVelo attributes: {attributes}"
+      enter_value: value, Enter
+      missing: is missing
+      not_tagged: is not tagged
+      check_below: check below
+      add_below: add below
+      add_below_optional: add below if relevant
+      state:
+        inherited: "TILDA takes {value} from other tags (e.g. of the road)"
+        derived: "TILDA reads {value} from {tag}"
+        guess: "TILDA assumes {value}; please tag it"
+        ignored: "TILDA cannot use “{value}”: choose another value"
+        normalized: "TILDA reads it as {value}"
+      reminder:
+        damage_signs:
+          title: "Check for damage signs."
+          text: "Is there a sign “Radwegschäden”, “Gehwegschäden” or “Geh- und Radwegschäden” on this path (e.g. in Mapillary or the Infra3D viewer)? If so, add it to traffic_sign."
+        barrier:
+          title: "Check for barriers."
+          text: "Is the cycle track blocked by a barrier (Absperrbake) so that it cannot be used? If so, add a TILDA note on the spot (TILDA Notes layer). It is not an OSM tag."
+      default:
+        generic: "Not tagged = {tag}. Tag it only if it is different here."
+        surface_colour: "Not tagged = not coloured. Tag it only if the surface is red or green."
+        oneway_bicycle: "Not tagged = bicycles follow the one-way. Tag “no” only if bicycles may ride against it."
+        oneway_side: "Not tagged = bicycles ride with the traffic on this side. Tag “no” only if they may ride both ways here."
+        oneway_road: "Not tagged = two-way road."
+        dual_carriageway: "Not tagged = no dual carriageway. Tag “yes” if the other direction is a separate way."
+      checks:
+        check: Checked
+        check_tooltip: "Confirm that you looked at this and that the default is right. This is saved for the project, not in OpenStreetMap, and needs no upload."
+        uncheck_tooltip: "Checked. Click to remove the check."
+        checked_by: "Checked by {user}, {date}"
+        verify: Verified
+        verify_tooltip: "Mark this way as verified (second look by another mapper). This is saved for the project, not in OpenStreetMap, and needs no upload."
+        unverify_tooltip: "Verified. Click to remove it."
+        verified_by: "Verified by {user}, {date}"
+        not_verified: Not verified yet
+        changed_since: the way was changed since
+        you: you
+        save_failed: "The check could not be saved: {reason}"
+        disabled:
+          new_way: "Upload the way first; a check needs its OpenStreetMap id."
+          unavailable: "Checks are not available from this address."
+          loading: "Loading the checks…"
+          logged_out: "Log in to OpenStreetMap to save checks."
+      side:
+        self: This way
+        left: Left side
+        right: Right side
+      category:
+        pedestrianAreaBicycleYes: "Pedestrian area, bicycles allowed"
+        bicycleRoad: "Bicycle road (Fahrradstraße)"
+        bicycleRoad_vehicleDestination: "Bicycle road, destination traffic allowed (Anlieger frei)"
+        footAndCyclewayShared_adjoining: "Shared foot and cycle path, along a road"
+        footAndCyclewayShared_isolated: "Shared foot and cycle path, separate"
+        footAndCyclewayShared_adjoiningOrIsolated: "Shared foot and cycle path (along a road?)"
+        footAndCyclewaySegregated_adjoining: "Segregated foot and cycle path, along a road"
+        footAndCyclewaySegregated_isolated: "Segregated foot and cycle path, separate"
+        footAndCyclewaySegregated_adjoiningOrIsolated: "Segregated foot and cycle path (along a road?)"
+        footwayBicycleYes_adjoining: "Footway, bicycles allowed, along a road"
+        footwayBicycleYes_isolated: "Footway, bicycles allowed, separate"
+        footwayBicycleYes_adjoiningOrIsolated: "Footway, bicycles allowed (along a road?)"
+        cycleway_adjoining: "Cycle track, along a road (Radweg)"
+        cycleway_isolated: "Cycle path, separate"
+        cycleway_adjoiningOrIsolated: "Cycle track (along a road?)"
+        crossing: "Crossing"
+        cyclewayLink: "Cycleway link"
+        cyclewayOnHighway_advisory: "Advisory bike lane (Schutzstreifen)"
+        cyclewayOnHighway_exclusive: "Exclusive bike lane (Radfahrstreifen)"
+        cyclewayOnHighway_advisoryOrExclusive: "Bike lane (advisory or exclusive?)"
+        sharedMotorVehicleLane: "Shared lane with motor vehicles"
+        cyclewayOnHighwayBetweenLanes: "Bike lane between lanes"
+        cyclewayOnHighwayProtected: "Protected bike lane"
+        sharedBusLaneBusWithBike: "Bus lane, bicycles allowed"
+        sharedBusLaneBikeWithBus: "Bike lane, buses allowed"
+        needsClarification: "Needs clarification"
+        data_no: "No bike infrastructure"
+        separate_geometry: "Mapped as separate way"
+        not_expected: "No bike infrastructure expected"
+      category_group:
+        track: Cycle tracks
+        lane: On the carriageway
+        foot: Shared with pedestrians
+        bus: Shared with buses
+        bicycle_road: Bicycle roads
+        special: "Special cases: links and crossings"
+        other: Other
+      attribute:
+        width: "Width"
+        width_effective: "Usable width (inside the marking)"
+        source_width: "Width source"
+        cycleway_width: "Width of the cycleway part"
+        source_cycleway_width: "Width source of the cycleway part"
+        surface: "Surface"
+        sett_length: "Sett stone size (m)"
+        surface_colour: "Surface colour"
+        traffic_sign: "Traffic sign (or none)"
+        oneway: "Oneway"
+        oneway_bicycle: "Oneway for bicycles"
+        dual_carriageway: "Dual carriageway"
+        is_sidepath: "Along a road (sidepath)"
+        segregated: "Foot and bike segregated"
+        lane: "Lane type"
+        cycleway: "Bike infrastructure on the sides"
+        separation_left: "Separation, left"
+        separation_right: "Separation, right"
+        traffic_mode_left: "Traffic next to it, left"
+        traffic_mode_right: "Traffic next to it, right"
+        buffer_left: "Buffer, left"
+        buffer_right: "Buffer, right"
+        marking_left: "Marking, left"
+        marking_right: "Marking, right"
+    measure_tape:
+      button: "Measure on the map"
+      annotation: "Measured width"
+    surface_smoothness:
+      photo: "Photo"
+      multiple_values: "Multiple values"
+    side_prerequisite:
+      missing: "Set “{field}” for this side first"
+      other_value: "“{value}”: change “{field}” first"
+    side_width:
+      cycleway:
+        left: Bike Lane Width, Left (Meters)
+        right: Bike Lane Width, Right (Meters)
+        both: Bike Lane Width, Both Sides (Meters)
+      sidewalk:
+        left: Sidewalk Width, Left (Meters)
+        right: Sidewalk Width, Right (Meters)
+        both: Sidewalk Width, Both Sides (Meters)
     zoom_to:
       key: Z
       title: Zoom To Selection
@@ -738,7 +1032,7 @@ en:
     multiple_types: Multiple Types
     unshared_value_tooltip: not shared by all features
     hidden_preset:
-      manual: "{features} are hidden. Enable them in the Map Data pane."
+      manual: "{features} are hidden. Enable them in the Map Display pane."
       zoom: "{features} are hidden. Zoom in to enable them."
     back_tooltip: Change feature type
     remove: Remove
@@ -818,6 +1112,31 @@ en:
       disable:
         already_set: "This photo is already tagged on the selected map feature"
         too_far: "This photo is too far away from the selected map feature"
+  preset_shortcut:
+    title: Set Keyboard Shortcut
+    button_tooltip: Set keyboard shortcut
+    button_tooltip_with_shortcut: "Keyboard shortcut: {shortcut}"
+    preset_label: "Set shortcut for: {preset}"
+    instructions: "Enter a number between 8 and 999 (numbers 1-7 are reserved shortcuts)."
+    placeholder: "e.g. 8, 22, 555"
+    error_range: "Shortcut must be between 8 and 999 (numbers 1-7 are reserved shortcuts)"
+    error_conflict: "Shortcut {shortcut} is already in use"
+    remove: Remove Shortcut
+    inline_label: "Shortcut:"
+    none_display: "none"
+    edit_tooltip: "Edit shortcut"
+    add_tooltip: "Add shortcut"
+    save_tooltip: "Save shortcut"
+    cancel_tooltip: "Cancel"
+  traffic_sign_field:
+    order_hint: Signs are read top to bottom. The top sign is the main sign.
+    open_tool: Open in Traffic Sign Tool
+    drag: Drag or use arrow keys to reorder
+    empty: No signs yet. Search below by name or sign ID to add one.
+    add_sign: Add sign…
+    unknown_sign: Unknown sign
+    no_sign: No sign
+    no_sign_description: There is explicitly no traffic sign here (traffic_sign=none)
   background:
     title: Background
     description: Background Settings
@@ -827,6 +1146,13 @@ en:
     best_imagery: Best known imagery source for this location
     switch: Switch back to this background
     custom: Custom
+    custom_label: "Custom: {val}"
+    custom_add: Add custom background
+    custom_delete:
+      tooltip: Delete this custom background
+      header: Delete custom background
+      message: "Delete “{name}”? This cannot be undone."
+      confirm: Delete
     overlays: Overlays
     imagery_problem_faq: Report an Imagery Problem
     reset: reset
@@ -864,8 +1190,11 @@ en:
         tooltip: Map data from OpenStreetMap
         title: OpenStreetMap Data
       notes:
-        tooltip: Note data from OpenStreetMap
-        title: OpenStreetMap Notes
+        tooltip: Public notes from OpenStreetMap. Everyone can read them.
+        title: OpenStreetMap Notes (public)
+      tilda-notes:
+        tooltip: Internal notes of the project from TILDA. Only members of the region see them.
+        title: TILDA Notes (internal)
       osmose:
         tooltip: Data issues detected by osmose.openstreetmap.fr
         title: Osmose Issues
@@ -873,6 +1202,35 @@ en:
         tooltip: "Drag and drop a data file onto the page, or click the button to setup"
         title: Custom Map Data
         zoom: Zoom to data
+    custom_data_layers:
+      title: Custom Data Layers
+      add: Add custom data layer
+      empty: No custom data layers yet. Add one with the + button.
+      edit_tooltip: Edit this data layer
+      filter_tooltip: "Only features with {filter}"
+      delete:
+        tooltip: Delete this data layer
+        header: Delete data layer
+        message: "Delete “{name}”? This cannot be undone."
+        confirm: Delete
+      settings:
+        header_add: Add custom data layer
+        header_edit: Edit custom data layer
+        name: Name (optional)
+        url: URL
+        url_placeholder: https://example.com/data.pmtiles
+        color: Color
+        formats: "Supported: GeoJSON files (.geojson, .json), PMTiles archives (.pmtiles) and vector tile URL templates (z, x, y). The server must allow cross-origin requests (CORS)."
+        filter: Filter (optional)
+        filter_key: Key
+        filter_value: Value
+        filter_help: "Only show features with this property. Leave the value empty to show all features that have the key."
+        tracker:
+          label: Progress tracking
+          none: No tracking
+          mapping: Track mapping progress
+          track: Track "track" separation mapping progress
+          help: "With tracking, the lines can be clicked and marked as done in the sidebar (a second click takes the mark away). Done lines get a green casing, the others a red one. The marks are stored in our key-value database with your OSM user name, not in OpenStreetMap."
     history_panel:
       title: Show History Panel
       tooltip: Show version details for the selection.
@@ -880,19 +1238,171 @@ en:
       title: Show Measurement Panel
       tooltip: Show geometry values for the selection.
     style_options: Style Options
+    lens:
+      title: Lens
+      select: Lens
+      default: Default
+      default_tooltip: iD's normal map style
+      bundled:
+        radnetz_qa:
+          name: Radnetz QA
+          tooltip: "How complete the tags for the Radnetz dataset are (TILDA checklist). Green: complete. Orange: tags missing. Red: TILDA cannot tell the category. Wide: bike infrastructure, thin: roads."
+      select_tooltip: Show the map with this lens
+      add: Import a lens
+      edit_tooltip: Edit name and shortcut
+      header_add: Import a lens
+      header_edit: Edit lens
+      name: Name
+      choose_file: Choose CSS file
+      no_file: No file chosen
+      delete:
+        header: Delete lens
+        message: "Delete “{name}”? This cannot be undone."
+        confirm: Delete
+      upload: CSS file
+      upload_description: The lens is kept in your browser.
+      upload_warning: Only import lenses from sources you trust. A lens's CSS can change the editor's appearance.
+      remove: Remove lens
+      shortcut:
+        label: Shortcut letter (activated with Alt + letter)
+        placeholder: key
+        reserved: This letter is reserved by another shortcut.
+        invalid: Enter a single letter (a-z).
+        flash: "Lens: {name}"
     highlight_edits:
       key: G
     map_features: Map Features
+    layer_mode:
+      feature:
+        interactive: "Editable: shown, can be selected and edited"
+        readonly: "Read-only: shown muted, cannot be selected"
+        hidden: "Hidden: not shown"
+      custom_data:
+        interactive: "Selectable: shown, features can be selected"
+        readonly: "Overlay only: shown, cannot be selected"
+        readonly_tracked: "Not available with progress tracking: the lines must be selectable to mark them as done"
+        hidden: "Hidden: not shown"
     autohidden: "These features have been automatically hidden because too many would be shown on the screen.  You can zoom in to edit them."
     osmhidden: "These features have been automatically hidden because the OpenStreetMap layer is hidden."
+  live_touched:
+    title: Live edits nearby
+    toggle: Show and share live edits
+    unreachable: "Live edits could not be turned on: {reason}"
+    login: Live edits need your OpenStreetMap login, so others can see who is editing.
+    login_button: Log in to OpenStreetMap
+    consent:
+      body: "While this is on, other mappers who also use it can see which objects you are editing, with your OSM username, before you upload. Only object ids, versions, and a rough location are shared. To confirm your OSM username, your OpenStreetMap login token is sent to the live-edits server, which uses it only to read your user id and name. Everything is deleted after 3 hours at the latest."
+      accept: Turn on
+      privacy: Privacy details
+    status:
+      touched: "{user} is editing this, since {minutes} min"
+      stale: "{user} edited this {minutes} min ago"
+      saved: "{user} saved this as v{version} {minutes} min ago"
+    hint:
+      parallel: "You also edited this, this might result in merge conflicts"
+      outdated: "You are on v{local}, {user} saved v{remote}. Save soon to avoid conflicts"
+      ok: Your version is current
+    zoomIn: Zoom in to see live edits
+    empty: Nobody else is editing here right now
+    nuke:
+      button: Delete my data on the server
+      confirm: Delete all your live-edit entries on the server and turn this off?
+      done: "Deleted {count} entries"
+  way_table:
+    title: Way Table
+    key: K
+    previous: Select the previous way
+    next: Select the next way
+    tooltip: Compare the tags of the selected way with the previous and next ways, below the map.
+    empty: Select a way to compare its tags with the previous and next ways.
+    reversed: This way points in the opposite direction. Its left/right tags are shown swapped.
+    edited: Changed in this mapping session
+    junction:
+      backward: "Several ways continue before the first way. Choose one:"
+      forward: "Several ways continue after the last way. Choose one:"
   visual_diff:
     highlight_edits:
       description: Highlight Changes
       tooltip: Outline edited features
+  mapillary_sign_bar:
+    loading: loading images …
+    image_of: "image {n} of {count}, click for the next"
+    write_sign: "Write the sign to {key}"
+    write_source: "Add this image as source of the sign"
+    write_image: "Add this image to {key}"
+    suggested_image: "yellow frame: the image row chosen in the Mapillary images field"
+    suggested: "yellow frame: fits the direction the sign faces"
+    write_tags: Set these tags
+    present: "green: already tagged"
+    present_undo: "set in this session, click to remove it again"
+    replaces: "orange: replaces {value}"
+    annotation: Set a traffic sign from Mapillary.
+    annotation_remove: Removed a tag set from Mapillary.
+    icon:
+      mapillary: "Detected by Mapillary: {value}"
+      sign: "German traffic sign this detection means (from the traffic sign tool): {sign} {name}"
+    direction:
+      forward: "↑ forward"
+      backward: "↓ backward"
+      tooltip: The direction along the selected way the sign applies to, from the way the sign faces
+  infra3d:
+    tooltip_feature: "Open infra3D looking at this feature (the middle of a line). Needs an infra3D account."
+    tooltip_image: "Open infra3D where this image was taken. Needs an infra3D account."
+    tooltip_sign: "Open infra3D looking at this sign. Needs an infra3D account."
+  kv_errors:
+    origin_not_allowed: "The project database does not accept requests from {origin}. Ask the admin to allow this address."
+    login: Your OpenStreetMap login was not accepted. Log out and in again.
+    rate_limited: Too many requests to the project database. Try again in a minute.
+    osm_unavailable: OpenStreetMap could not confirm your login right now. Try again later.
+    server: "The project database answered with an error ({status} {code})."
+    network: "The project database could not be reached from {origin}: offline, or this address is not allowed there."
+  progress_tracking:
+    done: Done
+    done_tooltip: Mark this line as done
+    undo_tooltip: Take the mark away again
+    done_by: "Done: {user}, {date}"
+    error: "The progress could not be saved: {reason}"
+    already_done: "{user} marked this line as done in the meantime."
+    already_open: Someone took the mark away in the meantime.
+    disabled:
+      logged_out: Log in to OpenStreetMap to change the progress.
+      unavailable: The progress database could not be reached. A click tries again.
+      no_id: This line has no id (id or lfd_nr), so it cannot be tracked.
+  map_display:
+    title: Map Display
+    description: Map Display
+    key: J
+  photos_pane:
+    title: Photos
+    description: Photos
+    key: J
+  pane_tooltips:
+    background: Aerial imagery, brightness and imagery offset.
+    map-data: OpenStreetMap data and notes, QA layers, custom data layers, overlays and live edits.
+    map-display: Area fill, lens and which feature types are shown.
+    photos: Street-level photos, their filters and the traffic signs.
+    issues: Errors and warnings in your edits and in the map.
+    preferences: Toolbar labels, optional buttons, panels, privacy, favorite presets and the OpenStreetMap server.
+    help: Documentation, walkthrough, keyboard shortcuts and the editor's version.
   photo_overlays:
     title: Photo Overlays
     traffic_signs:
       title: Traffic Signs
+    sign_groups:
+      label: Show signs
+      tooltip: "{count} of the loaded signs in view"
+      bike:
+        title: Bike
+        tooltip: "Bike paths, shared and separated paths, bicycles excepted, no bicycles, bike crossings"
+      speed:
+        title: Speed
+        tooltip: "Speed limits and their ends, 30 zones, living streets, town signs"
+      access:
+        title: Access & oneway
+        tooltip: "No entry, oneway, closed roads, bus and tram only"
+      other:
+        title: Other
+        tooltip: "All other signs, mostly parking, stopping and direction signs"
     photo_type:
       flat:
         title: "Flat Photos"
@@ -910,6 +1420,21 @@ en:
     username_filter:
       title: "Username"
       tooltip: "Show only photos by this user"
+    highlight_users_filter:
+      title: "Highlight users"
+      tooltip: "Mark images and sequences of these Mapillary users (comma separated usernames)"
+    highlight_orgs_filter:
+      title: "Highlight organizations"
+      tooltip: "Mark images and sequences of these Mapillary organizations (comma separated organization names as in the Mapillary URL)"
+    auto_show:
+      title: "Show image on select"
+      tooltip: "When you select a feature with a Mapillary image tag, turn on the Mapillary layer and show its image in the viewer"
+    age_legend:
+      outdated: "older than {date}"
+      old: "oldest third"
+      mid: "middle third"
+      new: "newest third"
+    age_cutoff_marker: "{date}"
     age_slider_filter:
       title: "Date Range"
       tooltip: "Shows only photos that are newer than the selected date"
@@ -983,19 +1508,18 @@ en:
       tooltip: Edit custom background
       header: Custom Background Settings
       instructions:
-        info: Enter a tile URL template below.
         license_disclaimer: Make sure that the used background imagery is allowed to be used for mapping.
         license_faq: Read more.
         license_faq_url: "https://wiki.openstreetmap.org/wiki/FAQ#What_images_and_maps_may_I_use_to_make_maps_from?"
         wms:
-          tokens_label: "Supported WMS tokens:"
+          tokens_label: "Supported WMS tokens"
           tokens:
             proj: "`{proj}`: requested projection (`EPSG:3857` only)"
             wkid: "`{wkid}`: same as proj, but without the EPSG (`3857` only)"
             dimensions: "`{width}`, `{height}`: requested image dimensions (`256` only)"
             bbox: "`{bbox}`: requested bounding box (e.g. `minX,minY,maxX,maxY`)"
         tms:
-          tokens_label: "Supported TMS tokens:"
+          tokens_label: "Supported TMS tokens"
           tokens:
             xyz: "`{zoom}` or `{z}`, `{x}`, `{y}`: Z/X/Y tile coordinates"
             flipped_y: "`{-y}` or `{ty}`: flipped TMS-style Y coordinates"
@@ -1003,7 +1527,10 @@ en:
             quadtile: "`{u}`: quadtile (Bing) scheme"
             scale_factor: "`{@2x}` or `{r}`: resolution scale factor"
         example: "Example:"
+      name:
+        label: "Name (optional)"
       template:
+        label: Tile URL template
         placeholder: Enter a URL template
     custom_data:
       tooltip: Edit custom data layer
@@ -1019,6 +1546,49 @@ en:
     title: Preferences
     description: Preferences
     key: P
+    interface:
+      title: Interface
+      labels:
+        description: Show button labels
+        tooltip: Show the captions under the toolbar buttons.
+      scale:
+        description: Show the scale
+        tooltip: A scale bar at the bottom of the map. Click it to switch between metric and imperial units.
+      zoom:
+        description: Show the zoom buttons
+        tooltip: "The + and − buttons at the edge of the map. The shortcuts + and − always work."
+      zoom-to-selection:
+        description: Show "Zoom to this"
+        tooltip: The button that zooms to the selected features. Its shortcut always works.
+      geolocate:
+        description: Show "Show My Location"
+        tooltip: The button that centers the map on your location.
+      help:
+        description: Show the help button
+        tooltip: "The button that opens the help, with the editor's version and the links to report a bug. Its shortcut always works."
+    osm_server:
+      title: OpenStreetMap Server
+      live: Live
+      dev: Development server
+      hint: Which OpenStreetMap server the editor reads from and uploads to. Switching discards unsaved changes.
+    panels:
+      title: Panels
+    favorite_presets:
+      title: Favorite Presets & Shortcuts
+      empty_message: Click the star on a preset to add it to the favorites. Each favorite has a number shortcut.
+      explanation: Click the star on a preset to add it to the favorites. Each new favorite gets a free number shortcut, which stays the same until you change it here. Drag the list to change the order in the preset list.
+      add_tooltip: Add to favorites
+      remove_tooltip: Remove from favorites
+      shortcut_label: Shortcut number
+      config_tooltip: Open preferences to manage favorites
+      heart_tooltip_active: Remove favorite; Right-click to open preferences
+      heart_tooltip_inactive: Add favorite; Right-click to open preferences
+      flash:
+        draw: "Shortcut {shortcut}: add "
+        apply:
+          one: "Shortcut {shortcut}: changed {n} feature to "
+          other: "Shortcut {shortcut}: changed {n} features to "
+        switch: "Switching to shortcut {shortcut}"
     privacy:
       title: Privacy
       privacy_link: View the iD privacy policy
@@ -1261,6 +1831,43 @@ en:
     login: You must log in to change or comment on this note.
     upload_explanation: "Your comments will be publicly visible to all OpenStreetMap users."
     upload_explanation_with_user: "Your comments as {user} will be publicly visible to all OpenStreetMap users."
+  tilda_notes:
+    title: TILDA note
+    private: "Internal note: only members of this region in TILDA can see it."
+    new: New TILDA note
+    status:
+      open: open
+      closed: resolved
+    replies: "{count} replies"
+    loading: Loading the note…
+    save_failed: "The TILDA note was not saved. {reason}"
+    not_loaded: The note could not be loaded.
+    no_body: Only a subject was given.
+    subject: Subject
+    body: Note
+    body_placeholder: "Describe what you noticed (Markdown)."
+    reply: Reply
+    reply_placeholder: "Write a reply (Markdown)."
+    save_explanation: "Saved in TILDA at once, not with your OpenStreetMap changes. Not public."
+    save: Save note
+    save_reply: Save reply
+    resolve: Mark as resolved
+    resolve_reply: Reply and resolve
+    reopen: Reopen
+    reopen_reply: Reply and reopen
+    open_in_tilda: Open in TILDA
+    open_tilda: Open TILDA
+    add:
+      title: TILDA
+      osm_title: OSM
+      description: "Add an internal TILDA note. Only members of the project see it."
+    errors:
+      login: "Log in to OpenStreetMap to see and write TILDA notes."
+      invalid_osm_token: "OpenStreetMap did not accept your login. Log in again."
+      no_tilda_user: "Your OpenStreetMap account has no TILDA account yet. Sign in to TILDA once."
+      not_member: "You are not a member of this region in TILDA. Ask for access."
+      network: "TILDA could not be reached."
+      other: "TILDA: {message}"
   help:
     title: Help
     key: H
@@ -1438,7 +2045,7 @@ en:
       title: Street Level Photos
       intro: "Street level photos are useful for mapping traffic signs, businesses, and other details that you can't see from satellite and aerial images. The iD editor supports street level photos from a variety of different providers, such as [Panoramax](https://panoramax.fr), [Mapillary](https://www.mapillary.com), or [KartaView](https://kartaview.org)."
       using_h: "Using Street Level Photos"
-      using: "To use street level photos for mapping, open the {data_icon} **{map_data}** panel on the side of the map to enable or disable the available photo overlays."
+      using: "To use street level photos for mapping, open the {photos_icon} **{photos}** panel on the side of the map to enable or disable the available photo overlays."
       photos: "When enabled, the photo overlay displays a line along the sequence of photos. At higher zoom levels, a circle marks at each photo location, and at even higher zoom levels, a cone indicates the direction the camera was facing when the photo was taken."
       viewer: "When you select one of the photo locations, a photo viewer appears in the bottom corner of the map. The photo viewer contains controls to step forward and backward in the image sequence. It also shows the username of the person who captured the image, the date it was captured, and a link to view the image on the original site."
     gps:
@@ -1669,6 +2276,20 @@ en:
         message: "{feature} has no descriptive tags"
       relation_type:
         message: "{feature} is a relation without a type"
+    cycleway_oneway_wrong:
+      title: Bike Lane Direction Likely Wrong
+      tip: "Find roads where the “oneway” tag of a bike lane or cycle track on the side most likely says the wrong direction."
+      message: "{feature}: {tag} is likely wrong"
+      two_way_road:
+        reference: "“oneway” refers to the direction the way is drawn in. On the left side of a two-way road bicycles ride against that direction, so “{tag}” says they ride against the traffic next to them. Without the tag the usual direction is assumed: with the traffic on each side. Remove the tag, or set “no” if bicycles may ride both ways here."
+      contraflow:
+        reference: "Bicycles may ride against this one-way road, so its left side is the side for the opposite direction. “{tag}” says they ride with the one-way there. Without the tag the usual direction is assumed. Remove the tag, or set “no” if bicycles may ride both ways here."
+    cycleway_oneway_redundant:
+      title: Bike Lane Direction Not Needed
+      tip: "Find roads where the “oneway” tag of a bike lane or cycle track on the side only repeats the default."
+      message: "{feature}: {tag} is not needed"
+      default:
+        reference: "Without “{key}” bicycles are assumed to ride with the traffic on their side, which is what “{tag}” says. The tag is not needed and easy to get wrong, because “oneway” refers to the direction the way is drawn in."
     mutually_exclusive_tags:
       title: Contradictory Tags
       tip: "Find features that have contradictory tags."
@@ -1830,6 +2451,11 @@ en:
       remove_tag:
         title: Remove the tag
         annotation: Removed tag.
+      cycleway_oneway_both_ways:
+        title: Bicycles ride both ways here
+        annotation: Tagged a two-way bike lane.
+      cycleway_oneway_correct:
+        title: This is correct here
       remove_named_tag:
         title: 'Remove the "{tag}" tag'
         annotation: 'Removed "{tag}" tag.'
@@ -2199,6 +2825,9 @@ en:
         background: "Toggle background imagery pane"
         background_switch: "Switch back to last background"
         map_data: "Toggle map data pane"
+        map_display: "Toggle map display pane"
+        photos: "Toggle photos pane"
+        way_table: "Toggle way table"
         issues: "Toggle validation issues pane"
         preferences: "Toggle user preferences pane"
         fullscreen: "Enter full screen mode"
@@ -2248,6 +2877,9 @@ en:
         disconnect: "Disconnect selected features"
         extract: "Extract a point from a feature"
         extract_without_relations: "Extract a point from a feature, without extracting its relations"
+        extract_sidepath: "Extract a cycle track or sidewalk from a road (several choices: pick one from a menu)"
+        merge_sidepaths: "Merge a cycleway and a footway into one foot and cycle path"
+        extract_merge_sidepaths: "Extract the cycle track of a road and merge it with the sidewalk way next to it, in one step (several choices: pick one from a menu)"
         split: "Split features at the selected points"
         reverse: "Reverse selected features"
         move: "Move selected features"
@@ -2302,6 +2934,9 @@ en:
     coordinate_pair: "{latitude}, {longitude}"
     # translate the letters but leave the format the same
     year_month_day: "YYYY-MM-DD"
+  fields:
+    access:
+      add_type: Add a new mode of transport
   wikidata:
     identifier: "Identifier"
     label: "Label"

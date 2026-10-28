@@ -5,6 +5,8 @@ import { modeBrowse } from '../modes/browse';
 import { modeSelect } from '../modes/select';
 import { modeSelectData } from '../modes/select_data';
 import { modeSelectNote } from '../modes/select_note';
+import { modeSelectTildaNote } from '../modes/select_tilda_note';
+import { TildaNote } from '../tilda_notes/note';
 import { modeSelectError } from '../modes/select_error';
 import { OsmAbstractEntity, osmNote, QAItem } from '../osm';
 import { utilFastMouse } from '../util/util';
@@ -348,6 +350,12 @@ export function behaviorSelect(context) {
             context
                 .selectedNoteID(datum.id)
                 .enter(modeSelectNote(context, datum.id));
+
+        } else if (datum instanceof TildaNote && !isMultiselect) {
+            // targeting an internal TILDA note
+            context
+                .selectedNoteID(null)
+                .enter(modeSelectTildaNote(context, datum.id));
 
         } else if (datum instanceof QAItem && !isMultiselect) {
             // targeting an external QA issue

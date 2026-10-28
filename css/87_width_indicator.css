@@ -1,0 +1,24 @@
+/* Width preview on the map while a width field is hovered or focused */
+
+.data-layer.width-indicator {
+    pointer-events: none;
+}
+
+.width-indicator path.width-indicator-band {
+    /* same blue as the directional combo side indicator (css/20_map.css) */
+    fill: rgba(112, 146, 255, 0.3);
+    stroke: #7092ff;
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+}
+
+.width-indicator text.width-indicator-label {
+    fill: #fff;
+    stroke: #000;
+    stroke-width: 3px;
+    paint-order: stroke;
+    font-size: 12px;
+    font-weight: bold;
+    text-anchor: middle;
+    dominant-baseline: middle;
+}

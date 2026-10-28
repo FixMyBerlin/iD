@@ -528,6 +528,9 @@ export default {
             _currentFrame
                 .showPhotoFrame(wrap)
                 .selectPhoto(d, true);
+        }).catch(function() {
+            // nothing to show: close the viewer instead of leaving an empty box
+            that.hideViewer(context);
         });
 
         if (d.account_id) {
