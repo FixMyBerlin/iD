@@ -22,6 +22,23 @@ describe('lookupKeys', () => {
 });
 
 describe('requiredAttributes', () => {
+    it('traffic_sign: both directions count, a single direction leaves the other one missing', () => {
+        const state = (extra: Record<string, string>, base: Record<string, string>) => {
+            const tags = { ...base, ...extra };
+            return byId(requiredAttributes(resultFor(tags, 'self'), tags)).traffic_sign.state;
+        };
+        const bases = [
+            { highway: 'cycleway', bicycle: 'designated', foot: 'no' },
+            { highway: 'path', bicycle: 'designated', foot: 'designated' }
+        ];
+        for (const base of bases) {
+            expect(state({ 'traffic_sign:forward': 'DE:240', 'traffic_sign:backward': 'DE:240' }, base)).toBe('ok');
+            expect(state({ traffic_sign: 'DE:240' }, base)).toBe('ok');
+            expect(state({ 'traffic_sign:forward': 'DE:240' }, base)).toBe('missing');
+            expect(state({ 'traffic_sign:backward': 'DE:240' }, base)).toBe('missing');
+        }
+    });
+
     it('advisory lane on the right: side keys, surface from the road, parking inferred', () => {
         const tags = {
             highway: 'secondary', surface: 'asphalt', 'parking:right': 'lane',

@@ -84,6 +84,11 @@ type Rule = {
     alsoKeys?: string[];
     /** other keys TILDA reads for the same value, after `key` (`surface:colour` for `cycleway:surface:colour`); not written */
     readKeys?: string[];
+    /**
+     * Directional keys `<key>:forward` / `<key>:backward` that replace the plain key together; with
+     * only one of them the other direction is still missing
+     */
+    directions?: boolean;
     /** what TILDA reads for this attribute */
     tilda?: (ctx: RuleContext) => string | number | null | undefined;
     /** TILDA values that are only a guess, not tagged information */
@@ -274,7 +279,7 @@ function isSegregatedWay(ctx: RuleContext) {
 }
 
 const COMMON: Rule[] = [
-    { id: 'traffic_sign', key: 'traffic_sign', feeds: ['pflicht', 'fuehr', 'nutz_beschr'], options: trafficSignOptions, tilda: field('traffic_sign') },
+    { id: 'traffic_sign', key: 'traffic_sign', directions: true, feeds: ['pflicht', 'fuehr', 'nutz_beschr'], options: trafficSignOptions, tilda: field('traffic_sign') },
     { id: 'width', key: 'width', feeds: ['breite'], options: [], tilda: field('width'),
         // shared bus lanes: the lane width is only a side benefit (Radinfra FAQ)
         optional: ctx => ctx.category.startsWith('sharedBusLane'), unless: isSegregatedWay },
@@ -421,16 +426,22 @@ function evaluate(rules: Rule[], ctx: RuleContext): RequiredAttribute[] {
             const keysFor = (key: string) => rule.sourceFor
                 ? lookupKeys(rule.sourceFor, ctx.side, ctx.prefix).map(k => `source:${k}`)
                 : [key, ...(key === rule.key ? rule.readKeys ?? [] : [])].flatMap(k => lookupKeys(k, ctx.side, ctx.prefix));
-            const value = rule.alsoKeys ? summary(ctx, [rule.key, ...rule.alsoKeys])
+            const plain = rule.alsoKeys ? summary(ctx, [rule.key, ...rule.alsoKeys])
                 : keysFor(rule.key).map(k => ctx.tags[k]).find(v => v !== undefined);
-            const lookup = [...new Set(ownKeys.flatMap(keysFor))];
-            const tagged = ownKeys
+            const directionKeys = rule.directions && plain === undefined ? ['forward', 'backward'].map(d => `${rule.key}:${d}`) : [];
+            const directional = directionKeys.map(key => keysFor(key).find(k => ctx.tags[k] !== undefined));
+            const oneDirection = directional.filter(Boolean).length === 1;
+            const value = plain ?? (directional.every(Boolean) && directionKeys.length
+                ? directional.map((k, i) => `${directionKeys[i].split(':').pop()}=${ctx.tags[k!]}`).join(', ')
+                : undefined);
+            const lookup = [...new Set([...ownKeys, ...directionKeys].flatMap(keysFor))];
+            const tagged = [...ownKeys, ...directionKeys]
                 .map(key => keysFor(key).find(k => ctx.tags[k] !== undefined))
                 .filter((key, i, keys): key is string => !!key && keys.indexOf(key) === i)
                 .map(key => ({ key, value: ctx.tags[key] }));
             const derived = value === undefined ? rule.derivedFrom?.(ctx) : undefined;
             const assumed = value === undefined && !derived ? rule.assumed?.(ctx) : undefined;
-            const tilda = derived?.tilda ?? assumed ?? displayValue(rule.tilda?.(ctx));
+            const tilda = oneDirection ? undefined : derived?.tilda ?? assumed ?? displayValue(rule.tilda?.(ctx));
             const allOptions = [...(typeof rule.options === 'function' ? rule.options(ctx) : rule.options ?? [])];
             // a default: offer only the values that say something else
             const options = assumed === undefined ? allOptions
@@ -439,7 +450,8 @@ function evaluate(rules: Rule[], ctx: RuleContext): RequiredAttribute[] {
 
             let state: AttributeState;
             if (value !== undefined) {
-                const dropped = rule.tilda !== undefined && tilda === undefined;
+                // TILDA does not read the directional keys, so a missing TILDA value says nothing about them
+                const dropped = rule.tilda !== undefined && tilda === undefined && plain !== undefined;
                 const invalid = rule.tilda === undefined && rule.strict && !allOptions.includes(value);
                 state = dropped || invalid ? 'ignored' : 'ok';
             } else if (derived) {
