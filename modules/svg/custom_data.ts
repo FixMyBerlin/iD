@@ -17,6 +17,7 @@ import { PROGRESS_REFRESH_MS, progressFeatureID, progressTracker, type ProgressT
 import { services } from '../services';
 import { utilHashcode } from '../util';
 import { svgPath } from './helpers';
+import { geoScaleToZoom } from '../geo';
 import type { Projection } from '../geo/raw_mercator';
 
 /** A GeoJSON feature with the ids that iD's data hover and select code expects */
@@ -92,6 +93,9 @@ function featureClasses(d: DataFeature) {
         d.__layerID__ ?? ''
     ].filter(Boolean).join(' ');
 }
+
+/** Labels of the features from this zoom on */
+const LABEL_MIN_ZOOM = 18;
 
 function featureLabel(d: DataFeature): string | undefined {
     return d.properties?.desc ?? d.properties?.name;
@@ -349,8 +353,20 @@ export function svgCustomData(
     function drawLabels(group: d3.Selection<SVGGElement>, textClass: string, features: DataFeature[]) {
         const labelPath = d3_geoPath(projection);
 
+        // The labels are the features' `desc` or `name` (the track lines carry the street name).
+        // One per feature and tile piece covered the map with names when zoomed out: so only when
+        // zoomed in, and each text once in the view.
+        const zoom = geoScaleToZoom(projection.scale());
+        const seen = new Set<string>();
+        const labelled = zoom < LABEL_MIN_ZOOM ? [] : features.filter(feature => {
+            const text = featureLabel(feature);
+            if (!text || seen.has(text)) return false;
+            seen.add(text);
+            return true;
+        });
+
         const labels = group.selectAll<SVGTextElement, DataFeature>(`text.${textClass}`)
-            .data(features.filter(featureLabel), featureKey);
+            .data(labelled, featureKey);
 
         labels.exit()
             .remove();
