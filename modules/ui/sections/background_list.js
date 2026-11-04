@@ -60,6 +60,23 @@ export function uiSectionBackgroundList(context) {
             .merge(container);
 
 
+        // "Smooth image" checkbox: off = no browser interpolation when tiles are scaled
+        var smoothLabel = selection.selectAll('.background-smooth')
+            .data([0])
+            .enter()
+            .append('label')
+            .attr('class', 'background-smooth');
+        smoothLabel.append('input')
+            .attr('type', 'checkbox')
+            .on('change', function() {
+                context.background().smooth(this.checked);
+            });
+        smoothLabel.append('span')
+            .call(t.append('background.smooth_image'));
+        selection.select('.background-smooth input')
+            .property('checked', context.background().smooth());
+
+
         // "Info / Report a Problem" link
         selection.selectAll('.imagery-faq')
             .data([0])

@@ -34,6 +34,7 @@ export function rendererBackground(context) {
   let _contrast = 1;
   let _saturation = 1;
   let _sharpness = 1;
+  let _smooth = prefs('background-smooth') !== 'false';
 
 
   function ensureImageryIndex() {
@@ -144,7 +145,8 @@ export function rendererBackground(context) {
       .attr('class', 'layer layer-background')
       .merge(base);
 
-    base.style('filter', baseFilter || null);
+    base.style('filter', baseFilter || null)
+      .classed('no-smooth', !_smooth);
 
 
     let imagery = base.selectAll('.layer-imagery')
@@ -550,6 +552,15 @@ export function rendererBackground(context) {
   background.saturation = function(d) {
     if (!arguments.length) return _saturation;
     _saturation = d;
+    if (context.mode()) dispatch.call('change');
+    return background;
+  };
+
+
+  background.smooth = function(d) {
+    if (!arguments.length) return _smooth;
+    _smooth = !!d;
+    prefs('background-smooth', _smooth ? 'true' : 'false');
     if (context.mode()) dispatch.call('change');
     return background;
   };

@@ -3621,6 +3621,11 @@ div.full-screen > button:focus {
 
 /* Background / Map Data Settings
 ------------------------------------------------------- */
+.background-smooth {
+    display: block;
+    margin-bottom: 10px;
+}
+
 .imagery-faq {
     margin-bottom: 10px;
     white-space: nowrap;
@@ -4646,6 +4651,10 @@ li.issue-fix-item button:not(.actionable) .fix-icon {
 
 /* Raster Background Tiles
 ------------------------------------------------------- */
+.layer-background.no-smooth img.tile {
+    image-rendering: pixelated;
+}
+
 img.tile {
     position: absolute;
     transform-origin: 0 0;

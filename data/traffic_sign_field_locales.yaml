@@ -524,6 +524,7 @@ de:
     save_tooltip: Kürzel speichern
     cancel_tooltip: Abbrechen
   background:
+    smooth_image: Bild glätten
     custom_label: "Eigener: {val}"
     custom_add: Eigenen Hintergrund hinzufügen
     custom_delete:
@@ -727,6 +728,8 @@ de-CH:
   modes:
     add_note:
       description: "Öffentlichen OpenStreetMap-Hinweis hinzufügen. Jede:r kann ihn lesen."
+  background:
+    smooth_image: Bild glätten
   account:
     title: Konto
     tooltip: "Angemeldet als {user}"
