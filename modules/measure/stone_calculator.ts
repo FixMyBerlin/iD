@@ -5,6 +5,7 @@ import { t } from '../core/localizer';
 import { svgIcon } from '../svg/icon';
 import { uiTooltip } from '../ui/tooltip';
 import { STONE_SIZES_CM, formatStoneSource, parseStoneSource, stoneWidth, type StoneCount } from './stones';
+import { withoutRedundantPartSources } from '../width/part_widths';
 
 const BUTTON_CLASS = 'stone-calculator-button';
 const PANEL_CLASS = 'stone-calculator';
@@ -54,7 +55,7 @@ export function stoneCalculator(context: iD.Context) {
         const current = entity();
         const stones = stonesOf(key);
         if (!current || !(stones.count > 0) || !(stones.cm > 0)) return;
-        const tags = { ...current.tags, [key]: stoneWidth(stones), [sourceKeyOf(key)]: formatStoneSource(stones) };
+        const tags = withoutRedundantPartSources({ ...current.tags, [key]: stoneWidth(stones), [sourceKeyOf(key)]: formatStoneSource(stones) });
         context.perform(actionChangeTags(current.id, tags), t('inspector.stone_calculator.annotation'));
         _drafts.delete(key);
         refresh();

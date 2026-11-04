@@ -3,6 +3,7 @@ import { select as d3_select } from 'd3-selection';
 
 import { t } from '../../core/localizer';
 import { utilGetSetValue, utilNoAuto, utilRebind } from '../../util';
+import { inheritedPartSource, redundantPartSourceUpdate } from '../../width/part_widths';
 
 /**
  * A source field as pills (WORKDOC feature 25): one click on a common value ("Luftbild 2026",
@@ -13,11 +14,16 @@ export function uiFieldSourcePills(field: any) {
     const dispatch = d3_dispatch('change');
     const options: string[] = field.options ?? [];
     let _value: string | undefined;
+    /** `source:width` shown on a part source (`source:cycleway:width`) that has no value of its own */
+    let _inherited: string | undefined;
+    let _tags: TagsMulti = {};
     let _selection = d3_select<HTMLDivElement, number>(null!);
 
     function change(value: string | undefined) {
         const update: TagsUpdate = {};
         update[field.key] = value || undefined;
+        // the general source wins: no `source:cycleway:width` that repeats `source:width`
+        Object.assign(update, redundantPartSourceUpdate({ ..._tags, ...update } as Record<string, string | undefined>));
         dispatch.call('change', sourcePills, update);
     }
 
@@ -68,6 +74,8 @@ export function uiFieldSourcePills(field: any) {
     function update() {
         _selection.selectAll<HTMLButtonElement, string>('button.source-pill')
             .classed('active', d => d === _value)
+            .classed('inherited', d => d === _inherited)
+            .attr('title', d => d === _inherited ? t('inspector.source_pills.inherited') : null)
             .attr('aria-pressed', d => String(d === _value));
         // the input shows a value that is not one of the pills
         _selection.select<HTMLInputElement>('input.source-pills-other')
@@ -77,6 +85,8 @@ export function uiFieldSourcePills(field: any) {
     sourcePills.tags = function(tags: TagsMulti) {
         const value = tags[field.key];
         _value = typeof value === 'string' ? value : undefined;
+        _tags = tags;
+        _inherited = inheritedPartSource(field.key, tags as Record<string, string | undefined>);
         update();
         return sourcePills;
     };

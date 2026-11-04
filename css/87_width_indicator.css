@@ -106,3 +106,9 @@
     margin-top: 6px;
     padding: 0 10px;
 }
+
+/* a part source (`source:cycleway:width`) without its own value: the one of `source:width` */
+.ideditor .source-pills button.source-pill.inherited {
+    border-style: dashed;
+    border-color: var(--link-color);
+}

@@ -209,6 +209,15 @@ de:
         reference: "„oneway“ bezieht sich auf die Richtung, in der die Linie gezeichnet ist. Auf der linken Seite einer Straße mit Gegenverkehr fährt der Radverkehr gegen diese Richtung; „{tag}“ sagt also, er fährt dem Verkehr neben sich entgegen. Ohne das Tag gilt die übliche Richtung: auf jeder Seite mit dem Verkehr. Entferne das Tag, oder setze „no“, wenn Radfahrende hier in beide Richtungen fahren dürfen."
       contraflow:
         reference: "Radfahrende dürfen diese Einbahnstraße in Gegenrichtung befahren; die linke Seite ist damit die Seite für die Gegenrichtung. „{tag}“ sagt, dort wird in Richtung der Einbahnstraße gefahren. Ohne das Tag gilt die übliche Richtung. Entferne das Tag, oder setze „no“, wenn Radfahrende hier in beide Richtungen fahren dürfen."
+    width_part_whole:
+      title: Teil so breit wie der ganze Weg
+      tip: "Findet Geh- und Radwege, bei denen der Radweg- oder Gehweganteil so breit ist wie der ganze Weg."
+      message:
+        cycleway: "{feature}: Radweganteil ({meters} m) so breit wie der ganze Weg ({width} m)"
+        footway: "{feature}: Gehweganteil ({meters} m) so breit wie der ganze Weg ({width} m)"
+      reference:
+        cycleway: "„width“ ist der ganze Weg. Ist „{key}“ genauso breit, bleibt für den Fußverkehr nichts übrig. Wurde die Breite des ganzen Wegs beim Teil eingetragen? Entferne „{key}“ oder trage die echte Teilbreite ein (und „{other}“). Gehört die ganze Breite dem Radverkehr, ist das kein gemeinsamer Geh- und Radweg."
+        footway: "„width“ ist der ganze Weg. Ist „{key}“ genauso breit, bleibt für den Radverkehr nichts übrig. Wurde die Breite des ganzen Wegs beim Teil eingetragen? Entferne „{key}“ oder trage die echte Teilbreite ein (und „{other}“). Gehört die ganze Breite dem Fußverkehr, ist das kein gemeinsamer Geh- und Radweg."
     width_parts_sum:
       title: Breite ist nicht die Summe der Teile
       tip: "Findet gemeinsame Geh- und Radwege, bei denen „width“ nicht Radweg- plus Gehwegbreite ist."
@@ -226,6 +235,9 @@ de:
       message: "{feature}: Daneben verläuft ein Gehweg, „traffic_mode“ ist möglicherweise sinnvoll"
       reference: "Ein Gehweg verläuft in höchstens {meters} m Abstand zu diesem Radweg. Wenn nichts anderes dazwischen liegt, wähle im Feld „Verkehr daneben“ für diese Seite „Fußgänger“ (traffic_mode:left=foot oder traffic_mode:right=foot). Links und rechts beziehen sich auf die Richtung, in der die Linie gezeichnet ist."
     fix:
+      width_part_whole:
+        title: "{key} entfernen"
+        annotation: "{key} entfernt."
       width_parts_sum:
         title: "Breite auf {sum} m setzen (die Summe)"
         annotation: Breite auf die Summe der Teile gesetzt.
@@ -423,6 +435,7 @@ de:
       annotation: Breite aus gezählten Pflastersteinen gesetzt.
     source_pills:
       other: Andere Quelle…
+      inherited: Die Quelle der ganzen Breite gilt auch hier (kein eigenes Quellen-Tag nötig)
     part_width:
       toggle: Je Teil
       toggle_tooltip: "Breite von Radweg- und Gehweganteil, wenn sie getrennt sind"
@@ -827,6 +840,15 @@ de-CH:
         reference: "„oneway“ bezieht sich auf die Richtung, in der die Linie gezeichnet ist. Auf der linken Seite einer Straße mit Gegenverkehr fährt der Radverkehr gegen diese Richtung; „{tag}“ sagt also, er fährt dem Verkehr neben sich entgegen. Ohne das Tag gilt die übliche Richtung: auf jeder Seite mit dem Verkehr. Entferne das Tag, oder setze „no“, wenn Radfahrende hier in beide Richtungen fahren dürfen."
       contraflow:
         reference: "Radfahrende dürfen diese Einbahnstraße in Gegenrichtung befahren; die linke Seite ist damit die Seite für die Gegenrichtung. „{tag}“ sagt, dort wird in Richtung der Einbahnstraße gefahren. Ohne das Tag gilt die übliche Richtung. Entferne das Tag, oder setze „no“, wenn Radfahrende hier in beide Richtungen fahren dürfen."
+    width_part_whole:
+      title: Teil so breit wie der ganze Weg
+      tip: "Findet Geh- und Radwege, bei denen der Radweg- oder Gehweganteil so breit ist wie der ganze Weg."
+      message:
+        cycleway: "{feature}: Radweganteil ({meters} m) so breit wie der ganze Weg ({width} m)"
+        footway: "{feature}: Gehweganteil ({meters} m) so breit wie der ganze Weg ({width} m)"
+      reference:
+        cycleway: "„width“ ist der ganze Weg. Ist „{key}“ genauso breit, bleibt für den Fußverkehr nichts übrig. Wurde die Breite des ganzen Wegs beim Teil eingetragen? Entferne „{key}“ oder trage die echte Teilbreite ein (und „{other}“). Gehört die ganze Breite dem Radverkehr, ist das kein gemeinsamer Geh- und Radweg."
+        footway: "„width“ ist der ganze Weg. Ist „{key}“ genauso breit, bleibt für den Radverkehr nichts übrig. Wurde die Breite des ganzen Wegs beim Teil eingetragen? Entferne „{key}“ oder trage die echte Teilbreite ein (und „{other}“). Gehört die ganze Breite dem Fußverkehr, ist das kein gemeinsamer Geh- und Radweg."
     width_parts_sum:
       title: Breite ist nicht die Summe der Teile
       tip: "Findet gemeinsame Geh- und Radwege, bei denen „width“ nicht Radweg- plus Gehwegbreite ist."
@@ -839,6 +861,9 @@ de-CH:
       default:
         reference: "Ohne „{key}“ gilt: Der Radverkehr fährt mit dem Verkehr auf seiner Seite. Genau das sagt „{tag}“. Das Tag ist nicht nötig und leicht falsch zu setzen, weil sich „oneway“ auf die Richtung der gezeichneten Linie bezieht."
     fix:
+      width_part_whole:
+        title: "{key} entfernen"
+        annotation: "{key} entfernt."
       width_parts_sum:
         title: "Breite auf {sum} m setzen (die Summe)"
         annotation: Breite auf die Summe der Teile gesetzt.

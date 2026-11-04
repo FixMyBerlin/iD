@@ -59,3 +59,53 @@ export function partWidthMismatch(tags: TagsLike): PartWidthMismatch | undefined
 export function formatMeters(meters: number): string {
     return String(Math.round(meters * 100) / 100);
 }
+
+
+export type PartWidthWholeWay = { key: PartWidthKey; meters: number; width: number };
+
+/**
+ * A part (`cycleway:width` or `footway:width`) of a foot and cycle path is as wide as the whole
+ * way (or wider): nothing would be left for the other part. Usually the width of the whole way
+ * was copied into the part, or the way is no shared path. Undefined otherwise.
+ */
+export function partWidthWholeWay(tags: TagsLike): PartWidthWholeWay | undefined {
+    if (!PATH_HIGHWAYS.has(value(tags, 'highway') ?? '')) return undefined;
+    const width = parseOsmWidth(value(tags, 'width'));
+    if (width === undefined) return undefined;
+    for (const key of PART_WIDTH_KEYS) {
+        const meters = parseOsmWidth(value(tags, key));
+        if (meters !== undefined && meters >= width - TOLERANCE) return { key, meters, width };
+    }
+    return undefined;
+}
+
+/**
+ * The general source wins: `source:cycleway:width` (and `source:footway:width`) is not stored when
+ * it says the same as `source:width`. Returns the tags without those keys (a new object when
+ * something was dropped).
+ */
+export function withoutRedundantPartSources<T extends TagsLike>(tags: T): T {
+    const general = value(tags, 'source:width');
+    if (!general) return tags;
+    const redundant = PART_WIDTH_KEYS.map(key => `source:${key}`).filter(key => value(tags, key) === general);
+    if (!redundant.length) return tags;
+    const result = { ...tags };
+    for (const key of redundant) delete result[key];
+    return result;
+}
+
+/** The part source keys that `withoutRedundantPartSources` drops, as an update (`undefined` values) */
+export function redundantPartSourceUpdate(tags: TagsLike): Record<string, undefined> {
+    const kept = withoutRedundantPartSources(tags);
+    const update: Record<string, undefined> = {};
+    for (const key of Object.keys(tags)) {
+        if (!(key in kept)) update[key] = undefined;
+    }
+    return update;
+}
+
+/** The general source a part source inherits: `source:width` for `source:cycleway:width` */
+export function inheritedPartSource(key: string, tags: TagsLike): string | undefined {
+    if (!PART_WIDTH_KEYS.some(part => key === `source:${part}`)) return undefined;
+    return value(tags, key) ? undefined : value(tags, 'source:width');
+}

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { formatMeters, partWidthMismatch, partWidthMode } from '../../../modules/width/part_widths';
+import { formatMeters, inheritedPartSource, partWidthMismatch, partWidthMode, partWidthWholeWay, redundantPartSourceUpdate, withoutRedundantPartSources } from '../../../modules/width/part_widths';
 
 describe('partWidthMode', () => {
     it('always shows the parts on a segregated path or when a part is tagged', () => {
@@ -42,5 +42,45 @@ describe('partWidthMismatch', () => {
     it('writes meters without trailing zeros', () => {
         expect(formatMeters(4.5)).toBe('4.5');
         expect(formatMeters(4.499999)).toBe('4.5');
+    });
+});
+
+
+describe('partWidthWholeWay', () => {
+    const path = { highway: 'path', bicycle: 'designated', foot: 'designated', segregated: 'yes' };
+
+    it('finds a part as wide as the whole path (way 1304329604: 1.7 and 1.7)', () => {
+        expect(partWidthWholeWay({ ...path, width: '1.7', 'cycleway:width': '1.7' }))
+            .toEqual({ key: 'cycleway:width', meters: 1.7, width: 1.7 });
+        expect(partWidthWholeWay({ ...path, width: '2', 'footway:width': '2.5' })?.key).toBe('footway:width');
+    });
+
+    it('accepts a part narrower than the whole, and roads', () => {
+        expect(partWidthWholeWay({ ...path, width: '3', 'cycleway:width': '1.7' })).toBeUndefined();
+        expect(partWidthWholeWay({ ...path, 'cycleway:width': '1.7' })).toBeUndefined();
+        expect(partWidthWholeWay({ highway: 'residential', width: '6', 'cycleway:width': '6' })).toBeUndefined();
+    });
+});
+
+describe('redundant part sources', () => {
+    const infra3d = 'Messung aus Punktwolke (Infra3DViewer)';
+
+    it('drops source:cycleway:width when it says the same as source:width', () => {
+        const tags = { width: '1.7', 'source:width': infra3d, 'cycleway:width': '1.7', 'source:cycleway:width': infra3d };
+        expect(withoutRedundantPartSources(tags)).toEqual({ width: '1.7', 'source:width': infra3d, 'cycleway:width': '1.7' });
+        expect(redundantPartSourceUpdate(tags)).toEqual({ 'source:cycleway:width': undefined });
+    });
+
+    it('keeps a different part source, and a part source without a general one', () => {
+        const tags = { 'source:width': 'Luftbild 2026', 'source:cycleway:width': infra3d };
+        expect(withoutRedundantPartSources(tags)).toBe(tags);
+        const only = { 'source:cycleway:width': infra3d };
+        expect(withoutRedundantPartSources(only)).toBe(only);
+    });
+
+    it('shows the general source on a part without its own', () => {
+        expect(inheritedPartSource('source:cycleway:width', { 'source:width': infra3d })).toBe(infra3d);
+        expect(inheritedPartSource('source:cycleway:width', { 'source:width': infra3d, 'source:cycleway:width': 'x' })).toBeUndefined();
+        expect(inheritedPartSource('source:width', { 'source:width': infra3d })).toBeUndefined();
     });
 });

@@ -1012,6 +1012,7 @@ en:
       annotation: Set the width from counted paving stones.
     source_pills:
       other: Other source…
+      inherited: The source of the whole width applies here, too (no own source tag needed)
     part_width:
       toggle: Per part
       toggle_tooltip: "Widths of the cycleway and the footway part, if they are separated"
@@ -2318,6 +2319,15 @@ en:
         reference: "“oneway” refers to the direction the way is drawn in. On the left side of a two-way road bicycles ride against that direction, so “{tag}” says they ride against the traffic next to them. Without the tag the usual direction is assumed: with the traffic on each side. Remove the tag, or set “no” if bicycles may ride both ways here."
       contraflow:
         reference: "Bicycles may ride against this one-way road, so its left side is the side for the opposite direction. “{tag}” says they ride with the one-way there. Without the tag the usual direction is assumed. Remove the tag, or set “no” if bicycles may ride both ways here."
+    width_part_whole:
+      title: Part as Wide as the Whole Path
+      tip: "Find foot and cycle paths where the cycleway or footway part is as wide as the whole path."
+      message:
+        cycleway: "{feature}: the cycleway part ({meters} m) is as wide as the whole path ({width} m)"
+        footway: "{feature}: the footway part ({meters} m) is as wide as the whole path ({width} m)"
+      reference:
+        cycleway: "“width” is the whole path. With “{key}” as wide as that, nothing is left for walking. Was the width of the whole path entered for the part? Remove “{key}” or tag the real part width (and “{other}”). If the whole width is for bicycles, this is no shared foot and cycle path."
+        footway: "“width” is the whole path. With “{key}” as wide as that, nothing is left for cycling. Was the width of the whole path entered for the part? Remove “{key}” or tag the real part width (and “{other}”). If the whole width is for walking, this is no shared foot and cycle path."
     width_parts_sum:
       title: Width Is Not the Sum of Its Parts
       tip: "Find shared foot and cycle paths where “width” is not the cycleway width plus the footway width."
@@ -2495,6 +2505,9 @@ en:
       remove_tag:
         title: Remove the tag
         annotation: Removed tag.
+      width_part_whole:
+        title: "Remove {key}"
+        annotation: "Removed {key}."
       width_parts_sum:
         title: "Set the width to {sum} m (the sum)"
         annotation: Set the width to the sum of its parts.
