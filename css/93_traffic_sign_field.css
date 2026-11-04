@@ -5,13 +5,17 @@
 .traffic-sign-plan {
     flex-basis: 100%;
     width: 100%;
-    padding: 8px 10px;
+    padding: 6px 10px;
     border-top: 1px solid var(--border-color);
     background: var(--bg-color-2);
 }
 .traffic-sign-plan-header {
     font-size: 12px;
-    font-weight: bold;
+    color: var(--passive-text-color);
+    cursor: pointer;
+}
+.traffic-sign-plan[open] .traffic-sign-plan-header {
+    color: var(--text-color);
 }
 
 /* below an empty traffic sign field: "No sign here" (sets `none`) */

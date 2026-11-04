@@ -56,3 +56,24 @@
 .tag-plan .tagDiff-cell-remove {
     background: var(--error-bg-color);
 }
+
+/* one tag with its own small apply button (traffic sign suggestions) */
+.tag-plan .tag-plan-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.ideditor .tag-plan button.tag-plan-apply-row {
+    flex: none;
+    width: auto;
+    height: 20px;
+    padding: 0 8px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    background: transparent;
+    color: var(--text-color);
+    font-size: 11px;
+}
+.ideditor .tag-plan button.tag-plan-apply-row:hover {
+    background: var(--bg-color-3);
+}

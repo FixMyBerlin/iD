@@ -385,8 +385,8 @@ de:
       label: Hier steht kein Schild
       tooltip: "Setzt {tag}: geprüft, es steht kein Schild"
     traffic_sign_plan:
-      header: "Das Verkehrsschild legt diese Tags nahe:"
-      apply: Diese Tags übernehmen
+      summary: "Vorschläge aus dem Verkehrsschild ({count})"
+      apply_row: Übernehmen
       cause:
         sign: "Folgt aus {sign}"
         normalize: Die übliche Schreibweise für dieses Schild

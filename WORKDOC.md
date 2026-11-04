@@ -1571,6 +1571,7 @@ Left as it is (iD in general): a full redraw at z17 costs 250–500 ms and runs 
 
 ## Progress log
 
+- 2026-11-04: Traffic sign field: the tags the sign suggests are folded by default ("Vorschläge aus dem Verkehrsschild (2)", the count is the tags that would change), and each tag has its own small "Übernehmen" button instead of one big button for all. They did not always match the project's other rules and confused mappers.
 - 2026-11-04: Custom data layers: the labels (the features' `desc` or `name`, e.g. the street name of the track lines) only from zoom 18, and each text once in the view. Before, every feature and tile piece had its own label, which covered the map when zoomed out.
 - 2026-10-20: Extract and merge in one click (feature 38, ⌘G).
 - 2026-10-15: Local performance harness (feature 37) and four performance fixes found with it: read-only styling without per-element transparency, read-only targets with an inline style, no full redraw from iD's empty data layer on our vector tiles, no double vertex draw with a selection.

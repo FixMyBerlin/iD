@@ -119,23 +119,30 @@ export function uiFieldTrafficSign(field: unknown, context: iD.Context) {
         }
 
         // not `traffic-sign-suggestions`: the package's own (switched off) suggestions use that class
-        // and would remove this box
-        let box = _selection.selectAll<HTMLDivElement, number>('.traffic-sign-plan')
+        // and would remove this box.
+        // Folded by default: the suggestions do not always match the rest of the project's rules, so
+        // they are only a hint. The count is the tags that would change; each row applies on its own.
+        let box = _selection.selectAll<HTMLDetailsElement, number>('.traffic-sign-plan')
             .data(rows.length ? [0] : []);
         box.exit().remove();
         const boxEnter = box.enter()
-            .append('div')
+            .append('details')
             .attr('class', 'traffic-sign-plan');
-        boxEnter.append('div')
-            .attr('class', 'traffic-sign-plan-header')
-            .call(t.append('inspector.traffic_sign_plan.header'));
+        boxEnter.append('summary')
+            .attr('class', 'traffic-sign-plan-header');
         box = box.merge(boxEnter);
+
+        const changes = rows.filter(row => row.kind !== 'conflict').length;
+        box.select('.traffic-sign-plan-header')
+            .text(t('inspector.traffic_sign_plan.summary', { count: changes }));
 
         drawTagPlan(box, rows.length ? {
             rows,
-            canApply: true,
-            applyLabel: t('inspector.traffic_sign_plan.apply'),
-            onApply: () => dispatch.call('change', trafficSign, tagPlanChanges(rows))
+            canApply: false,
+            applyLabel: '',
+            onApply: () => {},
+            onApplyRow: row => dispatch.call('change', trafficSign, tagPlanChanges([row])),
+            applyRowLabel: t('inspector.traffic_sign_plan.apply_row')
         } : undefined);
     }
 

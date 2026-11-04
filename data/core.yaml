@@ -844,8 +844,8 @@ en:
       label: No sign here
       tooltip: "Sets {tag}: checked, there is no sign"
     traffic_sign_plan:
-      header: "The traffic sign suggests these tags:"
-      apply: Apply these tags
+      summary: "Suggestions from the traffic sign ({count})"
+      apply_row: Apply
       cause:
         sign: "{sign} implies this"
         normalize: The usual way to write this sign

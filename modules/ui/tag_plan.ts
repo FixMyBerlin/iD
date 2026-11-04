@@ -24,6 +24,9 @@ export type TagPlanView = {
      * `- key=old` / `+ key=new` row each, with the reason as tooltip. Else a list with the reason below each tag.
      */
     diff?: boolean;
+    /** a small button per tag row that applies only that row (list mode) */
+    onApplyRow?: (row: TagPlanRow) => void;
+    applyRowLabel?: string;
 };
 
 
@@ -76,7 +79,15 @@ export function drawTagPlan<E extends HTMLElement>(selection: d3.Selection<E>, p
                 return;
             }
             const tag = d.kind === 'change' ? `${d.key}: ${d.from} → ${d.value}` : `${d.key}=${d.value}`;  // remove shows the old tag
-            li.append('code').text(tag);
+            const line = li.append('div').attr('class', 'tag-plan-line');
+            line.append('code').text(tag);
+            if (plan.onApplyRow) {
+                line.append('button')
+                    .attr('type', 'button')
+                    .attr('class', 'tag-plan-apply-row')
+                    .text(plan.applyRowLabel ?? '')
+                    .on('click', () => plan.onApplyRow!(d));
+            }
             li.append('span').attr('class', 'tag-plan-reason').text(d.reason);
         });
 
