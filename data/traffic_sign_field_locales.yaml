@@ -617,6 +617,9 @@ de:
     error: "Der Fortschritt konnte nicht gespeichert werden: {reason}"
     already_done: "{user} hat diese Linie inzwischen als erledigt markiert."
     already_open: Jemand hat die Markierung inzwischen weggenommen.
+    flash:
+      done: Als erledigt markiert
+      not_done: Markierung entfernt
     disabled:
       logged_out: Melde dich bei OpenStreetMap an, um den Fortschritt zu ändern.
       unavailable: Die Fortschrittsdatenbank war nicht erreichbar. Ein Klick versucht es erneut.

@@ -69,7 +69,10 @@ export function uiProgressTracking(context: iD.Context) {
         // view was loaded, nothing is written and we say so
         (done ? tracker.setDone(featureID, bbox!) : tracker.setNotDone(featureID))
             .then(change => {
-                if (change.result !== 'already') return;
+                if (change.result !== 'already') {
+                    flash(t(done ? 'progress_tracking.flash.done' : 'progress_tracking.flash.not_done'), '#iD-icon-apply');
+                    return;
+                }
                 flash(change.mark
                     ? t('progress_tracking.already_done', { user: change.mark.user })
                     : t('progress_tracking.already_open'), '#iD-icon-info');
@@ -109,11 +112,15 @@ export function uiProgressTracking(context: iD.Context) {
         if (!current) return;
 
         section.select('.progress-tracking-title').text(current.name);
-        section.select('.progress-done')
+        const key = uiCmd(progressTrackingKey());
+        const button = section.select('.progress-done')
             .classed('active', !!current.mark)
             .attr('aria-checked', String(!!current.mark))
-            .attr('title', `${t(current.mark ? 'progress_tracking.undo_tooltip' : 'progress_tracking.done_tooltip')} (${uiCmd(progressTrackingKey())})`)
-            .text(`${current.mark ? '✓ ' : ''}${t('progress_tracking.done')}`)
+            .attr('aria-keyshortcuts', 'Shift+D')
+            .attr('title', `${t(current.mark ? 'progress_tracking.undo_tooltip' : 'progress_tracking.done_tooltip')} (${key})`)
+            .text(`${current.mark ? '✓ ' : ''}${t('progress_tracking.done')}`);
+        button.append('kbd').attr('class', 'progress-done-key').text(key);
+        button
             // "unavailable" is only a note: the last request failed, a click tries again
             .property('disabled', (!!current.disabled && current.disabled !== 'unavailable') || _saving);
 

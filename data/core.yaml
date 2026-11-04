@@ -1372,6 +1372,9 @@ en:
     error: "The progress could not be saved: {reason}"
     already_done: "{user} marked this line as done in the meantime."
     already_open: Someone took the mark away in the meantime.
+    flash:
+      done: Marked as done
+      not_done: Mark taken away
     disabled:
       logged_out: Log in to OpenStreetMap to change the progress.
       unavailable: The progress database could not be reached. A click tries again.
