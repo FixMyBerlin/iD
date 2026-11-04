@@ -281,8 +281,18 @@ const SEGREGATED_WIDTH: Rule[] = [
         options: WIDTH_SOURCE_OPTIONS, when: widthEdited('cycleway:width') }
 ];
 
+const FOOT_ALLOWED = new Set(['designated', 'yes', 'permissive']);
+
+/**
+ * Footway and cycleway parts on this one way: a path or footway, or a cycleway that pedestrians
+ * may use. A `highway=cycleway` without foot access is the cycleway part alone (the footway is a
+ * separate way, `traffic_mode:right=foot`, or a DE:241 cycleway): its `width` is the cycleway width
+ * (TILDA reads `cycleway:width` before `width` on paths, so `width` is enough there).
+ */
 function isSegregatedWay(ctx: RuleContext) {
-    return ctx.side === 'self' && ctx.category.startsWith('footAndCyclewaySegregated');
+    if (ctx.side !== 'self' || !ctx.category.startsWith('footAndCyclewaySegregated')) return false;
+    if (ctx.tags.highway !== 'cycleway') return true;
+    return FOOT_ALLOWED.has(ctx.tags.foot ?? '');
 }
 
 const COMMON: Rule[] = [
