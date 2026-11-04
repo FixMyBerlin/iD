@@ -19,6 +19,12 @@ describe('partWidthMode', () => {
         expect(partWidthMode({ highway: 'cycleway' })).toBeUndefined();
         expect(partWidthMode({ highway: 'footway' })).toBeUndefined();
     });
+
+    it('has no parts on a shared path, or on a cycleway whose footway is apart (way 1304329604)', () => {
+        expect(partWidthMode({ highway: 'path', bicycle: 'designated', foot: 'designated', segregated: 'no' })).toBeUndefined();
+        expect(partWidthMode({ highway: 'cycleway', segregated: 'yes', traffic_sign: 'DE:241-30' })).toBeUndefined();
+        expect(partWidthMode({ highway: 'cycleway', foot: 'designated', segregated: 'yes' })).toBe('always');
+    });
 });
 
 describe('partWidthMismatch', () => {

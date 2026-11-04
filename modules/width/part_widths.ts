@@ -23,18 +23,23 @@ const value = (tags: TagsLike, key: string) => {
 
 /**
  * - `always`: the part widths are shown (a segregated path, or a part width is tagged)
- * - `optional`: a path for walking and cycling; the parts can be shown with a button
+ * - `optional`: a path for walking and cycling without `segregated`; the parts can be shown with a button
  * - `undefined`: no parts
  */
 export function partWidthMode(tags: TagsLike): 'always' | 'optional' | undefined {
     if (PART_WIDTH_KEYS.some(key => value(tags, key) !== undefined)) return 'always';
     if (!PATH_HIGHWAYS.has(value(tags, 'highway') ?? '')) return undefined;
-    if (value(tags, 'segregated') === 'yes') return 'always';
 
+    // one way for walking and cycling; a cycleway with the footway apart has no parts
     const highway = value(tags, 'highway');
     const bicycle = highway === 'cycleway' || ALLOWED.has(value(tags, 'bicycle') ?? '');
     const foot = highway === 'footway' || ALLOWED.has(value(tags, 'foot') ?? '');
-    return bicycle && foot ? 'optional' : undefined;
+    if (!bicycle || !foot) return undefined;
+
+    // segregated: parts; shared: one width for walking and cycling, no parts
+    if (value(tags, 'segregated') === 'yes') return 'always';
+    if (value(tags, 'segregated') === 'no') return undefined;
+    return 'optional';
 }
 
 export type PartWidthMismatch = {

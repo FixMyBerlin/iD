@@ -281,18 +281,32 @@ const SEGREGATED_WIDTH: Rule[] = [
         options: WIDTH_SOURCE_OPTIONS, when: widthEdited('cycleway:width') }
 ];
 
-const FOOT_ALLOWED = new Set(['designated', 'yes', 'permissive']);
+const ACCESS_ALLOWED = new Set(['designated', 'yes', 'permissive']);
+
+/** One way in the side space for walking and cycling (not a cycleway with the footway apart) */
+function carriesFootAndBicycle(tags: Tags) {
+    const allowed = (key: string) => ACCESS_ALLOWED.has(tags[key] ?? '');
+    switch (tags.highway) {
+        case 'path': return tags.foot !== 'no' && tags.bicycle !== 'no';
+        case 'footway': return allowed('bicycle');
+        case 'cycleway': return allowed('foot');
+        default: return false;
+    }
+}
 
 /**
- * Footway and cycleway parts on this one way: a path or footway, or a cycleway that pedestrians
- * may use. A `highway=cycleway` without foot access is the cycleway part alone (the footway is a
- * separate way, `traffic_mode:right=foot`, or a DE:241 cycleway): its `width` is the cycleway width
- * (TILDA reads `cycleway:width` before `width` on paths, so `width` is enough there).
+ * Footway and cycleway parts of one way: the way carries both modes, and they are segregated.
+ * Only then are there part values (`cycleway:width`, `cycleway:surface:colour`); a shared way
+ * (`segregated=no`) has one width for both. `segregated` decides; when it is missing, the TILDA
+ * category does (e.g. a DE:241 sign). A `highway=cycleway` without foot access is the cycleway
+ * part alone (the footway is a separate way, `traffic_mode:right=foot`): its `width` is the
+ * cycleway width, and TILDA reads `cycleway:width` before `width` on paths anyway.
  */
 function isSegregatedWay(ctx: RuleContext) {
-    if (ctx.side !== 'self' || !ctx.category.startsWith('footAndCyclewaySegregated')) return false;
-    if (ctx.tags.highway !== 'cycleway') return true;
-    return FOOT_ALLOWED.has(ctx.tags.foot ?? '');
+    if (ctx.side !== 'self' || !carriesFootAndBicycle(ctx.tags)) return false;
+    if (ctx.tags.segregated === 'yes') return true;
+    if (ctx.tags.segregated === 'no') return false;
+    return ctx.category.startsWith('footAndCyclewaySegregated');
 }
 
 const COMMON: Rule[] = [

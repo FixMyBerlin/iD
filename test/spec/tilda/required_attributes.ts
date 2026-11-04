@@ -384,6 +384,25 @@ describe('roadAttributes', () => {
         expect(attributes.cycleway_width.state).toBe('missing');
     });
 
+    it('shared foot and cycle path (segregated=no): one width for both, no part width', () => {
+        const tags = { highway: 'path', bicycle: 'designated', foot: 'designated', segregated: 'no', is_sidepath: 'yes', traffic_sign: 'DE:240' };
+        const attributes = byId(requiredAttributes(resultFor(tags, 'self'), tags));
+        expect(attributes.cycleway_width).toBeUndefined();
+        expect(attributes.width.state).toBe('missing');
+    });
+
+    it('segregated decides over the category: DE:241 sign, but segregated=no tagged: no part width', () => {
+        const tags = { highway: 'path', segregated: 'no', is_sidepath: 'yes', traffic_sign: 'DE:241-30', width: '3' };
+        const attributes = byId(requiredAttributes(resultFor(tags, 'self'), tags, 'footAndCyclewaySegregated_adjoining'));
+        expect(attributes.cycleway_width).toBeUndefined();
+    });
+
+    it('footway with bicycle=designated and segregated=yes: part width', () => {
+        const tags = { highway: 'footway', bicycle: 'designated', foot: 'designated', segregated: 'yes', is_sidepath: 'yes' };
+        const attributes = byId(requiredAttributes(resultFor(tags, 'self'), tags));
+        expect(attributes.cycleway_width.state).toBe('missing');
+    });
+
     it('mixed traffic: no width and no width source (Leistungsbeschreibung, attribute 15)', () => {
         const attributes = byId(roadAttributes({ highway: 'residential', width: '7.5' }, new Set(['width'])));
         expect(attributes.width).toBeUndefined();
