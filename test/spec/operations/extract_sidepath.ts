@@ -1,6 +1,7 @@
 import { select as d3_select } from 'd3-selection';
 import { operationsExtractSidepath } from '../../../modules/operations/extract_sidepath';
 import { operationsExtractMergeSidepaths } from '../../../modules/operations/extract_merge_sidepaths';
+import { operationsExtractMenu } from '../../../modules/operations/extract_menu';
 import { operationsMergeSidepaths } from '../../../modules/operations/merge_sidepaths';
 import { loadSignRecommender, loadedSignRecommender } from '../../../modules/traffic_sign/recommender';
 import type { Operation } from '../../../modules/core/history';
@@ -121,6 +122,67 @@ describe('sidepath operations: keyboard shortcuts', () => {
             const operations = operationsExtractSidepath(fake, ['w1']);
             await keyOperation(operations).interrupts!.choose();
             expect(showEditMenu.mock.calls[0][0]).toEqual([100, 100]);
+        });
+    });
+
+    describe('extract menu', () => {
+        function menuKeys(menu: Operation) {
+            const behavior = menu.behavior as { which?(): Operation };
+            return behavior;
+        }
+
+        it('is one entry with the groups both sides, left only, right only', () => {
+            const { fake } = context(roadGraph({ highway: 'residential', 'cycleway:both': 'track', 'sidewalk:both': 'yes' }));
+            const operations = operationsExtractMenu(fake, ['w1']);
+            expect(operations).toHaveLength(1);
+            const [menu] = operations;
+            expect(menu.id).toBe('extract_menu');
+            expect(menu.flyout!.map(group => group.id)).toEqual(['both', 'left', 'right']);
+            const both = menu.flyout![0].operations;
+            // both cycle tracks, both sidewalks, both as one path, both extracted and merged
+            expect(both.map(operation => operation.id)).toEqual(['extract_sidepath', 'extract_sidepath', 'extract_sidepath', 'extract_merge_sidepaths']);
+            expect(menu.flyout![1].operations.every(operation => operation.side === 'left')).toBe(true);
+            expect(menu.flyout![2].operations.every(operation => operation.side === 'right')).toBe(true);
+            expect(menuKeys(menu)).toBeTruthy();
+        });
+
+        it('has only the sides there are: no "both" group for one cycle track', () => {
+            const { fake } = context(roadGraph({ highway: 'residential', 'cycleway:right': 'track' }));
+            const [menu] = operationsExtractMenu(fake, ['w1']);
+            expect(menu.flyout!.map(group => group.id)).toEqual(['right']);
+        });
+
+        it('is not offered for a road without anything to extract', () => {
+            const { fake } = context(roadGraph({ highway: 'residential' }));
+            expect(operationsExtractMenu(fake, ['w1'])).toEqual([]);
+        });
+
+        it('extracts both sides in one undo step with ⌘E', () => {
+            const container = d3_select('body').append('div');
+            const real = iD.coreContext().assetPath('../dist/').init().container(container as never);
+            container.append('div').attr('class', 'main-map').call(real.map() as never).append('div').attr('class', 'inspector-wrap');
+            real.enter(iD.modeBrowse(real) as never);
+            // with an annotation: undo stops here
+            real.perform(...roadEntities({ highway: 'residential', 'cycleway:both': 'track' }).map(entity => iD.actionAddEntity(entity)), 'setup' as never);
+
+            try {
+                const [menu] = operationsExtractMenu(real, ['w1']);
+                const both = menu.flyout![0].operations[0];
+                expect(both.disabled()).toBe(false);
+                const before = real.history().difference().summary().length;
+                const undoBefore = real.history().undoAnnotation();
+                both();
+                const tags = real.graph().entity('w1').tags;
+                expect(tags['cycleway:both']).toBe('separate');
+                expect(real.history().difference().summary().length).toBeGreaterThan(before);
+                expect(real.selectedIDs()).toHaveLength(2);
+                real.undo();
+                expect(real.history().undoAnnotation()).toBe(undoBefore);
+                expect(real.graph().entity('w1').tags['cycleway:both']).toBe('track');
+            } finally {
+                (real.mode() as unknown as { exit(): void }).exit();
+                container.remove();
+            }
         });
     });
 

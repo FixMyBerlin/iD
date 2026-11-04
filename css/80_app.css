@@ -6594,3 +6594,70 @@ textarea:focus:dir(rtl)::-webkit-resizer {
     width: 100px;
     color: var(--link-color);
 }
+
+/* Radnetz fork: an entry of the edit menu with a flyout (extract: both sides / left / right) */
+.edit-menu-item.flyout-open {
+    background: var(--bg-color-hover, #f1f1f1);
+}
+.edit-menu-item .flyout-caret {
+    position: absolute;
+    right: 3px;
+    font-size: 11px;
+    line-height: 1;
+    opacity: 0.6;
+    pointer-events: none;
+}
+.edit-menu-item {
+    position: relative;
+}
+.edit-menu-flyout {
+    position: absolute;
+    left: calc(100% + 4px);
+    min-width: 240px;
+    max-width: 340px;
+    padding: 4px 0;
+    background: var(--bg-color);
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    z-index: 1;
+}
+.edit-menu-flyout.flyout-left {
+    left: auto;
+    right: calc(100% + 4px);
+}
+.edit-menu-flyout-group + .edit-menu-flyout-group {
+    border-top: 1px solid #ddd;
+    margin-top: 4px;
+    padding-top: 4px;
+}
+.edit-menu-flyout-title {
+    padding: 2px 12px;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #777;
+}
+.edit-menu-flyout-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+    height: auto;
+    min-height: 28px;
+    padding: 4px 12px;
+    border-radius: 0;
+    text-align: start;
+    font-weight: normal;
+    line-height: 1.25;
+}
+.edit-menu-flyout-item .label {
+    flex: 1 1 auto;
+}
+.edit-menu-flyout-item.disabled {
+    color: #aaa;
+    cursor: not-allowed;
+}
+.edit-menu-flyout-item kbd {
+    flex: none;
+}

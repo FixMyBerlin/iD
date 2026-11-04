@@ -128,6 +128,7 @@ function extractMergeOperation(context: iD.Context, wayID: WayId, choice: Choice
 
     operation.icon = () => '#iD-operation-extract';
     operation.id = 'extract_merge_sidepaths';
+    operation.side = choice;
     operation.keys = [];
     operation.title = t.append(`operations.extract_merge_sidepaths.title.${choice}`);
 
@@ -141,7 +142,7 @@ function extractMergeOperation(context: iD.Context, wayID: WayId, choice: Choice
  * in one click, for roads whose sidewalk is a separate way already. ⌘G always runs the "both
  * sides" entry (the only side's entry if the road has a cycle track on one side only), no menu.
  */
-export function operationsExtractMergeSidepaths(context: iD.Context, selectedIDs: string[]): Operation[] {
+export function operationsExtractMergeSidepaths(context: iD.Context, selectedIDs: string[], options: { keys?: boolean } = {}): Operation[] {
     if (selectedIDs.length !== 1 || !selectedIDs[0].startsWith('w')) return [];
     const wayID = selectedIDs[0] as WayId;
     const way = context.hasEntity(wayID);
@@ -160,7 +161,9 @@ export function operationsExtractMergeSidepaths(context: iD.Context, selectedIDs
     const operations = choices.map(choice => extractMergeOperation(context, wayID, choice));
     // the behavior is installed and removed with the operation list: hang it on the first entry.
     // The key runs the last entry only ("both", or the only side): no choice
-    operations[0].behavior = behaviorOperation(context)
-        .which(sidepathKeyOperation(context, wayID, operations.slice(-1), 'extract_merge_sidepaths', uiCmd('⌘G')));
+    if (options.keys !== false) {
+        operations[0].behavior = behaviorOperation(context)
+            .which(sidepathKeyOperation(context, wayID, operations.slice(-1), 'extract_merge_sidepaths', uiCmd('⌘G')));
+    }
     return operations;
 }

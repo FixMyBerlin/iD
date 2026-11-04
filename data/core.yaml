@@ -66,18 +66,26 @@ en:
         cycleway:
           right: Extract right cycle track
           left: Extract left cycle track
+          both: Extract both cycle tracks
         protected:
           right: Extract right protected bike lane
           left: Extract left protected bike lane
         sidewalk:
           right: Extract right sidewalk
           left: Extract left sidewalk
+          both: Extract both sidewalks
         path:
           right: Extract right cycle track and sidewalk as one path
           left: Extract left cycle track and sidewalk as one path
+          both: Extract both cycle tracks and sidewalks as one path each
       side:
         right: right
         left: left
+      annotation_both:
+        cycleway: Extracted both cycle tracks into separate ways.
+        sidewalk: Extracted both sidewalks into separate ways.
+        path: Extracted both cycle tracks and sidewalks into one separate path each.
+      description_both: "Extract both sides in one step. This road gets {changes}."
       annotation:
         cycleway: "Extracted the {side} cycle track into a separate way."
         protected: "Extracted the {side} protected bike lane into a separate way."
@@ -92,6 +100,13 @@ en:
       closed: This can't be extracted because it is a closed way.
       too_short: This can't be extracted because the way is too short.
       not_eligible: This can't be extracted.
+    extract_menu:
+      title: Extract …
+      description: Extract cycle tracks or sidewalks of this road into separate ways, on both sides or on one.
+      group:
+        both: Both sides
+        left: Left side only
+        right: Right side only
     extract_merge_sidepaths:
       title:
         right: Extract right cycle track and merge with sidewalk
@@ -2910,7 +2925,7 @@ en:
         disconnect: "Disconnect selected features"
         extract: "Extract a point from a feature"
         extract_without_relations: "Extract a point from a feature, without extracting its relations"
-        extract_sidepath: "Extract a cycle track or sidewalk from a road (several choices: pick one from a menu)"
+        extract_sidepath: "Extract the cycle tracks or sidewalks of both sides of a road (several choices: pick one from a menu); one side only: the \"Extract …\" entry of the right-click menu"
         merge_sidepaths: "Merge a cycleway and a footway into one foot and cycle path"
         extract_merge_sidepaths: "Extract the cycle track of a road and merge it with the sidewalk way next to it, in one step (both sides if the road has a cycle track on both)"
         split: "Split features at the selected points"

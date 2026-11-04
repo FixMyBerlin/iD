@@ -450,7 +450,7 @@ de:
         progress_done: Die ausgewählte Linie einer Datenebene mit Fortschrittsverfolgung als erledigt markieren oder die Markierung wieder wegnehmen
     editing:
       operations:
-        extract_sidepath: "Einen Radweg oder Gehweg aus einer Straße herauslösen (mehrere Möglichkeiten: Auswahl aus einem Menü)"
+        extract_sidepath: "Radwege oder Gehwege beider Seiten einer Straße herauslösen (mehrere Möglichkeiten: Auswahl aus einem Menü); nur eine Seite: Eintrag „Herauslösen …“ im Rechtsklick-Menü"
         merge_sidepaths: Einen Radweg und einen Fußweg zu einem Geh- und Radweg zusammenführen
         extract_merge_sidepaths: "Den Radweg einer Straße herauslösen und in einem Schritt mit dem Gehweg daneben zusammenführen (mehrere Möglichkeiten: Auswahl aus einem Menü)"
   presets:
@@ -461,18 +461,26 @@ de:
         cycleway:
           right: Rechten Radweg herauslösen
           left: Linken Radweg herauslösen
+          both: Beide Radwege herauslösen
         protected:
           right: Rechten geschützten Radfahrstreifen herauslösen
           left: Linken geschützten Radfahrstreifen herauslösen
         sidewalk:
           right: Rechten Gehweg herauslösen
           left: Linken Gehweg herauslösen
+          both: Beide Gehwege herauslösen
         path:
           right: Rechten Radweg und Gehweg als einen Weg herauslösen
           left: Linken Radweg und Gehweg als einen Weg herauslösen
+          both: Beide Radwege und Gehwege als je einen Weg herauslösen
       side:
         right: rechts
         left: links
+      annotation_both:
+        cycleway: Beide Radwege als eigene Wege herausgelöst.
+        sidewalk: Beide Gehwege als eigene Wege herausgelöst.
+        path: Beide Radwege und Gehwege als je einen eigenen Weg herausgelöst.
+      description_both: "Löst beide Seiten in einem Schritt heraus. Diese Straße bekommt {changes}."
       annotation:
         cycleway: "Den Radweg ({side}) als eigenen Weg herausgelöst."
         protected: "Den geschützten Radfahrstreifen ({side}) als eigenen Weg herausgelöst."
@@ -487,6 +495,13 @@ de:
       closed: Das lässt sich nicht herauslösen, weil der Weg geschlossen ist.
       too_short: Das lässt sich nicht herauslösen, weil der Weg zu kurz ist.
       not_eligible: Das lässt sich nicht herauslösen.
+    extract_menu:
+      title: Herauslösen …
+      description: Radwege oder Gehwege dieser Straße als eigene Wege herauslösen, auf beiden Seiten oder auf einer.
+      group:
+        both: Beide Seiten
+        left: Nur links
+        right: Nur rechts
     extract_merge_sidepaths:
       title:
         right: Rechten Radweg herauslösen und mit dem Gehweg zusammenführen

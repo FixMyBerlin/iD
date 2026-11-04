@@ -106,6 +106,7 @@ function extractSidepathOperation(context: iD.Context, wayID: WayId, option: Ext
 
     operation.icon = () => '#iD-operation-extract';
     operation.id = 'extract_sidepath';
+    operation.side = side;
     operation.keys = [];
     operation.title = t.append(titleID(option));
 
@@ -164,7 +165,7 @@ export function sidepathKeyOperation(
  * sides of a single selected road (WORKDOC feature 17). Added to the edit menu after "Extract".
  * ⌘E extracts (one choice) or opens a menu with the choices (several).
  */
-export function operationsExtractSidepath(context: iD.Context, selectedIDs: string[]): Operation[] {
+export function operationsExtractSidepath(context: iD.Context, selectedIDs: string[], options: { keys?: boolean } = {}): Operation[] {
     if (selectedIDs.length !== 1 || !selectedIDs[0].startsWith('w')) return [];
     const wayID = selectedIDs[0] as WayId;
     const way = context.hasEntity(wayID);
@@ -175,8 +176,94 @@ export function operationsExtractSidepath(context: iD.Context, selectedIDs: stri
 
     const operations = extractOptions(way.tags).map(option => extractSidepathOperation(context, wayID, option));
     // the behavior is installed and removed with the operation list: hang it on the first entry
-    if (operations.length) {
+    if (operations.length && options.keys !== false) {
         operations[0].behavior = behaviorOperation(context).which(sidepathKeyOperation(context, wayID, operations, 'extract_sidepath', uiCmd('⌘E')));
     }
     return operations;
 }
+
+
+/**
+ * The same variant on both sides in one step (WORKDOC feature 17, extract menu): right, then left.
+ * One undo step; both new ways are selected after it.
+ */
+function extractBothSidesOperation(context: iD.Context, wayID: WayId, variant: ExtractOption['variant']): Operation {
+    const recommend = () => loadedSignRecommender() ?? undefined;
+    const sideAction = (side: 'right' | 'left') => actionExtractSidepath(wayID, variant, side, recommend(), loadedSignJoiner());
+
+    function action() {
+        const right = sideAction('right');
+        const left = sideAction('left');
+        const combined = (graph: iD.Graph) => left(right(graph));
+        return { combined, right, left };
+    }
+
+    const operation: Operation = function() {
+        const { combined, right, left } = action();
+        const before = context.entity(wayID).tags;
+        context.perform(combined, operation.annotation());
+        context.validator().validate();
+        const { changes } = roadChanges(before, context.entity(wayID).tags);
+        (context.ui().flash as any)
+            .duration(4000)
+            .iconName('#iD-operation-extract')
+            .iconClass('operation')
+            .label(t('operations.extract_sidepath.flash', { changes }))();
+        context.enter(modeSelect(context, [right.getWayId(), left.getWayId()]));
+    };
+
+    operation.available = () => true;
+
+    operation.disabled = function() {
+        if (loadedSignRecommender() === undefined) {
+            loadSignRecommender(context).catch(() => { /* extract without sign rules */ });
+            return 'loading';
+        }
+        const graph = context.graph();
+        const first = sideAction('right').disabled!(graph);
+        if (first) return first;
+        // the left side is checked on the road as it is after the right extraction
+        return sideAction('left').disabled!(sideAction('right')(graph)) || false;
+    };
+
+    operation.tooltip = function() {
+        const disabled = operation.disabled();
+        if (disabled) return t.append(`operations.extract_sidepath.${disabled}`);
+        const after = action().combined(context.graph()).entity(wayID).tags;
+        return t.append('operations.extract_sidepath.description_both', roadChanges(context.entity(wayID).tags, after));
+    };
+
+    operation.annotation = () => t(`operations.extract_sidepath.annotation_both.${variant}`);
+
+    operation.getAuxiliaryGeometry = function() {
+        if (operation.disabled()) return [];
+        const right = sideAction('right');
+        const left = sideAction('left');
+        const preview = left(right(context.graph()));
+        const path = svgPath(context.projection, preview, false);
+        return [right.getWayId(), left.getWayId()].map(id => ({
+            id: `extract-sidepath-${variant}-both-${id}`,
+            path: path(preview.entity(id)) ?? '',
+            klass: 'preview extract-sidepath-preview'
+        }));
+    };
+
+    operation.icon = () => '#iD-operation-extract';
+    operation.id = 'extract_sidepath';
+    operation.side = 'both';
+    operation.keys = [];
+    operation.title = t.append(`operations.extract_sidepath.title.${variant}.both`);
+    return operation;
+}
+
+
+/** "Both cycle tracks", "Both sidewalks", … for the variants that both sides have (not protected lanes) */
+export function operationsExtractBothSides(context: iD.Context, wayID: WayId): Operation[] {
+    const way = context.hasEntity(wayID);
+    if (!way) return [];
+    const options = extractOptions(way.tags).filter(option => !option.protectedLane);
+    const variants = (['cycleway', 'sidewalk', 'path'] as const).filter(variant =>
+        options.some(o => o.variant === variant && o.side === 'right') && options.some(o => o.variant === variant && o.side === 'left'));
+    return variants.map(variant => extractBothSidesOperation(context, wayID, variant));
+}
+
