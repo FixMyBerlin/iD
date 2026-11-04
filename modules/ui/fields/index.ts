@@ -60,6 +60,7 @@ import { uiFieldWikidata } from './wikidata';
 import { uiFieldWikipedia } from './wikipedia';
 import { uiFieldMapillaryImages } from './mapillary_images';
 import { uiFieldSurfaceSmoothness } from './surface_smoothness';
+import { uiFieldSourcePills } from './source_pills';
 import { uiFieldTrafficSign } from './traffic_sign';
 import { uiFieldTrafficSignGroup } from './traffic_sign_group';
 
@@ -95,6 +96,7 @@ export var uiFields = {
     // Radnetz Berlin: the fields of this fork, grouped after iD's own
     // eslint-disable-next-line sort-keys
     mapillaryImages: uiFieldMapillaryImages,
+    sourcePills: uiFieldSourcePills,
     surfaceSmoothness: uiFieldSurfaceSmoothness,
     trafficSign: uiFieldTrafficSign,
     trafficSignGroup: uiFieldTrafficSignGroup,

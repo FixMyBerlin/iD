@@ -415,6 +415,14 @@ de:
     side_prerequisite:
       missing: "Setze zuerst „{field}“ für diese Seite"
       other_value: "„{value}“: Ändere zuerst „{field}“"
+    stone_calculator:
+      button: Pflastersteine zählen
+      count: Anzahl Steine
+      stones_of: "Steine à"
+      apply: Breite und Quelle übernehmen
+      annotation: Breite aus gezählten Pflastersteinen gesetzt.
+    source_pills:
+      other: Andere Quelle…
     part_width:
       toggle: Je Teil
       toggle_tooltip: "Breite von Radweg- und Gehweganteil, wenn sie getrennt sind"

@@ -6,6 +6,7 @@ import { uiTooltip } from '../ui/tooltip';
 import { widthIndicator } from '../width/width_indicator';
 import { initialTapeEnds, initialTapeMeters, isMeasurableKey, type LonLatExtent } from './initial_tape';
 import { measureTape } from './measure_tape';
+import { isStoneKey, stoneCalculator } from './stone_calculator';
 
 const BUTTON_CLASS = 'measure-tape-button';
 
@@ -53,6 +54,8 @@ export function installMeasureTapeListeners(context: iD.Context) {
         .title(() => t.append('inspector.measure_tape.button'));
 
 
+    const stones = stoneCalculator(context);
+
     function start(key: string) {
         const ids = context.selectedIDs();
         const way = ids.length === 1 && ids[0].startsWith('w') ? context.graph().hasEntity(ids[0] as `w${number}`) : undefined;
@@ -96,6 +99,7 @@ export function installMeasureTapeListeners(context: iD.Context) {
 
             if (!host || !key || !hasInput) {
                 existing?.remove();
+                stones.remove(element as HTMLElement, host);
                 continue;
             }
 
@@ -114,6 +118,13 @@ export function installMeasureTapeListeners(context: iD.Context) {
                 });
                 // after the +/- buttons
                 host.appendChild(button.node()!);
+            }
+
+            // the stone calculator next to the tape, for widths (not buffers)
+            if (isStoneKey(key)) {
+                stones.refresh(element as HTMLElement, host, key, scheduleRefresh);
+            } else {
+                stones.remove(element as HTMLElement, host);
             }
         }
     }

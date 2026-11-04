@@ -989,6 +989,14 @@ en:
     side_prerequisite:
       missing: "Set “{field}” for this side first"
       other_value: "“{value}”: change “{field}” first"
+    stone_calculator:
+      button: Count paving stones
+      count: Number of stones
+      stones_of: "stones of"
+      apply: Apply width and source
+      annotation: Set the width from counted paving stones.
+    source_pills:
+      other: Other source…
     part_width:
       toggle: Per part
       toggle_tooltip: "Widths of the cycleway and the footway part, if they are separated"

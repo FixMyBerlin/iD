@@ -2,6 +2,9 @@ import type { Field, Preset } from '@openstreetmap/id-tagging-schema';
 
 import type { PresetCustomization } from './customization';
 
+/** Common width sources as pills: the aerial images and infra3D (Berlin: 2,708 times this wording) */
+const WIDTH_SOURCE_PILLS = ['Luftbild 2026', 'Luftbild 2025', 'Messung aus Punktwolke (Infra3DViewer)'];
+
 /**
  * Preset customization for the Radnetz Berlin editor: fields for the tags TILDA and the
  * infraVelo dataset need (WORKDOC feature 16, "Data index"), presets for TILDA categories
@@ -118,30 +121,26 @@ const FIELDS: Record<string, Field> = {
     } as unknown as Field,
     'source/width': {
         key: 'source:width',
-        type: 'combo',
+        type: 'sourcePills',
         label: 'Width Source',
         geometry: ['line'],
-        // the values the Radinfra mappers use (FAQ); the measuring tape writes `Luftbild <year>` itself.
-        // Not in a field list: the editor below the width field (related tags) takes its options, also for side widths
-        options: WIDTH_SOURCE_OPTIONS,
-        // free text as typed ("8 Steine à 20 cm"), not snake_cased or lowercased
-        snake_case: false,
-        caseSensitive: true,
+        // the values the Radinfra mappers use (FAQ) as pills; others ("survey", "6 Steine à 20 cm") go into
+        // the text input. The measuring tape writes `Luftbild <year>`, the stone calculator the stones.
+        // Not in a field list: the editor below the width field (related tags) takes it, also for side widths
+        options: WIDTH_SOURCE_PILLS,
         prerequisiteTag: { key: 'width' }
-    } as Field,
+    } as unknown as Field,
     'source/width/effective': {
         key: 'source:width:effective',
-        type: 'combo',
+        type: 'sourcePills',
         label: 'Usable Width Source',
         geometry: ['line'],
-        // the values the Radinfra mappers use (FAQ); the measuring tape writes `Luftbild <year>` itself.
-        // Not in a field list: the editor below the width field (related tags) takes its options, also for side widths
-        options: WIDTH_SOURCE_OPTIONS,
-        // free text as typed ("8 Steine à 20 cm"), not snake_cased or lowercased
-        snake_case: false,
-        caseSensitive: true,
+        // the values the Radinfra mappers use (FAQ) as pills; others ("survey", "6 Steine à 20 cm") go into
+        // the text input. The measuring tape writes `Luftbild <year>`, the stone calculator the stones.
+        // Not in a field list: the editor below the width field (related tags) takes it, also for side widths
+        options: WIDTH_SOURCE_PILLS,
         prerequisiteTag: { key: 'width:effective' }
-    } as Field,
+    } as unknown as Field,
     separation: sideField('separation', 'Separation', SEPARATION_OPTIONS),
     marking: sideField('marking', 'Marking', MARKING_OPTIONS),
     buffer: sideField('buffer', 'Buffer Width (Meters)', { no: 'No buffer', '0.25': '0.25', '0.5': '0.5', '0.75': '0.75', '1': '1' }, true),
