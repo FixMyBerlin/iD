@@ -81,6 +81,8 @@ function valueNote(attribute: RequiredAttribute) {
             : t('inspector.tilda.default.generic', { tag: attribute.default });
     }
     if (state === 'ignored') return t('inspector.tilda.state.ignored', { value });
+    // when the attribute applies at all (`traffic_mode:right=foot` only for two lines)
+    if (attribute.hint && state !== 'ok') return t(`inspector.tilda.hint.${attribute.hint}`);
     if (state === 'ok' && tilda !== undefined && tilda !== value) {
         // another tag decides (`oneway:bicycle` over `oneway`): name it, "reads it as yes" alone misleads
         return attribute.source ? t('inspector.tilda.state.derived', { value: tilda, tag: attribute.source })

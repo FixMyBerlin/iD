@@ -264,6 +264,8 @@ de:
         barrier:
           title: "Auf Absperrbaken prüfen."
           text: "Ist der Radweg durch eine Absperrbake versperrt, sodass er nicht nutzbar ist? Dann an der Stelle einen TILDA-Hinweis anlegen (Ebene „TILDA-Hinweise“). Es ist kein OSM-Tag."
+      hint:
+        traffic_mode_foot: "Nur wenn dieser getrennte Geh- und Radweg mit zwei Linien erfasst ist und dies die Radweg-Linie ist, mit dem Gehweg (eigene Linie) direkt rechts daneben. Sonst nicht taggen."
       default:
         generic: "Nicht getaggt = {tag}. Nur taggen, wenn es hier anders ist."
         surface_colour: "Nicht getaggt = nicht eingefärbt. Nur taggen, wenn die Oberfläche rot oder grün ist."
@@ -355,6 +357,7 @@ de:
         separation_right: Trennung rechts
         traffic_mode_left: Verkehr daneben, links
         traffic_mode_right: Verkehr daneben, rechts
+        traffic_mode_foot: Gehweg rechts daneben (eigene Linie)
         buffer_left: Sicherheitstrennstreifen links
         buffer_right: Sicherheitstrennstreifen rechts
         marking_left: Markierung links
@@ -881,6 +884,8 @@ de-CH:
         barrier:
           title: "Auf Absperrbaken prüfen."
           text: "Ist der Radweg durch eine Absperrbake versperrt, sodass er nicht nutzbar ist? Dann an der Stelle einen TILDA-Hinweis anlegen (Ebene „TILDA-Hinweise“). Es ist kein OSM-Tag."
+      hint:
+        traffic_mode_foot: "Nur wenn dieser getrennte Geh- und Radweg mit zwei Linien erfasst ist und dies die Radweg-Linie ist, mit dem Gehweg (eigene Linie) direkt rechts daneben. Sonst nicht taggen."
       default:
         generic: "Nicht getaggt = {tag}. Nur taggen, wenn es hier anders ist."
         surface_colour: "Nicht getaggt = nicht eingefärbt. Nur taggen, wenn die Oberfläche rot oder grün ist."

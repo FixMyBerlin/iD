@@ -903,6 +903,8 @@ en:
         barrier:
           title: "Check for barriers."
           text: "Is the cycle track blocked by a barrier (Absperrbake) so that it cannot be used? If so, add a TILDA note on the spot (TILDA Notes layer). It is not an OSM tag."
+      hint:
+        traffic_mode_foot: "Only if this segregated foot and cycle path is mapped as two lines and this is the cycleway line, with the footway (its own line) directly on its right. Otherwise do not tag it."
       default:
         generic: "Not tagged = {tag}. Tag it only if it is different here."
         surface_colour: "Not tagged = not coloured. Tag it only if the surface is red or green."
@@ -991,6 +993,7 @@ en:
         separation_right: "Separation, right"
         traffic_mode_left: "Traffic next to it, left"
         traffic_mode_right: "Traffic next to it, right"
+        traffic_mode_foot: "Footway right next to it (its own line)"
         buffer_left: "Buffer, left"
         buffer_right: "Buffer, right"
         marking_left: "Marking, left"

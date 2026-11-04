@@ -377,6 +377,23 @@ describe('roadAttributes', () => {
         expect(attributes.width.state).toBe('ok');
     });
 
+    it('cycleway line of a segregated path mapped as two lines: no segregated, traffic_mode:right=foot offered with its framing', () => {
+        const tags = { highway: 'cycleway', is_sidepath: 'yes', oneway: 'yes', segregated: 'yes', traffic_sign: 'DE:241-30', width: '1.7' };
+        const attributes = byId(requiredAttributes(resultFor(tags, 'self'), tags));
+        expect(attributes.segregated).toBeUndefined();
+        expect(attributes.traffic_mode_foot.key).toBe('traffic_mode:right');
+        expect(attributes.traffic_mode_foot.options).toEqual(['foot']);
+        expect(attributes.traffic_mode_foot.optional).toBe(true);
+        expect(attributes.traffic_mode_foot.hint).toBe('traffic_mode_foot');
+    });
+
+    it('one way for both modes: segregated asked, no traffic_mode', () => {
+        const tags = { highway: 'path', bicycle: 'designated', foot: 'designated', is_sidepath: 'yes', traffic_sign: 'DE:241-30' };
+        const attributes = byId(requiredAttributes(resultFor(tags, 'self'), tags));
+        expect(attributes.segregated.state).toBe('missing');
+        expect(attributes.traffic_mode_foot).toBeUndefined();
+    });
+
     it('segregated highway=cycleway with foot=designated: both parts on this way, so cycleway:width', () => {
         const tags = { highway: 'cycleway', foot: 'designated', segregated: 'yes', is_sidepath: 'yes', traffic_sign: 'DE:241-30', width: '3' };
         const attributes = byId(requiredAttributes(resultFor(tags, 'self'), tags));

@@ -57,6 +57,8 @@ export type RequiredAttribute = {
     note?: string;
     /** conditional attributes: a missing value is not an error */
     optional: boolean;
+    /** id of a text that says when the attribute applies at all: `inspector.tilda.hint.<hint>` */
+    hint?: string;
     feeds: InfraveloAttribute[];
 };
 
@@ -103,6 +105,8 @@ type Rule = {
     assumedOptions?: readonly string[];
     /** text for an `assumed` attribute: `inspector.tilda.default.<note>` (default: a generic text) */
     note?: string | ((ctx: RuleContext) => string | undefined);
+    /** text that frames when the attribute applies at all, in every state: `inspector.tilda.hint.<hint>` */
+    hint?: string;
     /**
      * The rule is the source of another key: `source:<key for this side>`, e.g. `source:cycleway:right:width`
      * (Radinfra FAQ decision: `source:` in front, not `cycleway:right:source:width`)
@@ -302,6 +306,11 @@ function carriesFootAndBicycle(tags: Tags) {
  * part alone (the footway is a separate way, `traffic_mode:right=foot`): its `width` is the
  * cycleway width, and TILDA reads `cycleway:width` before `width` on paths anyway.
  */
+/** A `highway=cycleway` without foot access: the cycleway alone, a footway next to it is a line of its own */
+function isCyclewayPartAlone(ctx: RuleContext) {
+    return ctx.side === 'self' && ctx.tags.highway === 'cycleway' && !ACCESS_ALLOWED.has(ctx.tags.foot ?? '');
+}
+
 function isSegregatedWay(ctx: RuleContext) {
     if (ctx.side !== 'self' || !carriesFootAndBicycle(ctx.tags)) return false;
     if (ctx.tags.segregated === 'yes') return true;
@@ -337,8 +346,14 @@ const SEPARATE_WAY: Rule[] = [
         // TILDA derives it from `footway=sidewalk` and similar; a chosen target category is no source
         tilda: ctx => ctx.isTarget ? undefined : sidepathFromCategory(ctx.category),
         when: ctx => ctx.side === 'self' && isSeparateWayCategory(ctx.category) },
+    // a cycleway without foot access is the cycleway part alone: `segregated` is about one way for both modes
     { id: 'segregated', key: 'segregated', feeds: ['fuehr'], options: ['yes', 'no'], strict: true,
-        when: ctx => ctx.category.startsWith('footAndCycleway') }
+        when: ctx => ctx.category.startsWith('footAndCycleway') && !isCyclewayPartAlone(ctx) },
+    // the cycleway part of a segregated foot and cycle path mapped as two lines: the footway is the
+    // other line, right of it (TILDA reads `traffic_mode:right=foot` as "Getrennter Geh- und Radweg")
+    { id: 'traffic_mode_foot', key: 'traffic_mode:right', feeds: ['fuehr'], options: ['foot'], strict: true, optional: true,
+        hint: 'traffic_mode_foot',
+        when: ctx => ctx.category.startsWith('footAndCyclewaySegregated') && isCyclewayPartAlone(ctx) }
 ];
 
 const LANE: Rule[] = [
@@ -528,6 +543,7 @@ function evaluate(rules: Rule[], ctx: RuleContext): RequiredAttribute[] {
                 default: state === 'assumed' ? `${key}=${assumed}` : undefined,
                 note: state === 'assumed' ? (typeof rule.note === 'function' ? rule.note(ctx) : rule.note) : undefined,
                 optional,
+                hint: rule.hint,
                 feeds: rule.feeds
             };
         });
