@@ -174,3 +174,8 @@
     font-size: 11px;
     opacity: 0.7;
 }
+ 
+/* data layer labels in the colour of their layer, so they can be told apart */
+.layer-custom-data text.label {
+    fill: var(--custom-data-color);
+}

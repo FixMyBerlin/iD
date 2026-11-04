@@ -129,7 +129,15 @@ export function uiFieldTrafficSign(field: unknown, context: iD.Context) {
             .append('details')
             .attr('class', 'traffic-sign-plan');
         boxEnter.append('summary')
-            .attr('class', 'traffic-sign-plan-header');
+            .attr('class', 'traffic-sign-plan-header')
+            // open and close here: the field around it prevents the default of clicks, so the
+            // `details` element alone did not open
+            .on('click', function(this: HTMLElement, d3_event: MouseEvent) {
+                d3_event.preventDefault();
+                d3_event.stopPropagation();
+                const details = this.parentElement as HTMLDetailsElement;
+                details.open = !details.open;
+            });
         box = box.merge(boxEnter);
 
         const changes = rows.filter(row => row.kind !== 'conflict').length;
