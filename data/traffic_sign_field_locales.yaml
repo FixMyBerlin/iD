@@ -209,6 +209,11 @@ de:
         reference: "„oneway“ bezieht sich auf die Richtung, in der die Linie gezeichnet ist. Auf der linken Seite einer Straße mit Gegenverkehr fährt der Radverkehr gegen diese Richtung; „{tag}“ sagt also, er fährt dem Verkehr neben sich entgegen. Ohne das Tag gilt die übliche Richtung: auf jeder Seite mit dem Verkehr. Entferne das Tag, oder setze „no“, wenn Radfahrende hier in beide Richtungen fahren dürfen."
       contraflow:
         reference: "Radfahrende dürfen diese Einbahnstraße in Gegenrichtung befahren; die linke Seite ist damit die Seite für die Gegenrichtung. „{tag}“ sagt, dort wird in Richtung der Einbahnstraße gefahren. Ohne das Tag gilt die übliche Richtung. Entferne das Tag, oder setze „no“, wenn Radfahrende hier in beide Richtungen fahren dürfen."
+    width_parts_sum:
+      title: Breite ist nicht die Summe der Teile
+      tip: "Findet gemeinsame Geh- und Radwege, bei denen „width“ nicht Radweg- plus Gehwegbreite ist."
+      message: "{feature}: Breite {width} m, die Teile ergeben {sum} m"
+      reference: "„width“ ist der ganze Weg: {cycleway} m Radweg + {footway} m Gehweg = {sum} m, nicht {width} m. Prüfe die Breiten oder setze die Breite auf die Summe."
     cycleway_oneway_redundant:
       title: Richtung der Radspur nicht nötig
       tip: "Findet Straßen, bei denen das „oneway“-Tag einer Radspur oder eines Radwegs an der Seite nur den Standard wiederholt."
@@ -221,6 +226,9 @@ de:
       message: "{feature}: Daneben verläuft ein Gehweg, „traffic_mode“ ist möglicherweise sinnvoll"
       reference: "Ein Gehweg verläuft in höchstens {meters} m Abstand zu diesem Radweg. Wenn nichts anderes dazwischen liegt, wähle im Feld „Verkehr daneben“ für diese Seite „Fußgänger“ (traffic_mode:left=foot oder traffic_mode:right=foot). Links und rechts beziehen sich auf die Richtung, in der die Linie gezeichnet ist."
     fix:
+      width_parts_sum:
+        title: "Breite auf {sum} m setzen (die Summe)"
+        annotation: Breite auf die Summe der Teile gesetzt.
       cycleway_oneway_both_ways:
         title: Radverkehr fährt hier in beide Richtungen
         annotation: Radspur in beide Richtungen eingetragen.
@@ -407,6 +415,11 @@ de:
     side_prerequisite:
       missing: "Setze zuerst „{field}“ für diese Seite"
       other_value: "„{value}“: Ändere zuerst „{field}“"
+    part_width:
+      toggle: Je Teil
+      toggle_tooltip: "Breite von Radweg- und Gehweganteil, wenn sie getrennt sind"
+      cycleway: Breite Radweg (Meter)
+      footway: Breite Gehweg (Meter)
     side_width:
       cycleway:
         left: Radweg-Breite links (Meter)
@@ -788,6 +801,11 @@ de-CH:
         reference: "„oneway“ bezieht sich auf die Richtung, in der die Linie gezeichnet ist. Auf der linken Seite einer Straße mit Gegenverkehr fährt der Radverkehr gegen diese Richtung; „{tag}“ sagt also, er fährt dem Verkehr neben sich entgegen. Ohne das Tag gilt die übliche Richtung: auf jeder Seite mit dem Verkehr. Entferne das Tag, oder setze „no“, wenn Radfahrende hier in beide Richtungen fahren dürfen."
       contraflow:
         reference: "Radfahrende dürfen diese Einbahnstraße in Gegenrichtung befahren; die linke Seite ist damit die Seite für die Gegenrichtung. „{tag}“ sagt, dort wird in Richtung der Einbahnstraße gefahren. Ohne das Tag gilt die übliche Richtung. Entferne das Tag, oder setze „no“, wenn Radfahrende hier in beide Richtungen fahren dürfen."
+    width_parts_sum:
+      title: Breite ist nicht die Summe der Teile
+      tip: "Findet gemeinsame Geh- und Radwege, bei denen „width“ nicht Radweg- plus Gehwegbreite ist."
+      message: "{feature}: Breite {width} m, die Teile ergeben {sum} m"
+      reference: "„width“ ist der ganze Weg: {cycleway} m Radweg + {footway} m Gehweg = {sum} m, nicht {width} m. Prüfe die Breiten oder setze die Breite auf die Summe."
     cycleway_oneway_redundant:
       title: Richtung der Radspur nicht nötig
       tip: "Findet Straßen, bei denen das „oneway“-Tag einer Radspur oder eines Radwegs an der Seite nur den Standard wiederholt."
@@ -795,6 +813,9 @@ de-CH:
       default:
         reference: "Ohne „{key}“ gilt: Der Radverkehr fährt mit dem Verkehr auf seiner Seite. Genau das sagt „{tag}“. Das Tag ist nicht nötig und leicht falsch zu setzen, weil sich „oneway“ auf die Richtung der gezeichneten Linie bezieht."
     fix:
+      width_parts_sum:
+        title: "Breite auf {sum} m setzen (die Summe)"
+        annotation: Breite auf die Summe der Teile gesetzt.
       cycleway_oneway_both_ways:
         title: Radverkehr fährt hier in beide Richtungen
         annotation: Radspur in beide Richtungen eingetragen.

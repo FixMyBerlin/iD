@@ -11,6 +11,7 @@ import { uiFormFields } from '../form_fields';
 import { uiSection } from '../section';
 import { appendTrafficSignInspectorFields, trafficSignFieldsSignature } from './traffic_sign_inspector_fields';
 import { uiSideWidthFields } from './side_width_fields';
+import { uiPartWidthFields } from './part_width_fields';
 import { uiRelatedTags } from './related_tags';
 
 export function uiSectionPresetFields(context) {
@@ -29,6 +30,8 @@ export function uiSectionPresetFields(context) {
     var _trafficSignFieldsArr = [];
     var _trafficSignFieldsSignature = '';
     var _sideWidthFields = uiSideWidthFields(context, dispatch);
+    // Radnetz Berlin: widths of the parts of a shared foot and cycle path, below the width field
+    var _partWidthFields = uiPartWidthFields(context, dispatch);
     // Radnetz Berlin: `source:*`, `note:*`, … as small lines below their field (feature 25)
     var _relatedTags = uiRelatedTags(context, dispatch);
     // Radnetz Berlin: another section (TILDA) can color field titles and bring a field into view
@@ -146,8 +149,14 @@ export function uiSectionPresetFields(context) {
         var signIndex = _fieldsArr.findIndex(function(field) { return field.key === 'traffic_sign'; });
         var fieldsToShow = signIndex === -1 ? _fieldsArr.concat(_trafficSignFieldsArr) :
             _fieldsArr.slice(0, signIndex + 1).concat(_trafficSignFieldsArr, _fieldsArr.slice(signIndex + 1));
-        var shownKeys = new Set(fieldsToShow.map(function(field) { return field.key; }));
         var widthField = presetManager.field('width');
+        var partFields = _partWidthFields.fields(_tags, _entityIDs, widthField);
+        if (partFields.length) {
+            var widthIndex = fieldsToShow.findIndex(function(field) { return field.key === 'width'; });
+            fieldsToShow = widthIndex === -1 ? fieldsToShow.concat(partFields) :
+                fieldsToShow.slice(0, widthIndex + 1).concat(partFields, fieldsToShow.slice(widthIndex + 1));
+        }
+        var shownKeys = new Set(fieldsToShow.map(function(field) { return field.key; }));
         fieldsToShow = fieldsToShow.concat(
             _sideWidthFields.fields(_tags, _entityIDs, widthField, shownKeys)
         );
@@ -173,6 +182,7 @@ export function uiSectionPresetFields(context) {
             );
 
         _relatedTags.render(selection);
+        renderPartWidthToggle(selection);
 
         _allFields = fieldsToShow;
         selection.selectAll('.wrap-form-field, .field-related-editor')   // also the editors of related tags
@@ -182,6 +192,32 @@ export function uiSectionPresetFields(context) {
                     .classed('field-status-required', status === 'required')
                     .classed('field-status-optional', status === 'optional');
             });
+    }
+
+    /** "Per part" in the title of the width field, on paths for walking and cycling (part_width_fields.ts) */
+    function renderPartWidthToggle(selection) {
+        var mode = _partWidthFields.mode(_tags, _entityIDs);
+        var label = selection.selectAll('.wrap-form-field')
+            .filter(function(d) { return d && d.key === 'width'; })
+            .select('.field-label');
+        var toggle = label.selectAll('.part-width-toggle')
+            .data(mode === 'optional' ? [0] : []);
+        toggle.exit().remove();
+        toggle.enter()
+            .insert('button', 'button')
+            .attr('type', 'button')
+            .attr('class', 'part-width-toggle sidebar-toggle')
+            .text(t('inspector.part_width.toggle'))
+            .attr('title', t('inspector.part_width.toggle_tooltip'))
+            .on('click', function(d3_event) {
+                d3_event.preventDefault();
+                d3_event.stopPropagation();
+                _partWidthFields.toggle();
+                section.reRender();
+            })
+            .merge(toggle)
+            .classed('active', _partWidthFields.open(_tags, _entityIDs))
+            .attr('aria-pressed', String(_partWidthFields.open(_tags, _entityIDs)));
     }
 
     /** `function(keys) → 'required' | 'optional' | undefined`: marks the titles of fields with these keys */

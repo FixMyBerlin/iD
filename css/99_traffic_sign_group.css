@@ -43,7 +43,9 @@
 }
 
 /* "Per direction" in the title of the way's field (look: `sidebar-toggle`, 99_z_sidebar_toggle.css) */
-.ideditor[dir] .entity-editor .form-field > .field-label > button.traffic-sign-toggle {
+.ideditor[dir] .entity-editor .form-field > .field-label > button.traffic-sign-toggle,
+/* the same for "Per part" in the title of the width field (part_width_fields.ts) */
+.ideditor[dir] .entity-editor .form-field > .field-label > button.part-width-toggle {
     width: auto;
     padding: 0 8px;
     margin-right: 6px;

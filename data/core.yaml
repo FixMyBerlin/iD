@@ -989,6 +989,11 @@ en:
     side_prerequisite:
       missing: "Set “{field}” for this side first"
       other_value: "“{value}”: change “{field}” first"
+    part_width:
+      toggle: Per part
+      toggle_tooltip: "Widths of the cycleway and the footway part, if they are separated"
+      cycleway: Cycleway Width (Meters)
+      footway: Footway Width (Meters)
     side_width:
       cycleway:
         left: Bike Lane Width, Left (Meters)
@@ -2287,6 +2292,11 @@ en:
         reference: "“oneway” refers to the direction the way is drawn in. On the left side of a two-way road bicycles ride against that direction, so “{tag}” says they ride against the traffic next to them. Without the tag the usual direction is assumed: with the traffic on each side. Remove the tag, or set “no” if bicycles may ride both ways here."
       contraflow:
         reference: "Bicycles may ride against this one-way road, so its left side is the side for the opposite direction. “{tag}” says they ride with the one-way there. Without the tag the usual direction is assumed. Remove the tag, or set “no” if bicycles may ride both ways here."
+    width_parts_sum:
+      title: Width Is Not the Sum of Its Parts
+      tip: "Find shared foot and cycle paths where “width” is not the cycleway width plus the footway width."
+      message: "{feature}: width {width} m, but the parts add up to {sum} m"
+      reference: "“width” is the whole path: {cycleway} m cycleway + {footway} m footway = {sum} m, not {width} m. Check the widths, or set the width to the sum."
     cycleway_oneway_redundant:
       title: Bike Lane Direction Not Needed
       tip: "Find roads where the “oneway” tag of a bike lane or cycle track on the side only repeats the default."
@@ -2459,6 +2469,9 @@ en:
       remove_tag:
         title: Remove the tag
         annotation: Removed tag.
+      width_parts_sum:
+        title: "Set the width to {sum} m (the sum)"
+        annotation: Set the width to the sum of its parts.
       cycleway_oneway_both_ways:
         title: Bicycles ride both ways here
         annotation: Tagged a two-way bike lane.
