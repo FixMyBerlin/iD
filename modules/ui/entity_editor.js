@@ -219,6 +219,13 @@ export function uiEntityEditor(context) {
             _coalesceChanges = !!onInput;
         }
 
+        // Radnetz Berlin: a finished change (leaving the field) ends the typing step also when it
+        // changes nothing more. Else the next change, from any field or button, replaced the typing
+        // step instead of being its own, and one undo took back both.
+        if (!onInput) {
+            _coalesceChanges = false;
+        }
+
         // if leaving field (blur event), rerun validation
         if (!onInput) {
             context.validator().validate();
@@ -274,6 +281,8 @@ export function uiEntityEditor(context) {
                 context.perform(combinedAction, annotation);
             }
         }
+        // Radnetz Berlin: a revert is finished, the next change is a step of its own
+        _coalesceChanges = false;
 
         context.validator().validate();
     }
