@@ -8,6 +8,12 @@ import type { PresetCustomization } from './customization';
  * that id-tagging-schema has no preset for, and shorter field lists for the presets we map.
  */
 
+/**
+ * Width sources to pick by hand, like the Radinfra mappers write them (FAQ). The measuring tape writes
+ * `Luftbild <year>` itself; the others are for widths measured elsewhere or counted from the paving.
+ */
+export const WIDTH_SOURCE_OPTIONS = ['Luftbild 2026', 'Luftbild 2025', 'Messung aus Punktwolke (Infra3DViewer)', '7,5 Steine à 20 cm', 'survey'];
+
 // Values as TILDA accepts them (`sanitize-road-tags.ts` in @tilda-geo/bicycle-infrastructure)
 const SEPARATION_OPTIONS = {
     no: 'None',
@@ -117,7 +123,10 @@ const FIELDS: Record<string, Field> = {
         geometry: ['line'],
         // the values the Radinfra mappers use (FAQ); the measuring tape writes `Luftbild <year>` itself.
         // Not in a field list: the editor below the width field (related tags) takes its options, also for side widths
-        options: ['Luftbild 2026', 'Luftbild 2025', 'Messung aus Punktwolke (Infra3DViewer)', 'survey'],
+        options: WIDTH_SOURCE_OPTIONS,
+        // free text as typed ("8 Steine à 20 cm"), not snake_cased or lowercased
+        snake_case: false,
+        caseSensitive: true,
         prerequisiteTag: { key: 'width' }
     } as Field,
     'source/width/effective': {
@@ -127,7 +136,10 @@ const FIELDS: Record<string, Field> = {
         geometry: ['line'],
         // the values the Radinfra mappers use (FAQ); the measuring tape writes `Luftbild <year>` itself.
         // Not in a field list: the editor below the width field (related tags) takes its options, also for side widths
-        options: ['Luftbild 2026', 'Luftbild 2025', 'Messung aus Punktwolke (Infra3DViewer)', 'survey'],
+        options: WIDTH_SOURCE_OPTIONS,
+        // free text as typed ("8 Steine à 20 cm"), not snake_cased or lowercased
+        snake_case: false,
+        caseSensitive: true,
         prerequisiteTag: { key: 'width:effective' }
     } as Field,
     separation: sideField('separation', 'Separation', SEPARATION_OPTIONS),

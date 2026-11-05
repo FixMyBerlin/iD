@@ -7,6 +7,8 @@ import {
     type BikelaneResult
 } from '@tilda-geo/bicycle-infrastructure';
 
+import { WIDTH_SOURCE_OPTIONS } from '../presets/radnetz_customization';
+
 /**
  * Tags the Radnetz Berlin dataset (infraVelo) needs for each TILDA category.
  * Derived from `infravelo-radnetz/scripts/translate_attributes_tilda_to_rvn.py` and the
@@ -263,8 +265,6 @@ function assumedOneway(ctx: RuleContext) {
 function widthEdited(key: string) {
     return (ctx: RuleContext) => lookupKeys(key, ctx.side, ctx.prefix).some(k => ctx.tags[k] !== undefined && ctx.edited.has(k));
 }
-
-const WIDTH_SOURCE_OPTIONS = ['Luftbild 2026', 'Luftbild 2025', 'Messung aus Punktwolke (Infra3DViewer)', 'survey'];
 
 const SOURCE_WIDTH: Rule = {
     id: 'source_width', key: 'source:width', sourceFor: 'width', feeds: ['breite'],
