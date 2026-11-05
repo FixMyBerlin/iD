@@ -8,6 +8,7 @@ import { uiPane } from '../pane';
 import { t, localizer } from '../../core/localizer';
 import { uiTooltip } from '../tooltip';
 import { helpHtml } from '../intro/helper';
+import { uiVersion } from '../version';
 
 export function uiPaneHelp(context) {
 
@@ -422,6 +423,34 @@ export function uiPaneHelp(context) {
         var nav = helpContent
             .append('div')
             .attr('class', 'nav');
+
+        // version and project links, formerly in the footer bar
+        var about = content
+            .append('ul')
+            .attr('class', 'help-about');
+
+        about
+            .append('li')
+            .attr('class', 'version')
+            .call(uiVersion(context));
+
+        about
+            .append('li')
+            .append('a')
+            .attr('target', '_blank')
+            .attr('href', 'https://github.com/openstreetmap/iD/issues')
+            .call(svgIcon('#iD-icon-bug', 'inline'))
+            .append('span')
+            .call(t.append('report_a_bug'));
+
+        about
+            .append('li')
+            .append('a')
+            .attr('target', '_blank')
+            .attr('href', 'https://github.com/openstreetmap/iD/blob/develop/CONTRIBUTING.md#translating')
+            .call(svgIcon('#iD-icon-translate', 'inline'))
+            .append('span')
+            .call(t.append('help_translate'));
 
         clickHelp(docs[0], 0);
     };

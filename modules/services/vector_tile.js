@@ -9,6 +9,7 @@ import { PbfReader } from 'pbf';
 import { VectorTile } from '@mapbox/vector-tile';
 
 import { utilHashcode, utilRebind, utilTiler } from '../util';
+import { createPMTilesSource, fetchPMTile, isPMTilesUrl } from './pmtiles_source';
 
 
 var tiler = utilTiler().tileSize(512).margin(1);
@@ -92,8 +93,10 @@ function vtToGeoJSON(data, tile, mergeCache) {
 }
 
 
-function loadTile(source, tile) {
-    if (source.loaded[tile.id] || source.inflight[tile.id]) return;
+function fetchTile(source, tile, signal) {
+    if (source.pmtiles) {
+        return fetchPMTile(source.pmtiles, tile, signal);
+    }
 
     var url = source.template
         .replace('{x}', tile.xyz[0])
@@ -106,23 +109,27 @@ function loadTile(source, tile) {
             return subdomains[(tile.xyz[0] + tile.xyz[1]) % subdomains.length];
         });
 
-
-    var controller = new AbortController();
-    source.inflight[tile.id] = controller;
-
-    fetch(url, { signal: controller.signal })
+    return fetch(url, { signal: signal })
         .then(function(response) {
             if (!response.ok) {
                 throw new Error(response.status + ' ' + response.statusText);
             }
+            return response.arrayBuffer();
+        });
+}
+
+
+function loadTile(source, tile) {
+    if (source.loaded[tile.id] || source.inflight[tile.id]) return;
+
+    var controller = new AbortController();
+    source.inflight[tile.id] = controller;
+
+    fetchTile(source, tile, controller.signal)
+        .then(function(data) {
             source.loaded[tile.id] = [];
             delete source.inflight[tile.id];
-            return response.arrayBuffer();
-        })
-        .then(function(data) {
-            if (!data) {
-                throw new Error('No Data');
-            }
+            if (!data) return;  // no data for this tile
 
             var z = tile.xyz[2];
             if (!source.canMerge[z]) {
@@ -163,8 +170,20 @@ export default {
 
 
     addSource: function(sourceID, template) {
-        _vtCache[sourceID] = { template: template, inflight: {}, loaded: {}, canMerge: {} };
-        return _vtCache[sourceID];
+        var source = { template: template, inflight: {}, loaded: {}, canMerge: {}, tiler: tiler, isReady: true };
+        if (isPMTilesUrl(template)) {
+            source.isReady = false;  // wait for the zoom range from the header
+            source.tiler = utilTiler().tileSize(512).margin(1);
+            source.pmtiles = createPMTilesSource(template, source.tiler);
+            source.pmtiles.ready
+                .then(function() {
+                    source.isReady = true;
+                    dispatch.call('loadedData');
+                })
+                .catch(function(err) { console.error(err); });  // eslint-disable-line no-console
+        }
+        _vtCache[sourceID] = source;
+        return source;
     },
 
 
@@ -172,7 +191,7 @@ export default {
         var source = _vtCache[sourceID];
         if (!source) return [];
 
-        var tiles = tiler.getTiles(projection);
+        var tiles = source.tiler.getTiles(projection);
         var seen = {};
         var results = [];
 
@@ -202,7 +221,9 @@ export default {
             source = this.addSource(sourceID, template);
         }
 
-        var tiles = tiler.getTiles(projection);
+        if (!source.isReady) return;
+
+        var tiles = source.tiler.getTiles(projection);
 
         // abort inflight requests that are no longer needed
         Object.keys(source.inflight).forEach(function(k) {

@@ -2,9 +2,9 @@ import { t } from '../../core/localizer';
 import { uiPane } from '../pane';
 
 import { uiSectionDataLayers } from '../sections/data_layers';
-import { uiSectionMapFeatures } from '../sections/map_features';
-import { uiSectionMapStyleOptions } from '../sections/map_style_options';
-import { uiSectionPhotoOverlays } from '../sections/photo_overlays';
+import { uiSectionCustomDataLayers } from '../sections/custom_data_layers';
+import { uiSectionLiveTouched } from '../sections/live_touched';
+import { uiSectionOverlayList } from '../sections/overlay_list';
 
 export function uiPaneMapData(context) {
 
@@ -15,9 +15,11 @@ export function uiPaneMapData(context) {
         .iconName('iD-icon-data')
         .sections([
             uiSectionDataLayers(context),
-            uiSectionPhotoOverlays(context),
-            uiSectionMapStyleOptions(context),
-            uiSectionMapFeatures(context)
+            uiSectionCustomDataLayers(context),
+            // overlays are extra data on top of the map, like the custom data layers;
+            // the background's display options and offset do not apply to them
+            uiSectionOverlayList(context),
+            uiSectionLiveTouched(context)
         ]);
 
     return mapDataPane;

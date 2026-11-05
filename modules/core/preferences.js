@@ -31,6 +31,11 @@ const _listeners = {};
  * @param {string | number | boolean | null} v
  * @returns {boolean} true if the action succeeded
  */
+/**
+ * @param {string} k
+ * @param {string | number | boolean | null} [v]
+ * @returns {string | null | boolean}
+ */
 function corePreferences(k, v) {
   try {
     if (v === undefined) return _storage.getItem(k);

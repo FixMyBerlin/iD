@@ -373,6 +373,7 @@ export function uiPresetIcon() {
 
   function render() {
     let p = _preset.apply(this, arguments);
+    if (!p) return; // Skip rendering if preset is null/undefined
     let geom = _geometry ? _geometry.apply(this, arguments) : null;
     if (geom === 'relation' &&
       p.tags &&

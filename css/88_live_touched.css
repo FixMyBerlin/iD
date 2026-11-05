@@ -1,0 +1,115 @@
+/* Live touched: objects other mappers are editing, list in the Map Data pane, indicator dot */
+
+/* map halos, drawn like the selection halo but in the status colors */
+.ideditor .live-touched-touched.shadow,
+.ideditor .live-touched-stale.shadow,
+.ideditor .live-touched-saved.shadow {
+    stroke-opacity: 0.7;
+}
+.ideditor path.live-touched-touched.shadow { stroke: #ff8c00; }
+.ideditor path.live-touched-stale.shadow { stroke: #ff8c00; stroke-opacity: 0.35; stroke-dasharray: 6, 6; }
+.ideditor path.live-touched-saved.shadow { stroke: #9b59ff; }
+.ideditor path.live-touched-conflict.casing { stroke: #e0282e; stroke-opacity: 1; }
+.ideditor g.point.live-touched .shadow,
+.ideditor g.vertex.live-touched .shadow { fill: #ff8c00; fill-opacity: 0.6; }
+.ideditor g.point.live-touched-saved .shadow,
+.ideditor g.vertex.live-touched-saved .shadow { fill: #9b59ff; }
+
+/* Map Data pane section */
+.live-touched-login {
+    margin: 0 0 8px;
+    padding: 8px 10px;
+    border-radius: 4px;
+    border-left: 4px solid #ff8c00;
+    background: rgba(255, 140, 0, 0.15);
+}
+.live-touched-login p {
+    margin: 0 0 6px;
+}
+.live-touched-login button {
+    height: auto;
+    padding: 4px 10px;
+}
+ul.live-touched-toggle li.disabled label {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+.live-touched-message {
+    margin: 4px 0;
+    font-size: 12px;
+}
+ul.live-touched-items li.live-touched-item {
+    display: block;
+    padding: 5px 10px;
+    line-height: 1.35;
+    cursor: pointer;
+    border-left: 4px solid #ff8c00;
+}
+ul.live-touched-items li.live-touched-item-stale { border-left-color: rgba(255, 140, 0, 0.4); }
+ul.live-touched-items li.live-touched-item-saved { border-left-color: #9b59ff; }
+.live-touched-item-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+}
+.live-touched-item-title {
+    font-weight: bold;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.live-touched-item-id {
+    flex: 0 0 auto;
+    font-size: 11px;
+    opacity: 0.7;
+}
+.live-touched-item-status,
+.live-touched-item-hint {
+    font-size: 12px;
+}
+/* conflict: only the hint line stands out, in iD's warning colors */
+.live-touched-item-hint {
+    margin-top: 2px;
+    color: var(--warning-text-color);
+}
+.live-touched-item-hint .icon {
+    color: var(--warning-icon-color);
+    fill: currentColor;
+}
+.live-touched-item-hint.hide {
+    display: none;
+}
+.live-touched-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 8px;
+    font-size: 12px;
+}
+.live-touched-footer button.live-touched-nuke {
+    height: auto;
+    padding: 4px 8px;
+    font-size: 12px;
+}
+
+/* pulsing dot on the Map Data button while others edit in view */
+.map-data-control button.live-touched-others-nearby {
+    position: relative;
+}
+.map-data-control button.live-touched-others-nearby::after {
+    content: '';
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ff8c00;
+    animation: live-touched-pulse 1.5s ease-in-out infinite;
+}
+@keyframes live-touched-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(1.4); }
+}

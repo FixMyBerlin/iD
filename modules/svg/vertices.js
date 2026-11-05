@@ -23,6 +23,8 @@ export function svgVertices(projection, context) {
     var _currSelected = {};
     var _prevSelected = {};
     var _radii = {};
+    // whether hovered vertices may be in the DOM: they are only rendered in the draw modes
+    var _hoverRendered = false;
 
 
     function sortY(a, b) {
@@ -383,6 +385,13 @@ export function svgVertices(projection, context) {
             _radii = {};
         }
 
+        if (isMoving) {
+            _hoverRendered = true;
+        } else if (fullRedraw) {
+            // outside the draw modes, a full redraw removes all vertices that are only hovered
+            _hoverRendered = false;
+        }
+
         // Collect important vertices from the `entities` list..
         // (during a partial redraw, it will not contain everything)
         for (var i = 0; i < entities.length; i++) {
@@ -445,7 +454,10 @@ export function svgVertices(projection, context) {
 
 
     // partial redraw - only update the selected items..
-    drawVertices.drawSelected = function(selection, graph, extent) {
+    // Radnetz Berlin: `onlyUpdate` keeps the selected set current without drawing, for a full redraw
+    // that follows anyway. Each partial draw re-renders all persistent vertices (see `filterRendered`),
+    // so drawing here too doubled the vertex work of every redraw with a selection.
+    drawVertices.drawSelected = function(selection, graph, extent, onlyUpdate) {
         var wireframe = context.surface().classed('fill-wireframe');
         var zoom = geoScaleToZoom(projection.scale());
 
@@ -467,6 +479,8 @@ export function svgVertices(projection, context) {
             _currSelected = getSiblingAndChildVertices(context.selectedIDs(), graph, wireframe, zoom);
         }
 
+        if (onlyUpdate) return;
+
         // note that drawVertices will add `_currSelected` automatically if needed..
         var filter = function(d) { return d.id in _prevSelected; };
         drawVertices(selection, graph, Object.values(_prevSelected), filter, extent, false);
@@ -479,8 +493,9 @@ export function svgVertices(projection, context) {
 
 
     // partial redraw - only update the hovered items..
+    // returns whether anything was redrawn
     drawVertices.drawHover = function(selection, graph, target, extent) {
-        if (target === _currHoverTarget) return;  // continue only if something changed
+        if (target === _currHoverTarget) return false;  // continue only if something changed
 
         var wireframe = context.surface().classed('fill-wireframe');
         var zoom = geoScaleToZoom(projection.scale());
@@ -495,9 +510,16 @@ export function svgVertices(projection, context) {
             _currHover = {};
         }
 
+        // outside the draw modes hovered vertices are not rendered, and none are left over
+        // from a draw mode: redrawing would not change anything
+        var mode = context.mode();
+        var isMoving = mode && /^(add|draw|drag|move|rotate)/.test(mode.id);
+        if (!isMoving && !_hoverRendered) return false;
+
         // note that drawVertices will add `_currHover` automatically if needed..
         var filter = function(d) { return d.id in _prevHover; };
         drawVertices(selection, graph, Object.values(_prevHover), filter, extent, false);
+        return true;
     };
 
     return drawVertices;

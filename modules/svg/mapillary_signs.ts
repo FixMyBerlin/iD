@@ -6,6 +6,8 @@ import { services } from '../services';
 import type { Projection } from '../geo/raw_mercator';
 import type { MlyImage } from '../services/mapillary';
 import type { coreContext } from '../core';
+import { isSignValue, signMatchesGroups } from '../mapillary/sign_groups';
+import { clearSelectedSign, selectedSign, selectMapillarySign, signSelectEvents } from '../mapillary/sign_select';
 
 
 export function svgMapillarySigns(projection: Projection, context: coreContext, dispatch: Dispatch<object>) {
@@ -59,32 +61,25 @@ export function svgMapillarySigns(projection: Projection, context: coreContext, 
     }
 
 
+    // WORKDOC feature 26: load all images of the sign and show the best one, turned to the sign;
+    // a click on the selected sign deselects it and keeps the image
     function click(d3_event: MouseEvent, d: MlyImage) {
-        const service = getService();
-        if (!service) return;
+        if (!getService()) return;
+        // ids from the vector tiles are numbers
+        if (selectedSign()?.id === String(d.id)) {
+            clearSelectedSign();
+            return;
+        }
+        selectMapillarySign(context, { id: String(d.id), value: d.value!, loc: d.loc });
+    }
 
-        context.map().centerEase(d.loc);
 
-        const selectedImage = service.getActiveImage();
-
-        service.getDetections(d.id).then(detections => {
-            if (detections.length) {
-                const { image } = detections[0];
-                if (selectedImage && image.id === selectedImage.id) {
-                    service
-                        .highlightDetection(detections[0])
-                        .selectImage(image);
-                } else {
-                    service.ensureViewerLoaded(context)
-                        .then(function() {
-                            service
-                                .highlightDetection(detections[0])
-                                .selectImage(image)
-                                .showViewer(context);
-                        });
-                }
-            }
-        });
+    /** Outlines in the viewer: signs of the chosen groups and the selected sign; other objects only with their layer */
+    function outlineFilter(value: string, detectionID: string) {
+        if (!isSignValue(value)) return context.layers().layer('mapillary-map-features')?.enabled() ?? false;
+        const sign = selectedSign();
+        if (sign?.imageId && sign.detections.get(sign.imageId) === detectionID) return true;
+        return signMatchesGroups(value, context.photos().signGroups());
     }
 
 
@@ -105,7 +100,8 @@ export function svgMapillarySigns(projection: Projection, context: coreContext, 
             });
         }
 
-        return detectedFeatures;
+        const groups = context.photos().signGroups();
+        return detectedFeatures.filter(feature => signMatchesGroups(feature.value!, groups));
     }
 
 
@@ -145,8 +141,37 @@ export function svgMapillarySigns(projection: Projection, context: coreContext, 
             .attr('y', '-12px');
 
         // update
+        const sign = selectedSign();
+        const selectedID = sign?.id;
+
+        // a dotted line from the shown image's marker (its GPS position) via Mapillary's computed
+        // position (a small dot) to the selected sign (WORKDOC feature 26)
+        const shownImage = sign?.imageId ? sign.days.flatMap(day => day.images).find(image => image.id === sign.imageId) : undefined;
+        const points = sign && shownImage ? [shownImage.originalLoc ?? shownImage.loc, shownImage.loc, sign.loc].map(loc => projection(loc)) : [];
+
+        const link = layer.selectAll<SVGPathElement, number>('.mapillary-sign-link')
+            .data(points.length ? [0] : []);
+        link.exit().remove();
+        link.enter()
+            .insert('path', ':first-child')
+            .attr('class', 'mapillary-sign-link')
+            .merge(link)
+            .attr('d', `M${points.map(point => point.join(',')).join('L')}`);
+
+        const computed = layer.selectAll<SVGCircleElement, number>('.mapillary-sign-computed')
+            .data(points.length ? [0] : []);
+        computed.exit().remove();
+        computed.enter()
+            .insert('circle', '.icon-sign')
+            .attr('class', 'mapillary-sign-computed')
+            .attr('r', 4)
+            .merge(computed)
+            .attr('cx', points[1]?.[0] ?? 0)
+            .attr('cy', points[1]?.[1] ?? 0);
+
         signs
             .merge(enter)
+            .classed('mly-sign-selected', d => String(d.id) === selectedID)
             .attr('transform', transform);
     }
 
@@ -167,17 +192,23 @@ export function svgMapillarySigns(projection: Projection, context: coreContext, 
             .style('display', enabled ? 'block' : 'none')
             .merge(layer);
 
+        // redraw the selected sign's frame and line when the selection changes (also when the
+        // layer was turned on from the URL, which does not go through `drawSigns.enabled`)
+        signSelectEvents.on('change.mapillary_signs', enabled ? update : null);
+
         if (enabled) {
             if (service && ~~context.map().zoom() >= minZoom) {
                 editOn();
                 update();
                 service.loadSigns(projection);
                 service.showSignDetections(true);
+                service.setOutlineFilter(outlineFilter);
             } else {
                 editOff();
             }
         } else if (service) {
             service.showSignDetections(false);
+            service.setOutlineFilter(null);
         }
     }
 

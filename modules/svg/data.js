@@ -20,7 +20,9 @@ var _geojson;
 
 
 export function svgData(projection, context, dispatch) {
-    var throttledRedraw = throttle(function () { dispatch.call('change'); }, 1000);
+    // Radnetz Berlin: only when this layer shows vector tiles. The custom data layers use the same
+    // vector tile service, and each of their tiles made this empty layer redraw the whole map.
+    var throttledRedraw = throttle(function () { if (_template) dispatch.call('change'); }, 1000);
     var _showLabels = true;
     var detected = utilDetect();
     var layer = d3_select(null);

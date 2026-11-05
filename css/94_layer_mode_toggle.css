@@ -1,0 +1,75 @@
+/* Interactive | read-only | hidden toggle in the Map Data lists (ui/layer_mode_toggle.ts) */
+
+:is(.map-data-pane, .map-display-pane) .layer-list li:has(> .layer-mode) {
+    display: flex;
+    align-items: stretch;
+}
+:is(.map-data-pane, .map-display-pane) .layer-list li:has(> .layer-mode) > label {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+/* Map Features: the toggle replaces the checkbox; keep the input for iD's own code */
+:is(.map-data-pane, .map-display-pane) .layer-feature-list li > label input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+/* dim the label's content, not the label: its tooltip is a child and would fade too */
+:is(.map-data-pane, .map-display-pane) .layer-list li[data-mode="readonly"] > label > :not(.popover, input),
+:is(.map-data-pane, .map-display-pane) .layer-list li[data-mode="hidden"] > label > :not(.popover, input) {
+    opacity: 0.6;
+}
+/* a read-only data layer looks the same on the map, so its row is not dimmed */
+:is(.map-data-pane, .map-display-pane) .layer-list-custom-data li[data-mode="readonly"] > label > :not(.popover, input) {
+    opacity: 1;
+}
+:is(.map-data-pane, .map-display-pane) .layer-mode {
+    display: flex;
+    flex: 0 0 auto;
+}
+:is(.map-data-pane, .map-display-pane) .layer-mode button {
+    width: 30px;
+    height: auto;
+    border-radius: 0;
+    border-left: 1px solid rgba(128, 128, 128, 0.3);
+    background: transparent;
+}
+:is(.map-data-pane, .map-display-pane) .layer-mode button .icon {
+    width: 14px;
+    height: 14px;
+    opacity: 0.25;
+}
+:is(.map-data-pane, .map-display-pane) .layer-mode button:hover .icon {
+    opacity: 0.6;
+}
+:is(.map-data-pane, .map-display-pane) .layer-mode button.active .icon {
+    opacity: 1;
+}
+:is(.map-data-pane, .map-display-pane) .layer-mode button.layer-mode-interactive.active {
+    color: #7092ff;
+}
+
+/* Map features moved to the Map Display pane, photo overlays to the Photos pane
+   (see WORKDOC "Right sidebar buttons"); they keep the Map Data pane's list styles. */
+.photos-pane .layer-list button {
+    border-left: 1px solid var(--border-color);
+    border-radius: 0;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+.photos-pane .layer-list button .icon {
+    fill: var(--text-color);
+    opacity: 0.5;
+}
+.photos-pane .layer-list button:last-of-type {
+    border-radius: 0 3px 3px 0;
+}
+
+/* a mode the entry cannot have (e.g. read-only for a data layer with progress tracking) */
+:is(.map-data-pane, .map-display-pane) .layer-mode button.unavailable {
+    cursor: not-allowed;
+}
+:is(.map-data-pane, .map-display-pane) .layer-mode button.unavailable .icon,
+:is(.map-data-pane, .map-display-pane) .layer-mode button.unavailable:hover .icon {
+    opacity: 0.1;
+}
