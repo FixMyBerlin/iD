@@ -21,6 +21,13 @@ const DIRECTIONS: readonly Direction[] = ['forward', 'backward'];
 
 /** Values of `cycleway:<side>` / `sidewalk:<side>` that mean "nothing on this side of the way" */
 const NOTHING = new Set(['no', 'none', 'separate']);
+/**
+ * Values of `cycleway` / `cycleway:<side>` that are a bike lane or track on that side. Others are no
+ * side: `cycleway=crossing`, `sidepath`, `link`, `asl` describe the way itself or a junction
+ */
+const CYCLEWAY_SIDE_VALUES = new Set([
+    'lane', 'track', 'opposite_lane', 'opposite_track', 'share_busway', 'opposite_share_busway', 'shared_lane'
+]);
 
 
 function value(tags: TagsLike, key: string): string | undefined {
@@ -48,12 +55,13 @@ export function parseSignKey(key: string): (SignRow & { group: SignGroup }) | un
  * Both sides without a key of their own are one row, `both`.
  */
 export function sidesWith(tags: TagsLike, group: 'cycleway' | 'sidewalk'): Side[] {
+    const present = (v: string) => group === 'cycleway' ? CYCLEWAY_SIDE_VALUES.has(v) : !NOTHING.has(v);
     const has = (side: 'left' | 'right') => {
         const own = value(tags, `${group}:${side}`) ?? value(tags, `${group}:both`);
-        if (own) return !NOTHING.has(own);
+        if (own) return present(own);
         const plain = value(tags, group);
         if (!plain) return false;
-        return group === 'sidewalk' ? plain === 'both' || plain === side : !NOTHING.has(plain);
+        return group === 'sidewalk' ? plain === 'both' || plain === side : present(plain);
     };
     const [left, right] = [has('left'), has('right')];
     const ownKeys = value(tags, `${group}:left`) !== undefined || value(tags, `${group}:right`) !== undefined;

@@ -20,6 +20,10 @@ describe('sidesWith', () => {
         expect(sidesWith({ 'cycleway:left': 'lane', 'cycleway:right': 'lane' }, 'cycleway')).toEqual(['left', 'right']);
         expect(sidesWith({ 'cycleway:both': 'separate' }, 'cycleway')).toEqual([]);
         expect(sidesWith({}, 'cycleway')).toEqual([]);
+        // the way itself or a junction, not a lane on its sides (changeset 191513814)
+        expect(sidesWith({ highway: 'cycleway', cycleway: 'crossing' }, 'cycleway')).toEqual([]);
+        expect(sidesWith({ cycleway: 'sidepath' }, 'cycleway')).toEqual([]);
+        expect(sidesWith({ 'cycleway:right': 'shared_lane' }, 'cycleway')).toEqual(['right']);
     });
 
     it('finds the sides with a sidewalk', () => {
