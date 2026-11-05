@@ -16,6 +16,7 @@ import { modeBrowse } from './browse';
 import { modeDragNode } from './drag_node';
 import { modeDragNote } from './drag_note';
 import { uiDataEditor } from '../ui/data_editor';
+import { progressTrackingKey } from '../ui/progress_tracking';
 import { utilKeybinding } from '../util';
 
 
@@ -72,6 +73,10 @@ export function modeSelectData(context, selectedDatum) {
 
         keybinding
             .on(t('inspector.zoom_to.key'), mode.zoomToSelected)
+            .on(progressTrackingKey(), function(d3_event) {
+                d3_event.preventDefault();
+                dataEditor.toggleProgressDone();
+            })
             .on('⎋', esc, true);
 
         d3_select(document)

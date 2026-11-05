@@ -79,6 +79,12 @@ export function uiDataEditor(context) {
     }
 
 
+    /** done / not done for the shown line, see uiProgressTracking */
+    dataEditor.toggleProgressDone = function() {
+        progressTracking.toggle();
+    };
+
+
     dataEditor.datum = function(val) {
         if (!arguments.length) return _datum;
         _datum = val;

@@ -1359,6 +1359,7 @@ en:
     server: "The project database answered with an error ({status} {code})."
     network: "The project database could not be reached from {origin}: offline, or this address is not allowed there."
   progress_tracking:
+    key: D
     done: Done
     done_tooltip: Mark this line as done
     undo_tooltip: Take the mark away again
@@ -2853,6 +2854,7 @@ en:
         title: "With features selected"
         edit_menu: "Toggle edit menu"
         zoom_to: "Zoom to selected features"
+        progress_done: "Mark the selected line of a data layer with a progress tracker as done, or take the mark away"
       vertex_selected:
         title: "With node selected"
         previous: "Jump to previous node"

@@ -153,6 +153,11 @@
             "text": "shortcuts.browsing.with_selected.zoom_to"
           },
           {
+            "modifiers": ["⇧"],
+            "shortcuts": ["progress_tracking.key"],
+            "text": "shortcuts.browsing.with_selected.progress_done"
+          },
+          {
             "section": "vertex_selected",
             "text": "shortcuts.browsing.vertex_selected.title"
           },

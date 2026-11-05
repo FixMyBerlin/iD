@@ -2,6 +2,7 @@ import { kvErrorMessage } from '../core/kv_error_message';
 import { t, localizer } from '../core/localizer';
 import { progressFeatureID, progressTracker, type ProgressMark } from '../progress/tracker';
 import { customDataLayerOfFeature, customDataLineBBox } from '../svg/custom_data';
+import { uiCmd } from './cmd';
 
 type DataFeature = { properties?: Record<string, unknown> | null };
 
@@ -48,6 +49,12 @@ export function uiProgressTracking(context: iD.Context) {
 
     /** Done, or back to nothing */
     function toggle() {
+        // the same as the disabled button; from the keyboard, say why nothing happens
+        const current = state();
+        if (current?.disabled && current.disabled !== 'unavailable') {
+            flash(t(`progress_tracking.disabled.${current.disabled}`), '#iD-icon-info');
+            return;
+        }
         const layer = _datum && customDataLayerOfFeature(_datum);
         const featureID = progressFeatureID(_datum?.properties);
         if (!layer?.tracker || !featureID || _saving) return;
@@ -105,7 +112,7 @@ export function uiProgressTracking(context: iD.Context) {
         section.select('.progress-done')
             .classed('active', !!current.mark)
             .attr('aria-checked', String(!!current.mark))
-            .attr('title', t(current.mark ? 'progress_tracking.undo_tooltip' : 'progress_tracking.done_tooltip'))
+            .attr('title', `${t(current.mark ? 'progress_tracking.undo_tooltip' : 'progress_tracking.done_tooltip')} (${uiCmd(progressTrackingKey())})`)
             .text(`${current.mark ? '✓ ' : ''}${t('progress_tracking.done')}`)
             // "unavailable" is only a note: the last request failed, a click tries again
             .property('disabled', (!!current.disabled && current.disabled !== 'unavailable') || _saving);
@@ -138,5 +145,14 @@ export function uiProgressTracking(context: iD.Context) {
         return progressTracking;
     };
 
+    /** the button's action, for the keyboard shortcut (nothing when the line has no progress tracker) */
+    progressTracking.toggle = toggle;
+
     return progressTracking;
+}
+
+
+/** ⇧D: done / not done for the selected line of a layer with a progress tracker */
+export function progressTrackingKey() {
+    return '⇧' + t('progress_tracking.key');
 }

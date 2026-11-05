@@ -425,6 +425,8 @@ de:
         map_display: "Kartendarstellung ein-/ausblenden"
         photos: "Fotos ein-/ausblenden"
         way_table: "Wege-Tabelle ein-/ausblenden"
+      with_selected:
+        progress_done: Die ausgewählte Linie einer Datenebene mit Fortschrittsverfolgung als erledigt markieren oder die Markierung wieder wegnehmen
     editing:
       operations:
         extract_sidepath: "Einen Radweg oder Gehweg aus einer Straße herauslösen (mehrere Möglichkeiten: Auswahl aus einem Menü)"
