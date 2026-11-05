@@ -880,6 +880,7 @@ en:
         guess: "TILDA assumes {value}; please tag it"
         ignored: "TILDA cannot use “{value}”: choose another value"
         normalized: "TILDA reads it as {value}"
+        unused: "{tag} is tagged too, but TILDA does not use it"
       reminder:
         damage_signs:
           title: "Check for damage signs."

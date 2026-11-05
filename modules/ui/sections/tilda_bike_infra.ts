@@ -61,8 +61,17 @@ const STATE_ICON: Record<RequiredAttribute['state'], string> = {
 };
 
 
-/** What TILDA makes of the tagged value, if that is worth saying */
+/** What TILDA makes of the tagged value, and a tag next to it that TILDA does not read */
 function stateNote(attribute: RequiredAttribute) {
+    const note = valueNote(attribute);
+    if (!attribute.unused) return note;
+    const unused = t('inspector.tilda.state.unused', { tag: attribute.unused });
+    return note ? `${note}. ${unused}` : unused;
+}
+
+
+/** What TILDA makes of the tagged value, if that is worth saying */
+function valueNote(attribute: RequiredAttribute) {
     const { state, value, tilda } = attribute;
     if (state === 'inherited' && attribute.source) return t('inspector.tilda.state.derived', { value: tilda, tag: attribute.source });
     if (state === 'inherited') return t('inspector.tilda.state.inherited', { value: tilda });

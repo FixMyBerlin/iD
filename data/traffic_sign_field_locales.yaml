@@ -292,6 +292,7 @@ de:
         guess: "TILDA nimmt {value} an; bitte tagge es"
         ignored: "TILDA kann „{value}“ nicht verwenden: Wähle einen anderen Wert"
         normalized: "TILDA liest es als {value}"
+        unused: "{tag} ist auch getaggt, wird aber nicht beachtet"
       side:
         self: Dieser Weg
         left: Linke Seite

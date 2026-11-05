@@ -294,15 +294,26 @@ describe('roadAttributes', () => {
         expect(byId(requiredAttributes(resultFor(withSource, 'right'), withSource, undefined, new Set(['cycleway:right:width']))).source_width.state).toBe('ok');
     });
 
-    it('oneway=no with oneway:bicycle=yes: names the tag TILDA reads instead', () => {
+    it('oneway=no with oneway:bicycle=yes: shows oneway:bicycle, oneway only as not used', () => {
         const tags = { highway: 'cycleway', oneway: 'no', 'oneway:bicycle': 'yes' };
         const oneway = byId(requiredAttributes(resultFor(tags, 'self'), tags)).oneway;
-        expect(oneway.value).toBe('no');
+        expect(oneway.key).toBe('oneway:bicycle');
+        expect(oneway.value).toBe('yes');
+        expect(oneway.tagged).toEqual([{ key: 'oneway:bicycle', value: 'yes' }]);
         expect(oneway.tilda).toBe('yes');
-        expect(oneway.source).toBe('oneway:bicycle=yes');
-        // without the other tag there is no source
+        expect(oneway.state).toBe('ok');
+        expect(oneway.unused).toBe('oneway=no');
+        // oneway:bicycle alone: TILDA reads it, nothing unused
+        const alone = { highway: 'path', bicycle: 'designated', 'oneway:bicycle': 'yes' };
+        const onlyBicycle = byId(requiredAttributes(resultFor(alone, 'self'), alone)).oneway;
+        expect(onlyBicycle.key).toBe('oneway:bicycle');
+        expect(onlyBicycle.state).toBe('ok');
+        expect(onlyBicycle.unused).toBeUndefined();
+        // without oneway:bicycle the row is about oneway
         const plain = { highway: 'cycleway', oneway: 'yes' };
-        expect(byId(requiredAttributes(resultFor(plain, 'self'), plain)).oneway.source).toBeUndefined();
+        const plainOneway = byId(requiredAttributes(resultFor(plain, 'self'), plain)).oneway;
+        expect(plainOneway.key).toBe('oneway');
+        expect(plainOneway.unused).toBeUndefined();
     });
 
     it('Radinfra FAQ: bicycle roads always need the marking, the buffer only with a line', () => {

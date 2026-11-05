@@ -44,6 +44,8 @@ export type RequiredAttribute = {
     tilda: string | undefined;
     /** the tag TILDA derives an untagged value from (`parking:right=lane`) */
     source?: string;
+    /** a tag of this attribute that is there, but TILDA does not read it (`oneway=yes` next to `oneway:bicycle`) */
+    unused?: string;
     state: AttributeState;
     /** values TILDA accepts, offered as buttons; for `assumed` only the values that differ from the default */
     options: string[];
@@ -108,6 +110,11 @@ type Rule = {
     derivedFrom?: (ctx: RuleContext) => { tag: string; tilda: string } | undefined;
     /** The tag TILDA reads instead of this key when both are there (`oneway:bicycle` wins over `oneway`) */
     overriddenBy?: (ctx: RuleContext) => string | undefined;
+    /**
+     * A key TILDA reads first on the way itself (`oneway:bicycle` before `oneway`): when it is tagged,
+     * the row shows and writes that key, and the own key, if tagged too, only as not used
+     */
+    preferredKey?: string;
     when?: (ctx: RuleContext) => boolean;
     /** the rule does not apply here (another rule replaces it) */
     unless?: (ctx: RuleContext) => boolean;
@@ -294,7 +301,8 @@ const COMMON: Rule[] = [
         tilda: field('surface_color'), optional: true, assumed: () => 'no', note: 'surface_colour', when: isSegregatedWay },
     { id: 'oneway', key: 'oneway', feeds: ['verkehrsri'], options: ['yes', 'no', '-1'], tilda: field('oneway'), guesses: ['assumed_no', 'implicit_yes'],
         // lanes on the road run with the traffic, bicycle roads are two-way: TILDA's default is reliable there
-        assumed: assumedOneway, overriddenBy: onewayBicycleTag,
+        // TILDA reads `oneway:bicycle` first (`derive_oneway.lua`): show that tag, `oneway` next to it is not used
+        assumed: assumedOneway, preferredKey: 'oneway:bicycle',
         // a road side: only "both ways" is information, the direction follows from the side
         assumedOptions: ['no'], note: ctx => ctx.side !== 'self' ? 'oneway_side' : undefined }
 ];
@@ -418,10 +426,26 @@ function summary(ctx: RuleContext, keys: string[]) {
 }
 
 
+/**
+ * The key TILDA reads first is tagged (and has no row of its own): the row is about that key,
+ * the own key, if tagged too, is not used
+ */
+function withPreferredKey(rule: Rule, active: Rule[], ctx: RuleContext): { rule: Rule; unused?: string } {
+    const preferred = rule.preferredKey;
+    if (!preferred || ctx.side !== 'self' || ctx.tags[preferred] === undefined || active.some(other => other.key === preferred)) return { rule };
+    const own = ctx.tags[rule.key];
+    return {
+        rule: { ...rule, key: preferred, readKeys: undefined, alsoKeys: undefined },
+        unused: own !== undefined ? `${rule.key}=${own}` : undefined
+    };
+}
+
+
 function evaluate(rules: Rule[], ctx: RuleContext): RequiredAttribute[] {
-    return rules
-        .filter(rule => (!rule.when || rule.when(ctx)) && !rule.unless?.(ctx))
-        .map(rule => {
+    const active = rules.filter(rule => (!rule.when || rule.when(ctx)) && !rule.unless?.(ctx));
+    return active
+        .map(original => {
+            const { rule, unused } = withPreferredKey(original, active, ctx);
             const ownKeys = [rule.key, ...(rule.alsoKeys ?? [])];
             const keysFor = (key: string) => rule.sourceFor
                 ? lookupKeys(rule.sourceFor, ctx.side, ctx.prefix).map(k => `source:${k}`)
@@ -474,6 +498,7 @@ function evaluate(rules: Rule[], ctx: RuleContext): RequiredAttribute[] {
                 lookup,
                 tilda,
                 source: derived?.tag ?? (value !== undefined && tilda !== undefined && tilda !== value ? rule.overriddenBy?.(ctx) : undefined),
+                unused,
                 state,
                 options,
                 default: state === 'assumed' ? `${key}=${assumed}` : undefined,
