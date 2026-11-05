@@ -138,8 +138,8 @@ function extractMergeOperation(context: iD.Context, wayID: WayId, choice: Choice
 /**
  * "Extract right cycle track and merge with the sidewalk" (left, or both sides) for a single
  * selected road with a cycle track on that side (WORKDOC feature 30): feature 17 and feature 28
- * in one click, for roads whose sidewalk is a separate way already. ⌘G runs the entry (one
- * choice) or opens a menu with the choices (several).
+ * in one click, for roads whose sidewalk is a separate way already. ⌘G always runs the "both
+ * sides" entry (the only side's entry if the road has a cycle track on one side only), no menu.
  */
 export function operationsExtractMergeSidepaths(context: iD.Context, selectedIDs: string[]): Operation[] {
     if (selectedIDs.length !== 1 || !selectedIDs[0].startsWith('w')) return [];
@@ -158,8 +158,9 @@ export function operationsExtractMergeSidepaths(context: iD.Context, selectedIDs
 
     const choices: Choice[] = [...(['right', 'left'] as const).filter(side => sides.includes(side)), ...(sides.length > 1 ? ['both' as const] : [])];
     const operations = choices.map(choice => extractMergeOperation(context, wayID, choice));
-    // the behavior is installed and removed with the operation list: hang it on the first entry
+    // the behavior is installed and removed with the operation list: hang it on the first entry.
+    // The key runs the last entry only ("both", or the only side): no choice
     operations[0].behavior = behaviorOperation(context)
-        .which(sidepathKeyOperation(context, wayID, operations, 'extract_merge_sidepaths', uiCmd('⌘G')));
+        .which(sidepathKeyOperation(context, wayID, operations.slice(-1), 'extract_merge_sidepaths', uiCmd('⌘G')));
     return operations;
 }

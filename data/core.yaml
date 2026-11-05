@@ -2292,6 +2292,11 @@ en:
       message: "{feature}: {tag} is not needed"
       default:
         reference: "Without “{key}” bicycles are assumed to ride with the traffic on their side, which is what “{tag}” says. The tag is not needed and easy to get wrong, because “oneway” refers to the direction the way is drawn in."
+    cycleway_traffic_mode_foot:
+      title: Footway Next to the Cycleway
+      tip: "Find cycleways with a footway right next to them where “traffic_mode” does not say so yet."
+      message: "{feature}: a footway runs next to it, “traffic_mode” may be useful"
+      reference: "A footway runs within {meters} m of this cycleway. If nothing else lies between the two, set “Pedestrians” in the field “Traffic Next To It” for that side (traffic_mode:left=foot or traffic_mode:right=foot). Left and right refer to the direction the way is drawn in."
     mutually_exclusive_tags:
       title: Contradictory Tags
       tip: "Find features that have contradictory tags."
@@ -2881,7 +2886,7 @@ en:
         extract_without_relations: "Extract a point from a feature, without extracting its relations"
         extract_sidepath: "Extract a cycle track or sidewalk from a road (several choices: pick one from a menu)"
         merge_sidepaths: "Merge a cycleway and a footway into one foot and cycle path"
-        extract_merge_sidepaths: "Extract the cycle track of a road and merge it with the sidewalk way next to it, in one step (several choices: pick one from a menu)"
+        extract_merge_sidepaths: "Extract the cycle track of a road and merge it with the sidewalk way next to it, in one step (both sides if the road has a cycle track on both)"
         split: "Split features at the selected points"
         reverse: "Reverse selected features"
         move: "Move selected features"
