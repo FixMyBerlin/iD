@@ -43,7 +43,7 @@ function samplePoints(locs: Loc[], step: number): Loc[] {
  * run along a third of it (a long sidewalk beside a short road piece). A footway that crosses the
  * cycleway does not stretch along it.
  */
-export function sidewalkCandidates(graph: coreGraph, bikeWayID: WayId, ways: osmWay[]): WayId[] {
+export function sidewalkCandidates(graph: coreGraph, bikeWayID: WayId, ways: osmWay[], nearMeters = NEAR_METERS): WayId[] {
     const bike = graph.hasEntity(bikeWayID);
     if (!bike || bike.type !== 'way') return [];
     const bikeLocs = wayLocs(graph, bike);
@@ -63,9 +63,9 @@ export function sidewalkCandidates(graph: coreGraph, bikeWayID: WayId, ways: osm
         const locs = wayLocs(graph, current as osmWay);
         if (locs.length < 2) continue;
         const points = samplePoints(locs, SAMPLE_METERS);
-        const near = points.filter(point => distanceToLineMeters(point, bikeLocs) <= NEAR_METERS);
+        const near = points.filter(point => distanceToLineMeters(point, bikeLocs) <= nearMeters);
         if (!near.length) continue;
-        const covered = bikePoints.filter(point => distanceToLineMeters(point, locs) <= NEAR_METERS).length;
+        const covered = bikePoints.filter(point => distanceToLineMeters(point, locs) <= nearMeters).length;
         if (near.length / points.length < NEAR_SHARE && covered / bikePoints.length < COVER_SHARE) continue;
 
         const along = near.map(point => projectOnLine(point, bikeLocs).along);

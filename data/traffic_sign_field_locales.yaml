@@ -215,6 +215,11 @@ de:
       message: "{feature}: {tag} ist nicht nötig"
       default:
         reference: "Ohne „{key}“ gilt: Der Radverkehr fährt mit dem Verkehr auf seiner Seite. Genau das sagt „{tag}“. Das Tag ist nicht nötig und leicht falsch zu setzen, weil sich „oneway“ auf die Richtung der gezeichneten Linie bezieht."
+    cycleway_traffic_mode_foot:
+      title: Gehweg neben dem Radweg
+      tip: "Findet Radwege mit einem Gehweg direkt daneben, bei denen „traffic_mode“ das noch nicht angibt."
+      message: "{feature}: Daneben verläuft ein Gehweg, „traffic_mode“ ist möglicherweise sinnvoll"
+      reference: "Ein Gehweg verläuft in höchstens {meters} m Abstand zu diesem Radweg. Wenn nichts anderes dazwischen liegt, wähle im Feld „Verkehr daneben“ für diese Seite „Fußgänger“ (traffic_mode:left=foot oder traffic_mode:right=foot). Links und rechts beziehen sich auf die Richtung, in der die Linie gezeichnet ist."
     fix:
       cycleway_oneway_both_ways:
         title: Radverkehr fährt hier in beide Richtungen
