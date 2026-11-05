@@ -40,8 +40,10 @@ export function reverseTags(tags: Tags): Tags {
     for (const [key, value] of Object.entries(tags)) {
         result[key.split(':').map(part => swap[part] ?? part).join(':')] = value;
     }
-    if (result.oneway === 'yes') result.oneway = '-1';
-    else if (result.oneway === '-1') result.oneway = 'yes';
+    for (const key of ['oneway', 'oneway:bicycle']) {
+        if (result[key] === 'yes') result[key] = '-1';
+        else if (result[key] === '-1') result[key] = 'yes';
+    }
     return result;
 }
 

@@ -123,6 +123,10 @@ describe('reverseTags', () => {
         expect(reverseTags({ oneway: 'yes', 'traffic_sign:forward': 'DE:237', 'separation:left': 'kerb', surface: 'asphalt' }))
             .toEqual({ oneway: '-1', 'traffic_sign:backward': 'DE:237', 'separation:right': 'kerb', surface: 'asphalt' });
     });
+
+    it('swaps oneway:bicycle too', () => {
+        expect(reverseTags({ oneway: 'no', 'oneway:bicycle': '-1' })).toEqual({ oneway: 'no', 'oneway:bicycle': 'yes' });
+    });
 });
 
 describe('commonTags', () => {

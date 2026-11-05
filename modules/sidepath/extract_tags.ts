@@ -1,7 +1,7 @@
 import { BIKELANE_TRANSFORMATIONS, getTransformedObjects } from '@tilda-geo/bicycle-infrastructure';
 
 import { roadWidthFromTags } from '../width/width_tags';
-import { combinedPathTags, type JoinSigns, type SignRecommend } from './merge_tags';
+import { combinedPathTags, reverseTags, type JoinSigns, type SignRecommend } from './merge_tags';
 
 export type { SignRecommend };
 
@@ -124,9 +124,8 @@ function signTags(sign: string | undefined, recommend: SignRecommend | undefined
 
 
 /**
- * The `oneway` value of the new way's bike traffic. The new way is always drawn in the road's
- * direction, so the side's tags (`separation:left`, `traffic_sign:forward`, …) stay valid as
- * they are, and a later merge with a sidewalk usually finds both in the same direction.
+ * The `oneway` value of the new way's bike traffic, in the road's direction. A `-1` is not kept:
+ * `planExtraction` then draws the way the other way round with `yes` (TILDA ignores `-1`).
  * Default: cycle tracks run with the traffic on their side, so right = `yes` and left = `-1`.
  * No guess for a left side of a one-way road that bikes may ride both ways (`oneway:bicycle=no`).
  */
@@ -144,6 +143,8 @@ export type ExtractionPlan = {
     offsetMeters: number;
     /** `bicycle` on the road was not changed because it has another value */
     keptBicycle: string | undefined;
+    /** the new way runs against the road (its bikes ride against the road): draw it reversed */
+    reversed: boolean;
 };
 
 
@@ -337,6 +338,10 @@ export function planExtraction(road: Tags, variant: ExtractVariant, side: Side, 
         signDesignated = [cycleway.traffic_sign, sidewalk.traffic_sign].some(value => signTags(value, recommend).bicycle === 'designated');
     }
 
+    // bikes only against the road: the way runs their direction, with its side and direction tags turned
+    const reversed = wayTags.oneway === '-1' || wayTags['oneway:bicycle'] === '-1';
+    if (reversed) wayTags = reverseTags(wayTags);
+
     if (wayTags.lit === undefined && road.lit) wayTags.lit = road.lit;
 
     // the road: the side becomes separate
@@ -351,5 +356,5 @@ export function planExtraction(road: Tags, variant: ExtractVariant, side: Side, 
         keptBicycle = result.kept;
     }
 
-    return { wayTags, roadTags, offsetMeters: sidepathOffsetMeters(road, side, variant), keptBicycle };
+    return { wayTags, roadTags, offsetMeters: sidepathOffsetMeters(road, side, variant), keptBicycle, reversed };
 }

@@ -92,8 +92,29 @@ describe('planExtraction', () => {
         const road = { highway: 'secondary', 'cycleway:left': 'track', 'cycleway:left:traffic_sign': 'DE:237', 'cycleway:right': 'separate', 'bicycle:forward': 'use_sidepath' };
         const plan = planExtraction(road, 'cycleway', 'left', recommend);
         expect(plan.roadTags).toEqual({ highway: 'secondary', 'cycleway:both': 'separate', bicycle: 'use_sidepath' });
-        // drawn in the road's direction; the left track's bikes ride against it
-        expect(plan.wayTags.oneway).toBe('-1');
+        // the left track's bikes ride against the road: drawn reversed, oneway=yes
+        expect(plan.wayTags.oneway).toBe('yes');
+        expect(plan.reversed).toBe(true);
+    });
+
+    it('A: a reversed left track turns its side and direction tags', () => {
+        const road = {
+            highway: 'secondary', 'cycleway:left': 'track', 'cycleway:left:separation:left': 'kerb',
+            'cycleway:left:traffic_mode:right': 'foot'
+        };
+        const plan = planExtraction(road, 'cycleway', 'left', undefined);
+        expect(plan.reversed).toBe(true);
+        expect(plan.wayTags).toEqual({
+            highway: 'cycleway', is_sidepath: 'yes', 'separation:right': 'kerb', 'traffic_mode:left': 'foot', oneway: 'yes'
+        });
+    });
+
+    it('C: a left path with bikes against the road is reversed, oneway:bicycle=yes', () => {
+        const road = { highway: 'residential', 'cycleway:left': 'track', 'sidewalk:left': 'yes' };
+        const plan = planExtraction(road, 'path', 'left', undefined);
+        expect(plan.reversed).toBe(true);
+        expect(plan.wayTags.oneway).toBe('no');
+        expect(plan.wayTags['oneway:bicycle']).toBe('yes');
     });
 
     it('A: DE:240 / DE:241 → highway=path with designations', () => {

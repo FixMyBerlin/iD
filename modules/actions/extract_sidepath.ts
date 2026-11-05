@@ -39,8 +39,9 @@ export function actionExtractSidepath(
         _keptBicycle = plan.keptBicycle;
 
         const locs = graph.childNodes(road).map(node => node.loc as [number, number]);
-        // in the road's direction; the bike direction is in the tags (`oneway=-1` on the left)
+        // in the road's direction, or against it where its bikes ride against the road (`oneway=yes` then)
         const offset = offsetLine(locs, plan.offsetMeters, side);
+        if (plan.reversed) offset.reverse();
 
         const nodes = offset.map(loc => new osmNode({ loc }));
         const way = new osmWay({ tags: plan.wayTags, nodes: nodes.map(node => node.id) });
