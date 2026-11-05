@@ -46,6 +46,18 @@ export function parseOsmWidth(value: string | undefined): number | undefined {
 }
 
 
+/** A width value (not its `source:` or `note:`): `width`, `cycleway:right:width`, `width:effective`, … */
+export function isWidthValueKey(key: string) {
+    return !/^(source|note|check_date):/.test(key) && /(^|:)width(:|$)/.test(key);
+}
+
+
+/** OSM numbers take a decimal point: a typed `2,5` becomes `2.5` */
+export function normalizeDecimalComma(value: string) {
+    return value.replace(/(\d),(\d)/g, '$1.$2');
+}
+
+
 function isOneway(tags: Tags) {
     if (tags.oneway === 'yes' || tags.oneway === '-1') return true;
     if (tags.oneway === 'no') return false;

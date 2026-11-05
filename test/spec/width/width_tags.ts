@@ -1,4 +1,4 @@
-import { parseOsmWidth, roadWidthFromTags, widthTargetForKey } from '../../../modules/width/width_tags';
+import { isWidthValueKey, normalizeDecimalComma, parseOsmWidth, roadWidthFromTags, widthTargetForKey } from '../../../modules/width/width_tags';
 import { sideWidthKeys } from '../../../modules/ui/sections/side_width_fields';
 
 
@@ -9,6 +9,19 @@ describe('width/width_tags', () => {
         expect(parseOsmWidth('150cm')).toBe(1.5);
         expect(parseOsmWidth('abc')).toBeUndefined();
         expect(parseOsmWidth(undefined)).toBeUndefined();
+    });
+
+    it('turns a decimal comma into a point, for width keys only', () => {
+        expect(normalizeDecimalComma('2,5')).toBe('2.5');
+        expect(normalizeDecimalComma('1,25 m')).toBe('1.25 m');
+        expect(normalizeDecimalComma('2.5')).toBe('2.5');
+        expect(isWidthValueKey('width')).toBe(true);
+        expect(isWidthValueKey('cycleway:width')).toBe(true);
+        expect(isWidthValueKey('cycleway:right:width')).toBe(true);
+        expect(isWidthValueKey('width:effective')).toBe(true);
+        expect(isWidthValueKey('source:width')).toBe(false);
+        expect(isWidthValueKey('note:cycleway:width')).toBe(false);
+        expect(isWidthValueKey('widthless')).toBe(false);
     });
 
     it('uses the width tag, else a default by highway type', () => {

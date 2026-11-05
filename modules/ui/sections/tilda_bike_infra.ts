@@ -25,6 +25,7 @@ import { uiPaneTooltip } from '../pane_tooltip';
 import { uiSection } from '../section';
 import { drawTagPlan, tagPlanChanges, type TagPlanRow } from '../tag_plan';
 import { sideWidthKeys } from './side_width_fields';
+import { isWidthValueKey, normalizeDecimalComma } from '../../width/width_tags';
 import { addableRelatedKeys } from '../../presets/related_tags';
 
 /** One card per TILDA result (self / left / right side of the way) */
@@ -571,7 +572,9 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
                 if (d3_event.key !== 'Enter' || !this.value.trim()) return;
                 d3_event.preventDefault();
                 const attribute = d3_select(this.closest('.tilda-attribute')!).datum() as RequiredAttribute;
-                changeTags({ [attribute.key]: this.value.trim() });
+                const value = this.value.trim();
+                // keys without a field (`cycleway:width`, `width:effective`) are typed here: a decimal comma becomes a point
+                changeTags({ [attribute.key]: isWidthValueKey(attribute.key) ? normalizeDecimalComma(value) : value });
             });
         inputs.append('datalist');
 
