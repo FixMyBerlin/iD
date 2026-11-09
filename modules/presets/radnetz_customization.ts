@@ -15,7 +15,9 @@ const WIDTH_SOURCE_PILLS = ['Luftbild 2026', 'Luftbild 2025', 'Messung aus Punkt
  * Width sources to pick by hand, like the Radinfra mappers write them (FAQ). The measuring tape writes
  * `Luftbild <year>` itself; the others are for widths measured elsewhere or counted from the paving.
  */
-export const WIDTH_SOURCE_OPTIONS = ['Luftbild 2026', 'Luftbild 2025', 'Messung aus Punktwolke (Infra3DViewer)', '7,5 Steine à 20 cm', 'survey'];
+// No fixed stone count ("7,5 Steine à 20 cm"): picked by hand it said 1.5 m next to other widths.
+// Counted stones come from the stone calculator next to the measuring tape, with the width.
+export const WIDTH_SOURCE_OPTIONS = ['Luftbild 2026', 'Luftbild 2025', 'Messung aus Punktwolke (Infra3DViewer)', 'survey'];
 
 // Values as TILDA accepts them (`sanitize-road-tags.ts` in @tilda-geo/bicycle-infrastructure)
 const SEPARATION_OPTIONS = {

@@ -2322,6 +2322,11 @@ en:
         reference: "“oneway” refers to the direction the way is drawn in. On the left side of a two-way road bicycles ride against that direction, so “{tag}” says they ride against the traffic next to them. Without the tag the usual direction is assumed: with the traffic on each side. Remove the tag, or set “no” if bicycles may ride both ways here."
       contraflow:
         reference: "Bicycles may ride against this one-way road, so its left side is the side for the opposite direction. “{tag}” says they ride with the one-way there. Without the tag the usual direction is assumed. Remove the tag, or set “no” if bicycles may ride both ways here."
+    width_stone_source:
+      title: Width Does Not Match the Counted Stones
+      tip: "Find widths whose source counts paving stones (“7,5 Steine à 20 cm”) but that give another width."
+      message: "{feature}: {key} is {width} m, the stones in the source give {stones} m"
+      reference: "The source “{source}” gives {stones} m, but {key} is {width} m. Count the stones again (stone calculator next to the measuring tape), set the width from the stones, or change the source."
     width_part_whole:
       title: Part as Wide as the Whole Path
       tip: "Find foot and cycle paths where the cycleway or footway part is as wide as the whole path."
@@ -2508,6 +2513,9 @@ en:
       remove_tag:
         title: Remove the tag
         annotation: Removed tag.
+      width_stone_source:
+        title: "Set {key} to {stones} m (from the stones)"
+        annotation: "Set {key} from the counted stones."
       width_part_whole:
         title: "Remove {key}"
         annotation: "Removed {key}."

@@ -18,3 +18,4 @@ export { validationPrivateData } from './private_data';
 export { validationSuspiciousName } from './suspicious_name';
 export { validationUnsquareWay } from './unsquare_way';
 export { validationWidthPartsSum, validationWidthPartWhole } from './width_parts';
+export { validationWidthStoneSource } from './width_stone_source';

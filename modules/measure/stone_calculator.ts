@@ -16,6 +16,12 @@ export const isStoneKey = (key: string) => STONE_KEY.test(key);
 /** The width source key of the Radinfra FAQ: `source:width`, `source:cycleway:width` */
 const sourceKeyOf = (key: string) => `source:${key}`;
 
+/** "7,5" or "7.5"; anything else is no count (0) */
+export function parseCount(text: string): number {
+    const value = text.trim().replace(',', '.');
+    return /^\d+(\.\d+)?$/.test(value) ? Number(value) : 0;
+}
+
 
 /**
  * The stone calculator next to the measuring tape (WORKDOC feature 21): "6 Steine à 20 cm = 1.2 m".
@@ -99,13 +105,13 @@ export function stoneCalculator(context: iD.Context) {
             .attr('class', PANEL_CLASS);
         const row = enter.append('div').attr('class', 'stone-calculator-row');
         row.append('input')
-            .attr('type', 'number')
-            .attr('min', '0')
-            .attr('step', '0.5')
+            // text, not number: a number input drops or rejects the comma in some browser languages
+            .attr('type', 'text')
+            .attr('inputmode', 'decimal')
             .attr('class', 'stone-count')
             .attr('aria-label', t('inspector.stone_calculator.count'))
             .on('input', function(this: HTMLInputElement) {
-                _drafts.set(key, { ...stonesOf(key), count: Number(this.value) });
+                _drafts.set(key, { ...stonesOf(key), count: parseCount(this.value) });
                 drawResult();
             });
         row.append('span').attr('class', 'stone-calculator-text').text(t('inspector.stone_calculator.stones_of'));
@@ -123,7 +129,7 @@ export function stoneCalculator(context: iD.Context) {
 
         const stones = stonesOf(key);
         const countInput = panel.select<HTMLInputElement>('input.stone-count').node()!;
-        if (document.activeElement !== countInput) countInput.value = stones.count ? String(stones.count) : '';
+        if (document.activeElement !== countInput) countInput.value = stones.count ? String(stones.count).replace('.', ',') : '';
 
         panel.select('.stone-sizes').selectAll<HTMLButtonElement, number>('button')
             .data([...new Set([...STONE_SIZES_CM, stones.cm])], d => String(d))

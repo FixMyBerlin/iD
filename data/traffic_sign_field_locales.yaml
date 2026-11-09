@@ -209,6 +209,11 @@ de:
         reference: "„oneway“ bezieht sich auf die Richtung, in der die Linie gezeichnet ist. Auf der linken Seite einer Straße mit Gegenverkehr fährt der Radverkehr gegen diese Richtung; „{tag}“ sagt also, er fährt dem Verkehr neben sich entgegen. Ohne das Tag gilt die übliche Richtung: auf jeder Seite mit dem Verkehr. Entferne das Tag, oder setze „no“, wenn Radfahrende hier in beide Richtungen fahren dürfen."
       contraflow:
         reference: "Radfahrende dürfen diese Einbahnstraße in Gegenrichtung befahren; die linke Seite ist damit die Seite für die Gegenrichtung. „{tag}“ sagt, dort wird in Richtung der Einbahnstraße gefahren. Ohne das Tag gilt die übliche Richtung. Entferne das Tag, oder setze „no“, wenn Radfahrende hier in beide Richtungen fahren dürfen."
+    width_stone_source:
+      title: Breite passt nicht zu den gezählten Steinen
+      tip: "Findet Breiten, deren Quelle Pflastersteine zählt („7,5 Steine à 20 cm“), die aber eine andere Breite ergeben."
+      message: "{feature}: {key} ist {width} m, die Steine in der Quelle ergeben {stones} m"
+      reference: "Die Quelle „{source}“ ergibt {stones} m, eingetragen ist {key} = {width} m. Zähle die Steine noch einmal (Steinrechner neben dem Messband), setze die Breite aus den Steinen oder ändere die Quelle."
     width_part_whole:
       title: Teil so breit wie der ganze Weg
       tip: "Findet Geh- und Radwege, bei denen der Radweg- oder Gehweganteil so breit ist wie der ganze Weg."
@@ -235,6 +240,9 @@ de:
       message: "{feature}: Daneben verläuft ein Gehweg, „traffic_mode“ ist möglicherweise sinnvoll"
       reference: "Ein Gehweg verläuft in höchstens {meters} m Abstand zu diesem Radweg. Wenn nichts anderes dazwischen liegt, wähle im Feld „Verkehr daneben“ für diese Seite „Fußgänger“ (traffic_mode:left=foot oder traffic_mode:right=foot). Links und rechts beziehen sich auf die Richtung, in der die Linie gezeichnet ist."
     fix:
+      width_stone_source:
+        title: "{key} auf {stones} m setzen (aus den Steinen)"
+        annotation: "{key} aus den gezählten Steinen gesetzt."
       width_part_whole:
         title: "{key} entfernen"
         annotation: "{key} entfernt."
@@ -843,6 +851,11 @@ de-CH:
         reference: "„oneway“ bezieht sich auf die Richtung, in der die Linie gezeichnet ist. Auf der linken Seite einer Straße mit Gegenverkehr fährt der Radverkehr gegen diese Richtung; „{tag}“ sagt also, er fährt dem Verkehr neben sich entgegen. Ohne das Tag gilt die übliche Richtung: auf jeder Seite mit dem Verkehr. Entferne das Tag, oder setze „no“, wenn Radfahrende hier in beide Richtungen fahren dürfen."
       contraflow:
         reference: "Radfahrende dürfen diese Einbahnstraße in Gegenrichtung befahren; die linke Seite ist damit die Seite für die Gegenrichtung. „{tag}“ sagt, dort wird in Richtung der Einbahnstraße gefahren. Ohne das Tag gilt die übliche Richtung. Entferne das Tag, oder setze „no“, wenn Radfahrende hier in beide Richtungen fahren dürfen."
+    width_stone_source:
+      title: Breite passt nicht zu den gezählten Steinen
+      tip: "Findet Breiten, deren Quelle Pflastersteine zählt („7,5 Steine à 20 cm“), die aber eine andere Breite ergeben."
+      message: "{feature}: {key} ist {width} m, die Steine in der Quelle ergeben {stones} m"
+      reference: "Die Quelle „{source}“ ergibt {stones} m, eingetragen ist {key} = {width} m. Zähle die Steine noch einmal (Steinrechner neben dem Messband), setze die Breite aus den Steinen oder ändere die Quelle."
     width_part_whole:
       title: Teil so breit wie der ganze Weg
       tip: "Findet Geh- und Radwege, bei denen der Radweg- oder Gehweganteil so breit ist wie der ganze Weg."
@@ -864,6 +877,9 @@ de-CH:
       default:
         reference: "Ohne „{key}“ gilt: Der Radverkehr fährt mit dem Verkehr auf seiner Seite. Genau das sagt „{tag}“. Das Tag ist nicht nötig und leicht falsch zu setzen, weil sich „oneway“ auf die Richtung der gezeichneten Linie bezieht."
     fix:
+      width_stone_source:
+        title: "{key} auf {stones} m setzen (aus den Steinen)"
+        annotation: "{key} aus den gezählten Steinen gesetzt."
       width_part_whole:
         title: "{key} entfernen"
         annotation: "{key} entfernt."
