@@ -2,7 +2,7 @@ import { dispatch as d3_dispatch } from 'd3-dispatch';
 import { select as d3_select } from 'd3-selection';
 
 import { utilRebind } from '../util/rebind';
-import { widthTargetForKey } from './width_tags';
+import { widthTargetForKey } from '@tilda-geo/bicycle-infrastructure-tagging';
 
 /** The width value to preview on the map while a width input is hovered or focused */
 export type WidthIndicatorState = {

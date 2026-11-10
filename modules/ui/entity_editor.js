@@ -193,7 +193,8 @@ export function uiEntityEditor(context) {
             if (!onInput) {
                 tags = utilCleanTags(tags);
                 // e.g. `cycleway:right=lane` → `no` also removes `cycleway:right:lane` (side_prerequisite.ts)
-                tags = removeUnmetSideValues(presetFieldsOf(context, entityID), entity.tags, tags);
+                var setNow = new Set(Object.keys(changed).filter(function(k) { return typeof changed[k] === 'string'; }));
+                tags = removeUnmetSideValues(presetFieldsOf(context, entityID), entity.tags, tags, setNow);
             }
 
             if (!deepEqual(entity.tags, tags)) {

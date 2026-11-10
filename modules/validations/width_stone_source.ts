@@ -4,8 +4,8 @@ import { validationIssue, validationIssueFix } from '../core/validation';
 import type { CreateValidator } from '../core/validation/models';
 import { parseStoneSource, stoneWidth } from '../measure/stones';
 import { utilDisplayLabel } from '../util/utilDisplayLabel';
-import { formatMeters } from '../width/part_widths';
-import { parseOsmWidth } from '../width/width_tags';
+import { parseWidth } from '@tilda-geo/bicycle-infrastructure';
+import { formatMeters } from '@tilda-geo/bicycle-infrastructure-tagging';
 
 /**
  * A width whose source counts paving stones (`source:width=7,5 Steine à 20 cm`), but the width
@@ -29,7 +29,7 @@ export function stoneSourceMismatches(tags: Record<string, string | undefined>):
         const key = sourceKey.slice('source:'.length);
         if (!WIDTH_KEY.test(key)) continue;
         const stones = parseStoneSource(source);
-        const width = parseOsmWidth(tags[key]);
+        const width = parseWidth(tags[key]);
         if (!stones || width === undefined) continue;
         const counted = stoneWidth(stones);
         if (Math.abs(Number(counted) - width) > TOLERANCE) result.push({ key, source, width, stones: counted });

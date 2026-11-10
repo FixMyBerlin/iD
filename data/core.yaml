@@ -874,44 +874,15 @@ en:
       mixed_traffic: Mixed traffic
       no_category: No category
       current: current
-      current_group: Current category
+      choose_kind: Choose a kind …
       collapsed_hint: bike infrastructure is on the sides
       target: Change to
       edit: Change the category
       apply_all: Apply these tags
-      remove_reason: Replaced by tags for each side
+      remove_reason: Does not fit the chosen target
       required: Needed for the Radnetz dataset
       required_for: "Needed for the Radnetz dataset as “{category}”"
-      feeds: "Used for the infraVelo attributes: {attributes}"
       enter_value: value, Enter
-      missing: is missing
-      not_tagged: is not tagged
-      check_below: check below
-      add_below: add below
-      add_below_optional: add below if relevant
-      state:
-        inherited: "TILDA takes {value} from other tags (e.g. of the road)"
-        derived: "TILDA reads {value} from {tag}"
-        guess: "TILDA assumes {value}; please tag it"
-        ignored: "TILDA cannot use “{value}”: choose another value"
-        normalized: "TILDA reads it as {value}"
-        unused: "{tag} is tagged too, but TILDA does not use it"
-      reminder:
-        damage_signs:
-          title: "Check for damage signs."
-          text: "Is there a sign “Radwegschäden”, “Gehwegschäden” or “Geh- und Radwegschäden” on this path (e.g. in Mapillary or the Infra3D viewer)? If so, add it to traffic_sign."
-        barrier:
-          title: "Check for barriers."
-          text: "Is the cycle track blocked by a barrier (Absperrbake) so that it cannot be used? If so, add a TILDA note on the spot (TILDA Notes layer). It is not an OSM tag."
-      hint:
-        traffic_mode_foot: "Only if this segregated foot and cycle path is mapped as two lines and this is the cycleway line, with the footway (its own line) directly on its right. Otherwise do not tag it."
-      default:
-        generic: "Not tagged = {tag}. Tag it only if it is different here."
-        surface_colour: "Not tagged = not coloured. Tag it only if the surface is red or green."
-        oneway_bicycle: "Not tagged = bicycles follow the one-way. Tag “no” only if bicycles may ride against it."
-        oneway_side: "Not tagged = bicycles ride with the traffic on this side. Tag “no” only if they may ride both ways here."
-        oneway_road: "Not tagged = two-way road."
-        dual_carriageway: "Not tagged = no dual carriageway. Tag “yes” if the other direction is a separate way."
       checks:
         check: Checked
         check_tooltip: "Confirm that you looked at this and that the default is right. This is saved for the project, not in OpenStreetMap, and needs no upload."
@@ -964,40 +935,6 @@ en:
         data_no: "No bike infrastructure"
         separate_geometry: "Mapped as separate way"
         not_expected: "No bike infrastructure expected"
-      category_group:
-        track: Cycle tracks
-        lane: On the carriageway
-        foot: Shared with pedestrians
-        bus: Shared with buses
-        bicycle_road: Bicycle roads
-        special: "Special cases: links and crossings"
-        other: Other
-      attribute:
-        width: "Width"
-        width_effective: "Usable width (inside the marking)"
-        source_width: "Width source"
-        cycleway_width: "Width of the cycleway part"
-        source_cycleway_width: "Width source of the cycleway part"
-        surface: "Surface"
-        sett_length: "Sett stone size (m)"
-        surface_colour: "Surface colour"
-        traffic_sign: "Traffic sign (or none)"
-        oneway: "Oneway"
-        oneway_bicycle: "Oneway for bicycles"
-        dual_carriageway: "Dual carriageway"
-        is_sidepath: "Along a road (sidepath)"
-        segregated: "Foot and bike segregated"
-        lane: "Lane type"
-        cycleway: "Bike infrastructure on the sides"
-        separation_left: "Separation, left"
-        separation_right: "Separation, right"
-        traffic_mode_left: "Traffic next to it, left"
-        traffic_mode_right: "Traffic next to it, right"
-        traffic_mode_foot: "Footway right next to it (its own line)"
-        buffer_left: "Buffer, left"
-        buffer_right: "Buffer, right"
-        marking_left: "Marking, left"
-        marking_right: "Marking, right"
     measure_tape:
       button: "Measure on the map"
       annotation: "Measured width"
@@ -2317,11 +2254,6 @@ en:
     cycleway_oneway_wrong:
       title: Bike Lane Direction Likely Wrong
       tip: "Find roads where the “oneway” tag of a bike lane or cycle track on the side most likely says the wrong direction."
-      message: "{feature}: {tag} is likely wrong"
-      two_way_road:
-        reference: "“oneway” refers to the direction the way is drawn in. On the left side of a two-way road bicycles ride against that direction, so “{tag}” says they ride against the traffic next to them. Without the tag the usual direction is assumed: with the traffic on each side. Remove the tag, or set “no” if bicycles may ride both ways here."
-      contraflow:
-        reference: "Bicycles may ride against this one-way road, so its left side is the side for the opposite direction. “{tag}” says they ride with the one-way there. Without the tag the usual direction is assumed. Remove the tag, or set “no” if bicycles may ride both ways here."
     width_stone_source:
       title: Width Does Not Match the Counted Stones
       tip: "Find widths whose source counts paving stones (“7,5 Steine à 20 cm”) but that give another width."
@@ -2330,23 +2262,17 @@ en:
     width_part_whole:
       title: Part as Wide as the Whole Path
       tip: "Find foot and cycle paths where the cycleway or footway part is as wide as the whole path."
-      message:
-        cycleway: "{feature}: the cycleway part ({meters} m) is as wide as the whole path ({width} m)"
-        footway: "{feature}: the footway part ({meters} m) is as wide as the whole path ({width} m)"
-      reference:
-        cycleway: "“width” is the whole path. With “{key}” as wide as that, nothing is left for walking. Was the width of the whole path entered for the part? Remove “{key}” or tag the real part width (and “{other}”). If the whole width is for bicycles, this is no shared foot and cycle path."
-        footway: "“width” is the whole path. With “{key}” as wide as that, nothing is left for cycling. Was the width of the whole path entered for the part? Remove “{key}” or tag the real part width (and “{other}”). If the whole width is for walking, this is no shared foot and cycle path."
-    width_parts_sum:
+    width_part_sum:
       title: Width Is Not the Sum of Its Parts
       tip: "Find shared foot and cycle paths where “width” is not the cycleway width plus the footway width."
-      message: "{feature}: width {width} m, but the parts add up to {sum} m"
-      reference: "“width” is the whole path: {cycleway} m cycleway + {footway} m footway = {sum} m, not {width} m. Check the widths, or set the width to the sum."
+    tilda_rule:
+      message: "{feature}: {text}"
+    width_part_unsegregated:
+      title: Part Widths Without Segregation
+      tip: "Find foot and cycle paths with segregated=no that have widths for the cycleway or footway part."
     cycleway_oneway_redundant:
       title: Bike Lane Direction Not Needed
       tip: "Find roads where the “oneway” tag of a bike lane or cycle track on the side only repeats the default."
-      message: "{feature}: {tag} is not needed"
-      default:
-        reference: "Without “{key}” bicycles are assumed to ride with the traffic on their side, which is what “{tag}” says. The tag is not needed and easy to get wrong, because “oneway” refers to the direction the way is drawn in."
     cycleway_traffic_mode_foot:
       title: Footway Next to the Cycleway
       tip: "Find cycleways with a footway right next to them where “traffic_mode” does not say so yet."
@@ -2516,17 +2442,10 @@ en:
       width_stone_source:
         title: "Set {key} to {stones} m (from the stones)"
         annotation: "Set {key} from the counted stones."
-      width_part_whole:
-        title: "Remove {key}"
-        annotation: "Removed {key}."
-      width_parts_sum:
-        title: "Set the width to {sum} m (the sum)"
-        annotation: Set the width to the sum of its parts.
-      cycleway_oneway_both_ways:
-        title: Bicycles ride both ways here
-        annotation: Tagged a two-way bike lane.
-      cycleway_oneway_correct:
+      tilda_rule_correct:
         title: This is correct here
+      tilda_rule:
+        title: "{text}"
       remove_named_tag:
         title: 'Remove the "{tag}" tag'
         annotation: 'Removed "{tag}" tag.'

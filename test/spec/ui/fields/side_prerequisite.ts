@@ -57,6 +57,13 @@ describe('ui/fields/side_prerequisite', () => {
                 .toEqual({ 'cycleway:left': 'no', 'cycleway:right': 'lane', 'cycleway:right:lane': 'exclusive' });
         });
 
+        it('keeps a side value the same change sets (a TILDA plan for a lane under construction)', () => {
+            const before = { 'cycleway:left': 'no', 'cycleway:right': 'lane' };
+            const after = { 'cycleway:left': 'no', 'construction:cycleway:right': 'lane', 'cycleway:right:lane': 'exclusive' };
+            expect(removeUnmetSideValues(fields, before, after, new Set(['construction:cycleway:right', 'cycleway:right:lane'])))
+                .toEqual(after);
+        });
+
         it('keeps data that did not match before, and unrelated changes', () => {
             const conflicting = { 'cycleway:right': 'track', 'cycleway:right:lane': 'advisory' };
             expect(removeUnmetSideValues(fields, conflicting, { ...conflicting, surface: 'asphalt' }))

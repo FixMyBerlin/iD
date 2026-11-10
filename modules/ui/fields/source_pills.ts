@@ -3,7 +3,7 @@ import { select as d3_select } from 'd3-selection';
 
 import { t } from '../../core/localizer';
 import { utilGetSetValue, utilNoAuto, utilRebind } from '../../util';
-import { inheritedPartSource, redundantPartSourceUpdate } from '../../width/part_widths';
+import { inheritedPartSource, redundantPartSourceUpdate } from '@tilda-geo/bicycle-infrastructure-tagging';
 
 /**
  * A source field as pills (WORKDOC feature 25): one click on a common value ("Luftbild 2026",

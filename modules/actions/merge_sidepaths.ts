@@ -3,9 +3,11 @@ import { actionDeleteWay } from './delete_way';
 import { actionSplit } from './split';
 import { distanceToLineMeters, lineLengthMeters, projectOnLine } from '../sidepath/offset_line';
 import {
-    combinedPathTags, commonTags, mergeSelection, reverseTags,
+    combinedPathTags, commonTags, mergeSelection,
     type JoinSigns, type MergeSelection, type MergeWay, type PartKind, type SignRecommend
-} from '../sidepath/merge_tags';
+} from '@tilda-geo/bicycle-infrastructure-tagging';
+import { reverseWayTags } from '../sidepath/reverse_tags';
+import { definedTags } from '../tilda/tags';
 import type { Action } from '../core/history';
 import type { coreGraph } from '../core';
 import { osmNode } from '../osm/node';
@@ -66,7 +68,7 @@ function mergedTags(
     recommend: SignRecommend | undefined, joinSigns: JoinSigns | undefined
 ) {
     const along = direction(wayLocs(graph, survivor));
-    const other = commonTags(deleted.map(way => dot(along, direction(wayLocs(graph, way))) < 0 ? reverseTags(way.tags) : way.tags));
+    const other = commonTags(deleted.map(way => dot(along, direction(wayLocs(graph, way))) < 0 ? reverseWayTags(way.tags) : way.tags));
     const [bike, foot] = surviving === 'bike' ? [survivor.tags, other] : [other, survivor.tags];
     return combinedPathTags(bike, foot, { recommend, joinSigns, primary: surviving });
 }
@@ -268,7 +270,7 @@ export function actionMergeSidepaths(
         for (const survivor of survivors) {
             const result = mergedTags(graph, survivor, deleted, surviving, recommend, joinSigns);
             for (const tag of result.dropped) dropped.add(tag);
-            graph = graph.replace(survivor.update({ tags: result.tags }));
+            graph = graph.replace(survivor.update({ tags: definedTags(result.tags) }));
         }
         _dropped = [...dropped];
 

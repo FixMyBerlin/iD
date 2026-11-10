@@ -204,11 +204,6 @@ de:
     cycleway_oneway_wrong:
       title: Richtung der Radspur vermutlich falsch
       tip: "Findet Straßen, bei denen das „oneway“-Tag einer Radspur oder eines Radwegs an der Seite sehr wahrscheinlich die falsche Richtung angibt."
-      message: "{feature}: {tag} ist vermutlich falsch"
-      two_way_road:
-        reference: "„oneway“ bezieht sich auf die Richtung, in der die Linie gezeichnet ist. Auf der linken Seite einer Straße mit Gegenverkehr fährt der Radverkehr gegen diese Richtung; „{tag}“ sagt also, er fährt dem Verkehr neben sich entgegen. Ohne das Tag gilt die übliche Richtung: auf jeder Seite mit dem Verkehr. Entferne das Tag, oder setze „no“, wenn Radfahrende hier in beide Richtungen fahren dürfen."
-      contraflow:
-        reference: "Radfahrende dürfen diese Einbahnstraße in Gegenrichtung befahren; die linke Seite ist damit die Seite für die Gegenrichtung. „{tag}“ sagt, dort wird in Richtung der Einbahnstraße gefahren. Ohne das Tag gilt die übliche Richtung. Entferne das Tag, oder setze „no“, wenn Radfahrende hier in beide Richtungen fahren dürfen."
     width_stone_source:
       title: Breite passt nicht zu den gezählten Steinen
       tip: "Findet Breiten, deren Quelle Pflastersteine zählt („7,5 Steine à 20 cm“), die aber eine andere Breite ergeben."
@@ -217,23 +212,17 @@ de:
     width_part_whole:
       title: Teil so breit wie der ganze Weg
       tip: "Findet Geh- und Radwege, bei denen der Radweg- oder Gehweganteil so breit ist wie der ganze Weg."
-      message:
-        cycleway: "{feature}: Radweganteil ({meters} m) so breit wie der ganze Weg ({width} m)"
-        footway: "{feature}: Gehweganteil ({meters} m) so breit wie der ganze Weg ({width} m)"
-      reference:
-        cycleway: "„width“ ist der ganze Weg. Ist „{key}“ genauso breit, bleibt für den Fußverkehr nichts übrig. Wurde die Breite des ganzen Wegs beim Teil eingetragen? Entferne „{key}“ oder trage die echte Teilbreite ein (und „{other}“). Gehört die ganze Breite dem Radverkehr, ist das kein gemeinsamer Geh- und Radweg."
-        footway: "„width“ ist der ganze Weg. Ist „{key}“ genauso breit, bleibt für den Radverkehr nichts übrig. Wurde die Breite des ganzen Wegs beim Teil eingetragen? Entferne „{key}“ oder trage die echte Teilbreite ein (und „{other}“). Gehört die ganze Breite dem Fußverkehr, ist das kein gemeinsamer Geh- und Radweg."
-    width_parts_sum:
+    width_part_sum:
       title: Breite ist nicht die Summe der Teile
       tip: "Findet gemeinsame Geh- und Radwege, bei denen „width“ nicht Radweg- plus Gehwegbreite ist."
-      message: "{feature}: Breite {width} m, die Teile ergeben {sum} m"
-      reference: "„width“ ist der ganze Weg: {cycleway} m Radweg + {footway} m Gehweg = {sum} m, nicht {width} m. Prüfe die Breiten oder setze die Breite auf die Summe."
+    tilda_rule:
+      message: "{feature}: {text}"
+    width_part_unsegregated:
+      title: Teilbreiten ohne Trennung
+      tip: "Geh- und Radwege mit segregated=no finden, die Breiten für den Rad- oder Gehwegteil haben."
     cycleway_oneway_redundant:
       title: Richtung der Radspur nicht nötig
       tip: "Findet Straßen, bei denen das „oneway“-Tag einer Radspur oder eines Radwegs an der Seite nur den Standard wiederholt."
-      message: "{feature}: {tag} ist nicht nötig"
-      default:
-        reference: "Ohne „{key}“ gilt: Der Radverkehr fährt mit dem Verkehr auf seiner Seite. Genau das sagt „{tag}“. Das Tag ist nicht nötig und leicht falsch zu setzen, weil sich „oneway“ auf die Richtung der gezeichneten Linie bezieht."
     cycleway_traffic_mode_foot:
       title: Gehweg neben dem Radweg
       tip: "Findet Radwege mit einem Gehweg direkt daneben, bei denen „traffic_mode“ das noch nicht angibt."
@@ -243,17 +232,10 @@ de:
       width_stone_source:
         title: "{key} auf {stones} m setzen (aus den Steinen)"
         annotation: "{key} aus den gezählten Steinen gesetzt."
-      width_part_whole:
-        title: "{key} entfernen"
-        annotation: "{key} entfernt."
-      width_parts_sum:
-        title: "Breite auf {sum} m setzen (die Summe)"
-        annotation: Breite auf die Summe der Teile gesetzt.
-      cycleway_oneway_both_ways:
-        title: Radverkehr fährt hier in beide Richtungen
-        annotation: Radspur in beide Richtungen eingetragen.
-      cycleway_oneway_correct:
+      tilda_rule_correct:
         title: Das ist hier richtig
+      tilda_rule:
+        title: "{text}"
       connect_features_manually:
         title: Die Objekte von Hand verbinden
         tooltip: Zum Beispiel, indem du fehlende Straßen- oder Wegabschnitte kartierst oder getrennte Kreuzungen korrigierst.
@@ -265,22 +247,6 @@ de:
       source_width_effective:
         label: Quelle der nutzbaren Breite
     tilda:
-      reminder:
-        damage_signs:
-          title: "Auf Schadenschilder prüfen."
-          text: "Steht auf diesem Weg ein Schild „Radwegschäden“, „Gehwegschäden“ oder „Geh- und Radwegschäden“ (z. B. in Mapillary oder im Infra3D-Viewer)? Dann in traffic_sign eintragen."
-        barrier:
-          title: "Auf Absperrbaken prüfen."
-          text: "Ist der Radweg durch eine Absperrbake versperrt, sodass er nicht nutzbar ist? Dann an der Stelle einen TILDA-Hinweis anlegen (Ebene „TILDA-Hinweise“). Es ist kein OSM-Tag."
-      hint:
-        traffic_mode_foot: "Nur wenn dieser getrennte Geh- und Radweg mit zwei Linien erfasst ist und dies die Radweg-Linie ist, mit dem Gehweg (eigene Linie) direkt rechts daneben. Sonst nicht taggen."
-      default:
-        generic: "Nicht getaggt = {tag}. Nur taggen, wenn es hier anders ist."
-        surface_colour: "Nicht getaggt = nicht eingefärbt. Nur taggen, wenn die Oberfläche rot oder grün ist."
-        oneway_bicycle: "Nicht getaggt = Radverkehr folgt der Einbahnstraße. Nur „no“ taggen, wenn er in Gegenrichtung fahren darf."
-        oneway_side: "Nicht getaggt = Radverkehr fährt mit dem Verkehr auf dieser Seite. Nur „no“ taggen, wenn er hier in beide Richtungen fahren darf."
-        oneway_road: "Nicht getaggt = Straße mit Gegenverkehr."
-        dual_carriageway: "Nicht getaggt = keine getrennte Richtungsfahrbahn. „yes“ taggen, wenn die Gegenrichtung eine eigene Linie ist."
       checks:
         check: Geprüft
         check_tooltip: "Bestätige, dass du das angesehen hast und der Standard stimmt. Das wird für das Projekt gespeichert, nicht in OpenStreetMap, und braucht keinen Upload."
@@ -306,28 +272,15 @@ de:
       mixed_traffic: Mischverkehr
       no_category: Keine Kategorie
       current: aktuell
-      current_group: Aktuelle Kategorie
+      choose_kind: Art wählen …
       collapsed_hint: die Radinfrastruktur liegt an den Seiten
       target: Ändern in
       edit: Die Kategorie ändern
       apply_all: Diese Tags übernehmen
-      remove_reason: Ersetzt durch Tags je Seite
+      remove_reason: Passt nicht zum gewählten Ziel
       required: Für den Radnetz-Datensatz nötig
       required_for: "Für den Radnetz-Datensatz als „{category}“ nötig"
-      feeds: "Genutzt für die infraVelo-Attribute: {attributes}"
       enter_value: Wert, Eingabetaste
-      missing: fehlt
-      not_tagged: ist nicht getaggt
-      check_below: unten prüfen
-      add_below: unten ergänzen
-      add_below_optional: unten ergänzen, falls zutreffend
-      state:
-        inherited: "TILDA übernimmt {value} aus anderen Tags (z. B. der Straße)"
-        derived: "TILDA liest {value} aus {tag}"
-        guess: "TILDA nimmt {value} an; bitte tagge es"
-        ignored: "TILDA kann „{value}“ nicht verwenden: Wähle einen anderen Wert"
-        normalized: "TILDA liest es als {value}"
-        unused: "{tag} ist auch getaggt, wird aber nicht beachtet"
       side:
         self: Dieser Weg
         left: Linke Seite
@@ -336,40 +289,6 @@ de:
         data_no: Keine Radinfrastruktur
         separate_geometry: Als eigener Weg kartiert
         not_expected: Keine Radinfrastruktur zu erwarten
-      category_group:
-        track: Radwege
-        lane: Auf der Fahrbahn
-        foot: Gemeinsam mit Fußgängern
-        bus: Gemeinsam mit Bussen
-        bicycle_road: Fahrradstraßen
-        special: "Sonderfälle: Verbindungen und Querungen"
-        other: Sonstiges
-      attribute:
-        width: Breite
-        width_effective: Nutzbare Breite (innerhalb der Markierung)
-        source_width: Quelle der Breite
-        cycleway_width: Breite des Radwegteils
-        source_cycleway_width: Quelle der Breite des Radwegteils
-        surface: Oberfläche
-        sett_length: Größe der Pflastersteine (m)
-        surface_colour: Farbe der Oberfläche
-        traffic_sign: Verkehrsschild (oder keines)
-        oneway: Einbahnstraße
-        oneway_bicycle: Einbahn für Fahrräder
-        dual_carriageway: Getrennte Fahrbahnen
-        is_sidepath: An einer Straße (Sidepath)
-        segregated: Fuß- und Radverkehr getrennt
-        lane: Art des Streifens
-        cycleway: Radinfrastruktur an den Seiten
-        separation_left: Trennung links
-        separation_right: Trennung rechts
-        traffic_mode_left: Verkehr daneben, links
-        traffic_mode_right: Verkehr daneben, rechts
-        traffic_mode_foot: Gehweg rechts daneben (eigene Linie)
-        buffer_left: Sicherheitstrennstreifen links
-        buffer_right: Sicherheitstrennstreifen rechts
-        marking_left: Markierung links
-        marking_right: Markierung rechts
     traffic_sign_group:
       label:
         way: Verkehrsschild
@@ -846,11 +765,6 @@ de-CH:
     cycleway_oneway_wrong:
       title: Richtung der Radspur vermutlich falsch
       tip: "Findet Straßen, bei denen das „oneway“-Tag einer Radspur oder eines Radwegs an der Seite sehr wahrscheinlich die falsche Richtung angibt."
-      message: "{feature}: {tag} ist vermutlich falsch"
-      two_way_road:
-        reference: "„oneway“ bezieht sich auf die Richtung, in der die Linie gezeichnet ist. Auf der linken Seite einer Straße mit Gegenverkehr fährt der Radverkehr gegen diese Richtung; „{tag}“ sagt also, er fährt dem Verkehr neben sich entgegen. Ohne das Tag gilt die übliche Richtung: auf jeder Seite mit dem Verkehr. Entferne das Tag, oder setze „no“, wenn Radfahrende hier in beide Richtungen fahren dürfen."
-      contraflow:
-        reference: "Radfahrende dürfen diese Einbahnstraße in Gegenrichtung befahren; die linke Seite ist damit die Seite für die Gegenrichtung. „{tag}“ sagt, dort wird in Richtung der Einbahnstraße gefahren. Ohne das Tag gilt die übliche Richtung. Entferne das Tag, oder setze „no“, wenn Radfahrende hier in beide Richtungen fahren dürfen."
     width_stone_source:
       title: Breite passt nicht zu den gezählten Steinen
       tip: "Findet Breiten, deren Quelle Pflastersteine zählt („7,5 Steine à 20 cm“), die aber eine andere Breite ergeben."
@@ -859,56 +773,20 @@ de-CH:
     width_part_whole:
       title: Teil so breit wie der ganze Weg
       tip: "Findet Geh- und Radwege, bei denen der Radweg- oder Gehweganteil so breit ist wie der ganze Weg."
-      message:
-        cycleway: "{feature}: Radweganteil ({meters} m) so breit wie der ganze Weg ({width} m)"
-        footway: "{feature}: Gehweganteil ({meters} m) so breit wie der ganze Weg ({width} m)"
-      reference:
-        cycleway: "„width“ ist der ganze Weg. Ist „{key}“ genauso breit, bleibt für den Fußverkehr nichts übrig. Wurde die Breite des ganzen Wegs beim Teil eingetragen? Entferne „{key}“ oder trage die echte Teilbreite ein (und „{other}“). Gehört die ganze Breite dem Radverkehr, ist das kein gemeinsamer Geh- und Radweg."
-        footway: "„width“ ist der ganze Weg. Ist „{key}“ genauso breit, bleibt für den Radverkehr nichts übrig. Wurde die Breite des ganzen Wegs beim Teil eingetragen? Entferne „{key}“ oder trage die echte Teilbreite ein (und „{other}“). Gehört die ganze Breite dem Fußverkehr, ist das kein gemeinsamer Geh- und Radweg."
-    width_parts_sum:
+    width_part_sum:
       title: Breite ist nicht die Summe der Teile
       tip: "Findet gemeinsame Geh- und Radwege, bei denen „width“ nicht Radweg- plus Gehwegbreite ist."
-      message: "{feature}: Breite {width} m, die Teile ergeben {sum} m"
-      reference: "„width“ ist der ganze Weg: {cycleway} m Radweg + {footway} m Gehweg = {sum} m, nicht {width} m. Prüfe die Breiten oder setze die Breite auf die Summe."
     cycleway_oneway_redundant:
       title: Richtung der Radspur nicht nötig
       tip: "Findet Straßen, bei denen das „oneway“-Tag einer Radspur oder eines Radwegs an der Seite nur den Standard wiederholt."
-      message: "{feature}: {tag} ist nicht nötig"
-      default:
-        reference: "Ohne „{key}“ gilt: Der Radverkehr fährt mit dem Verkehr auf seiner Seite. Genau das sagt „{tag}“. Das Tag ist nicht nötig und leicht falsch zu setzen, weil sich „oneway“ auf die Richtung der gezeichneten Linie bezieht."
     fix:
       width_stone_source:
         title: "{key} auf {stones} m setzen (aus den Steinen)"
         annotation: "{key} aus den gezählten Steinen gesetzt."
-      width_part_whole:
-        title: "{key} entfernen"
-        annotation: "{key} entfernt."
-      width_parts_sum:
-        title: "Breite auf {sum} m setzen (die Summe)"
-        annotation: Breite auf die Summe der Teile gesetzt.
-      cycleway_oneway_both_ways:
-        title: Radverkehr fährt hier in beide Richtungen
-        annotation: Radspur in beide Richtungen eingetragen.
-      cycleway_oneway_correct:
+      tilda_rule_correct:
         title: Das ist hier richtig
   inspector:
     tilda:
-      reminder:
-        damage_signs:
-          title: "Auf Schadenschilder prüfen."
-          text: "Steht auf diesem Weg ein Schild „Radwegschäden“, „Gehwegschäden“ oder „Geh- und Radwegschäden“ (z. B. in Mapillary oder im Infra3D-Viewer)? Dann in traffic_sign eintragen."
-        barrier:
-          title: "Auf Absperrbaken prüfen."
-          text: "Ist der Radweg durch eine Absperrbake versperrt, sodass er nicht nutzbar ist? Dann an der Stelle einen TILDA-Hinweis anlegen (Ebene „TILDA-Hinweise“). Es ist kein OSM-Tag."
-      hint:
-        traffic_mode_foot: "Nur wenn dieser getrennte Geh- und Radweg mit zwei Linien erfasst ist und dies die Radweg-Linie ist, mit dem Gehweg (eigene Linie) direkt rechts daneben. Sonst nicht taggen."
-      default:
-        generic: "Nicht getaggt = {tag}. Nur taggen, wenn es hier anders ist."
-        surface_colour: "Nicht getaggt = nicht eingefärbt. Nur taggen, wenn die Oberfläche rot oder grün ist."
-        oneway_bicycle: "Nicht getaggt = Radverkehr folgt der Einbahnstraße. Nur „no“ taggen, wenn er in Gegenrichtung fahren darf."
-        oneway_side: "Nicht getaggt = Radverkehr fährt mit dem Verkehr auf dieser Seite. Nur „no“ taggen, wenn er hier in beide Richtungen fahren darf."
-        oneway_road: "Nicht getaggt = Straße mit Gegenverkehr."
-        dual_carriageway: "Nicht getaggt = keine getrennte Richtungsfahrbahn. „yes“ taggen, wenn die Gegenrichtung eine eigene Linie ist."
       checks:
         check: Geprüft
         check_tooltip: "Bestätige, dass du das angesehen hast und der Standard stimmt. Das wird für das Projekt gespeichert, nicht in OpenStreetMap, und braucht keinen Upload."

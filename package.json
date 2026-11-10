@@ -20,7 +20,6 @@
     "build": "run-s build:css build:data build:js",
     "build:css": "node scripts/build_css.js",
     "build:data": "shx mkdir -p dist/data && node scripts/build_data.js",
-    "update:tilda-labels": "node scripts/update_tilda_labels.js",
     "build:stats": "node config/esbuild.config.min.js --stats && esbuild-visualizer --metadata dist/esbuild.json --filename docs/statistics.html && shx rm dist/esbuild.json",
     "build:js": "node config/esbuild.config.js",
     "build:js:watch": "node config/esbuild.config.js --watch",
@@ -69,7 +68,8 @@
     "@osm-editor-kit/live-touched": "^0.1.0",
     "@rapideditor/country-coder": "~5.6.0",
     "@rapideditor/location-conflation": "~3.0.0",
-    "@tilda-geo/bicycle-infrastructure": "^0.1.2",
+    "@tilda-geo/bicycle-infrastructure": "^0.2.0",
+    "@tilda-geo/bicycle-infrastructure-tagging": "^0.1.0",
     "@tmcw/togeojson": "^7.1.2",
     "@turf/bbox": "^7.2.0",
     "@turf/bbox-clip": "^7.2.0",
@@ -157,5 +157,8 @@
   },
   "browserslist": [
     "> 0.3%, last 6 major versions, Firefox ESR, not Safari < 14.1, not iOS <= 14, not dead, maintained node versions"
-  ]
+  ],
+  "overrides": {
+    "@tilda-geo/bicycle-infrastructure": "$@tilda-geo/bicycle-infrastructure"
+  }
 }

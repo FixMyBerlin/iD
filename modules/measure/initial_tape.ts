@@ -7,7 +7,8 @@ import {
     geoLatToMeters, geoLonToMeters, geoMetersToLat, geoMetersToLon, geoSphericalDistance
 } from '../geo/geo';
 import type { Vec2 } from '../geo/vector';
-import { parseOsmWidth, roadWidthFromTags } from '../width/width_tags';
+import { parseWidth } from '@tilda-geo/bicycle-infrastructure';
+import { roadWidthFromTags } from '@tilda-geo/bicycle-infrastructure-tagging';
 
 /** [[west, south], [east, north]] */
 export type LonLatExtent = [Vec2, Vec2];
@@ -59,7 +60,7 @@ export function tapeLength(ends: TapeEnds): number {
 
 /** Length the tape starts with: the field's value, else the road width for `width`, else 2 m */
 export function initialTapeMeters(key: string, value: string | undefined, tags: Tags): number {
-    const current = parseOsmWidth(value);
+    const current = parseWidth(value);
     if (current !== undefined && current > 0) return current;
     if (key === 'width') return roadWidthFromTags(tags).meters;
     return DEFAULT_TAPE_METERS;

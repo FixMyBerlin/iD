@@ -5,7 +5,8 @@ import { t } from '../core/localizer';
 import type { EntityId } from '../osm';
 import { utilRebind } from '../util/rebind';
 import { formatTapeValue, tapeLength, type TapeEnds } from './initial_tape';
-import { withoutRedundantPartSources } from '../width/part_widths';
+import { withoutRedundantPartSources } from '@tilda-geo/bicycle-infrastructure-tagging';
+import { definedTags } from '../tilda/tags';
 
 /** The measuring tape on the map (feature 21). Ends are [lon, lat]. */
 export type MeasureTapeState = {
@@ -76,7 +77,7 @@ function createMeasureTape() {
             if (!entity || !value || entity.tags[_state.key] === value) return measureTape;
 
             // the general source wins: no `source:cycleway:width` that repeats `source:width`
-            const tags = withoutRedundantPartSources({ ...entity.tags, [_state.key]: value, [`source:${_state.key}`]: measuredSource(context) });
+            const tags = definedTags(withoutRedundantPartSources({ ...entity.tags, [_state.key]: value, [`source:${_state.key}`]: measuredSource(context) }));
             context.perform(actionChangeTags(entity.id, tags), t('inspector.measure_tape.annotation'));
             return measureTape;
         },

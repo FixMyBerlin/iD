@@ -1,8 +1,7 @@
 import { actionExtractSidepath } from './extract_sidepath';
 import { actionMergeSidepaths, mergeSidepathsSelection } from './merge_sidepaths';
 import { sidewalkCandidates } from '../sidepath/find_sidewalk';
-import type { Side, SignRecommend } from '../sidepath/extract_tags';
-import type { JoinSigns } from '../sidepath/merge_tags';
+import type { JoinSigns, Side, SignRecommend } from '@tilda-geo/bicycle-infrastructure-tagging';
 import type { Action } from '../core/history';
 import type { coreGraph } from '../core';
 import type { geoExtent } from '../geo';

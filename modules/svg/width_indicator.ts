@@ -5,7 +5,8 @@ import type { Projection } from '../geo/raw_mercator';
 import type { Vec2 } from '../geo/vector';
 import { measureTape } from '../measure/measure_tape';
 import { widthIndicator } from '../width/width_indicator';
-import { parseOsmWidth, roadWidthFromTags, widthTargetForKey, type WidthSide } from '../width/width_tags';
+import { parseWidth } from '@tilda-geo/bicycle-infrastructure';
+import { roadWidthFromTags, widthTargetForKey, type WidthSide } from '@tilda-geo/bicycle-infrastructure-tagging';
 
 /** A band to draw: a closed polygon in screen coordinates plus a label position */
 type Band = {
@@ -81,7 +82,7 @@ export function svgWidthIndicator(projection: Projection, context: iD.Context, d
         // the band is hidden while the measuring tape is active
         const state = measureTape.state() ? null : widthIndicator.state();
         const target = state && widthTargetForKey(state.key);
-        const meters = parseOsmWidth(state?.value);
+        const meters = parseWidth(state?.value);
         if (!state || !target || !meters || meters <= 0) return [];
 
         const graph = context.graph();

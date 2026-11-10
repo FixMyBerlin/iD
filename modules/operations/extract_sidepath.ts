@@ -1,8 +1,8 @@
-import { actionExtractSidepath } from '../actions/extract_sidepath';
+import { actionExtractSidepath, planSidepathExtraction } from '../actions/extract_sidepath';
 import { behaviorOperation } from '../behavior/operation';
 import { t } from '../core/localizer';
 import { modeSelect } from '../modes/select';
-import { extractOptions, planExtraction, type ExtractOption } from '../sidepath/extract_tags';
+import { extractOptions, type ExtractOption } from '@tilda-geo/bicycle-infrastructure-tagging';
 import { svgPath } from '../svg/helpers';
 import { uiCmd } from '../ui/cmd';
 import { loadSignRecommender, loadedSignJoiner, loadedSignRecommender } from '../traffic_sign/recommender';
@@ -38,7 +38,7 @@ function extractSidepathOperation(context: iD.Context, wayID: WayId, option: Ext
     }
 
     function plan() {
-        return planExtraction(context.entity(wayID).tags, variant, side, recommend(), loadedSignJoiner());
+        return planSidepathExtraction(context.entity(wayID).tags, variant, side, recommend(), loadedSignJoiner());
     }
 
     const operation: Operation = function() {

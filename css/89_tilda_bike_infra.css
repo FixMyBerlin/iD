@@ -170,6 +170,25 @@
     width: 100%;
     height: 30px;
 }
+/* "Change to": the options of the chosen kind, one row of buttons per option */
+.tilda-option-row {
+    display: grid;
+    grid-template-columns: 7em 1fr;
+    align-items: baseline;
+    column-gap: 6px;
+    margin-top: 4px;
+    font-size: 12px;
+}
+.tilda-option-label {
+    color: var(--text-color-muted, #666);
+}
+.tilda-option-row .tilda-buttons {
+    margin: 0;
+}
+.tilda-card .tilda-option-row button.tilda-value.active {
+    background: var(--link-color, #7092ff);
+    color: #fff;
+}
 .tilda-attributes-header {
     margin: 10px 0 4px 0;
     font-size: 12px;

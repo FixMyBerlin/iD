@@ -1,9 +1,10 @@
 import type { BundledLens } from '../core/lenses';
-import { tildaQaClasses } from '../tilda/qa_state';
+import { tildaQaClasses } from '@tilda-geo/bicycle-infrastructure-tagging';
+import { radnetzBerlin } from '@tilda-geo/bicycle-infrastructure-tagging/profiles/radnetz-berlin';
 
 /**
  * "Radnetz QA" lens: colors ways by how complete their tags are for the Radnetz dataset
- * (the TILDA checklist, see `modules/tilda/qa_state.ts`).
+ * (the TILDA checklist, `tildaQaState` of `@tilda-geo/bicycle-infrastructure-tagging`).
  * Bike infrastructure is drawn wide, roads without bike infrastructure thin; everything else fades.
  */
 const CSS = `
@@ -46,5 +47,5 @@ export const RADNETZ_QA_LENS: BundledLens = {
     tooltipID: 'map_data.lens.bundled.radnetz_qa.tooltip',
     shortcut: 'q',
     css: CSS,
-    classes: tildaQaClasses
+    classes: (tags: Tags) => tildaQaClasses(tags, radnetzBerlin)
 };

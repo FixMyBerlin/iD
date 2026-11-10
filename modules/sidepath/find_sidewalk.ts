@@ -1,5 +1,5 @@
 import { distanceToLineMeters, lineLengthMeters, projectOnLine } from './offset_line';
-import { partKind } from './merge_tags';
+import { partKind } from '@tilda-geo/bicycle-infrastructure-tagging';
 import type { coreGraph } from '../core';
 import type { osmWay, WayId } from '../osm';
 

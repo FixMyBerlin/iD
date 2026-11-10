@@ -93,7 +93,9 @@ function commonKeys(key: string, side: string) {
  * (e.g. `cycleway:right=lane` → `no` removes `cycleway:right:lane`). A value in a common key
  * (`cycleway:both:lane`) is first written to the other sides. Data that did not match before stays.
  */
-export function removeUnmetSideValues(fields: Pick<FieldLike, 'keys' | 'prerequisiteTag'>[], before: Tags, after: Tags): Tags {
+export function removeUnmetSideValues(
+    fields: Pick<FieldLike, 'keys' | 'prerequisiteTag'>[], before: Tags, after: Tags, keep: ReadonlySet<string> = new Set()
+): Tags {
     let tags = after;
     for (const field of fields) {
         const prerequisite = field.prerequisiteTag;
@@ -104,12 +106,13 @@ export function removeUnmetSideValues(fields: Pick<FieldLike, 'keys' | 'prerequi
             if (!side) continue;
             const held = matchesPrerequisite(prerequisite, sideValue(before, prerequisite.key, side));
             const holds = matchesPrerequisite(prerequisite, sideValue(tags, prerequisite.key, side));
-            if (!held || holds || !hasOwnValue(tags, key, side)) continue;
+            // a key the same change sets on purpose (a TILDA plan: `cycleway:right` → `construction:cycleway:right`) stays
+            if (!held || holds || keep.has(key) || !hasOwnValue(tags, key, side)) continue;
 
             tags = { ...tags };
             for (const common of commonKeys(key, side)) {
                 const value = tags[common];
-                if (value === undefined) continue;
+                if (value === undefined || keep.has(common)) continue;
                 // keep the common value on the other sides
                 for (const other of field.keys) {
                     if (other !== key && tags[other] === undefined) tags[other] = value;

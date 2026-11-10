@@ -3,7 +3,8 @@ import type { Field } from '@openstreetmap/id-tagging-schema';
 
 import { t } from '../../core/localizer';
 import { presetField } from '../../presets/field';
-import { PART_WIDTH_KEYS, partWidthMode } from '../../width/part_widths';
+import { PART_WIDTH_KEYS, partWidthMode } from '@tilda-geo/bicycle-infrastructure-tagging';
+import { singleValueTags } from '../../tilda/tags';
 import { uiField } from '../field';
 
 /**
@@ -41,7 +42,7 @@ export function uiPartWidthFields(context: iD.Context, dispatch: Dispatch<object
     const partFields = {
         /** 'always', 'optional' (the button decides) or undefined, for one selected feature */
         mode(tags: TagsMulti, entityIDs: string[]) {
-            return entityIDs.length === 1 ? partWidthMode(tags) : undefined;
+            return entityIDs.length === 1 ? partWidthMode(singleValueTags(tags)) : undefined;
         },
 
         /** Whether the part fields are open: always, or after the button */

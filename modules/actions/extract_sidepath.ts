@@ -1,8 +1,12 @@
 import { osmNode } from '../osm/node';
 import { osmWay } from '../osm/way';
 import { lineLengthMeters, offsetLine } from '../sidepath/offset_line';
-import { planExtraction, type ExtractVariant, type Side, type SignRecommend } from '../sidepath/extract_tags';
-import type { JoinSigns } from '../sidepath/merge_tags';
+import {
+    planExtraction,
+    type ExtractVariant, type JoinSigns, type Side, type SignRecommend
+} from '@tilda-geo/bicycle-infrastructure-tagging';
+import { reverseWayTags } from '../sidepath/reverse_tags';
+import { definedTags } from '../tilda/tags';
 import type { Action } from '../core/history';
 import type { coreGraph } from '../core';
 import type { WayId } from '../osm';
@@ -12,6 +16,31 @@ export interface ActionExtractSidepath extends Action {
     getWayId(): WayId;
     /** `bicycle` value on the road that was kept instead of `use_sidepath` */
     keptBicycle(): string | undefined;
+}
+
+export type SidepathExtraction = {
+    wayTags: Tags;
+    roadTags: Tags;
+    /** meters from the road's centerline */
+    offsetMeters: number;
+    /** `bicycle` on the road was not changed because it has another value */
+    keptBicycle: string | undefined;
+    /** the new way runs against the road (its bikes ride against the road): draw it reversed */
+    reversed: boolean;
+};
+
+/**
+ * `planExtraction` of the package, plus: a new way whose bikes ride only against the road
+ * (`oneway=-1`, `oneway:bicycle=-1`) is drawn the other way round with its side and direction tags
+ * turned, because TILDA ignores `oneway=-1` (fork rule, not in the package yet).
+ */
+export function planSidepathExtraction(
+    road: Tags, variant: ExtractVariant, side: Side, recommend: SignRecommend | undefined, joinSigns?: JoinSigns
+): SidepathExtraction {
+    const plan = planExtraction(road, variant, side, { recommend, joinSigns });
+    const wayTags = definedTags(plan.wayTags);
+    const reversed = wayTags.oneway === '-1' || wayTags['oneway:bicycle'] === '-1';
+    return { ...plan, wayTags: reversed ? reverseWayTags(wayTags) : wayTags, roadTags: definedTags(plan.roadTags), reversed };
 }
 
 /** Ways shorter than this are not extracted */
@@ -35,7 +64,7 @@ export function actionExtractSidepath(
 
     const action: ActionExtractSidepath = function(graph: coreGraph) {
         const road = graph.entity(wayID);
-        const plan = planExtraction(road.tags, variant, side, recommend, joinSigns);
+        const plan = planSidepathExtraction(road.tags, variant, side, recommend, joinSigns);
         _keptBicycle = plan.keptBicycle;
 
         const locs = graph.childNodes(road).map(node => node.loc as [number, number]);

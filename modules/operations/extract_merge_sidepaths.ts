@@ -3,7 +3,7 @@ import { behaviorOperation } from '../behavior/operation';
 import { t } from '../core/localizer';
 import { modeSelect } from '../modes/select';
 import { roadChanges, sidepathKeyOperation } from './extract_sidepath';
-import { extractOptions, type Side } from '../sidepath/extract_tags';
+import { extractOptions, type Side } from '@tilda-geo/bicycle-infrastructure-tagging';
 import { svgPath } from '../svg/helpers';
 import { uiCmd } from '../ui/cmd';
 import { loadSignRecommender, loadedSignJoiner, loadedSignRecommender } from '../traffic_sign/recommender';

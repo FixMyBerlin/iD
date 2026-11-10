@@ -2,7 +2,7 @@ import { t } from '../core/localizer';
 import { validationIssue } from '../core/validation';
 import type { Validator, CreateValidator } from '../core/validation/models';
 import { sidewalkCandidates } from '../sidepath/find_sidewalk';
-import { partKind } from '../sidepath/merge_tags';
+import { partKind } from '@tilda-geo/bicycle-infrastructure-tagging';
 import { utilDisplayLabel } from '../util/utilDisplayLabel';
 import type { coreGraph } from '../core';
 import type { osmWay, WayId } from '../osm';
