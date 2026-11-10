@@ -140,6 +140,16 @@ function attributeRank(attribute: RequiredAttribute) {
 }
 
 
+/**
+ * The oneway row of a footway or path writes `oneway:bicycle`, but only `oneway` is tagged: its value,
+ * offered to tag as `oneway:bicycle` instead (TILDA reads both; `oneway:bicycle` is the better tag)
+ */
+function onewayToMove(attribute: RequiredAttribute) {
+    const [tag, ...more] = attribute.tagged;
+    return attribute.key === 'oneway:bicycle' && tag?.key === 'oneway' && !more.length ? tag.value : undefined;
+}
+
+
 /** A value as TILDA names it (`oneway=implicit_yes` → "Eine Richtung (abgeleitet)"); German only */
 function tildaValueLabel(attribute: RequiredAttribute, value: string | undefined) {
     if (value === undefined || packageLanguage() !== 'de') return value;
@@ -251,6 +261,18 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
     function disabledTitle() {
         const reason = _entityIDs.length === 1 ? checks.disabledReason(_entityIDs[0]) : undefined;
         return reason ? t(`inspector.tilda.checks.disabled.${reason}`) : undefined;
+    }
+
+
+    /**
+     * Tags `value` for an attribute. The oneway row of a footway or path writes `oneway:bicycle`
+     * (tagging package 0.2.0); an old `oneway` with the same value goes in the same step (Tobias),
+     * one with another value stays and shows as "not read".
+     */
+    function attributeUpdate(attribute: RequiredAttribute, value: string): TagsUpdate {
+        const update: TagsUpdate = { [attribute.key]: value };
+        if (attribute.key === 'oneway:bicycle' && _tags.oneway === value) update.oneway = undefined;
+        return update;
     }
 
 
@@ -713,7 +735,7 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
      */
     function drawAttributes(selection: d3.Selection<HTMLDivElement>, attributes: RequiredAttribute[], listID: string,
         headerText?: string, quickValues: Record<string, string> = {}) {
-        const done = (d: RequiredAttribute) => d.state === 'ok' || d.state === 'inherited' || !!confirmed(d);
+        const done = (d: RequiredAttribute) => (d.state === 'ok' || d.state === 'inherited' || !!confirmed(d)) && !onewayToMove(d);
         const open = attributes.filter(d => !done(d))
             .sort((a, b) => attributeRank(a) - attributeRank(b));
         const doneRows = attributes.filter(done);
@@ -761,7 +783,7 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
                 const attribute = d3_select(this.closest('.tilda-attribute')!).datum() as RequiredAttribute;
                 const value = this.value.trim();
                 // keys without a field (`cycleway:width`, `width:effective`) are typed here: a decimal comma becomes a point
-                changeTags({ [attribute.key]: isWidthValueKey(attribute.key) ? normalizeDecimalComma(value) : value });
+                changeTags(attributeUpdate(attribute, isWidthValueKey(attribute.key) ? normalizeDecimalComma(value) : value));
             });
         inputs.append('datalist');
 
@@ -828,7 +850,8 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
         // values as buttons only where no field below can edit the tag
         const needsInputs = (d: RequiredAttribute) => d.state !== 'ok' && d.state !== 'inherited' && !hasField(d);
         // one click for the usual answer of a missing tag, even where a field below can edit it
-        const quickValue = (d: RequiredAttribute) => !needsInputs(d) && d.state === 'missing' ? quickValues[d.key] : undefined;
+        const quickValue = (d: RequiredAttribute) => !needsInputs(d) && d.state === 'missing' ? quickValues[d.key]
+            : onewayToMove(d);
         rows.select<HTMLSpanElement>('.tilda-attribute-inputs')
             .style('display', d => needsInputs(d) || d.state === 'assumed' || quickValue(d) ? null : 'none');
         // a free value only when there are no values to click, or too many (a default: only the listed values)
@@ -854,10 +877,16 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
             .append('button')
             .attr('class', 'button tilda-value')
             .merge(buttons)
-            .text(d => d)
+            .each(function(value) {
+                const attribute = d3_select(this.closest('.tilda-attribute')!).datum() as RequiredAttribute;
+                const moved = onewayToMove(attribute) === value;
+                d3_select(this)
+                    .text(moved ? t('inspector.tilda.move_oneway', { tag: `${attribute.key}=${value}` }) : value)
+                    .attr('title', moved ? t('inspector.tilda.move_oneway_tooltip', { tag: `${attribute.key}=${value}`, old: `oneway=${value}` }) : null);
+            })
             .on('click', function(_d3_event: MouseEvent, value: string) {
                 const attribute = d3_select(this.closest('.tilda-attribute')!).datum() as RequiredAttribute;
-                changeTags({ [attribute.key]: value });
+                changeTags(attributeUpdate(attribute, value));
             });
 
         // the rows in order: one line that opens them

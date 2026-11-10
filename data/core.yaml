@@ -880,6 +880,8 @@ en:
       todo: To do
       done_rows: "{n} more in order"
       done_hide: Hide the rows in order
+      move_oneway: "Tag as {tag}"
+      move_oneway_tooltip: "On a footway or path, the direction for bicycles belongs in oneway:bicycle. Sets {tag} and removes {old}."
       collapsed_hint: bike infrastructure is on the sides
       target: Change to
       edit: Change the category

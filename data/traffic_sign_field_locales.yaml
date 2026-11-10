@@ -282,6 +282,8 @@ de:
       todo: Zu erledigen
       done_rows: "{n} weitere in Ordnung"
       done_hide: Zeilen in Ordnung ausblenden
+      move_oneway: "Als {tag} taggen"
+      move_oneway_tooltip: "An Fuß- und Gemeinsamen Wegen gehört die Richtung für Räder in oneway:bicycle. Setzt {tag} und entfernt {old}."
       collapsed_hint: die Radinfrastruktur liegt an den Seiten
       target: Ändern in
       edit: Die Kategorie ändern
