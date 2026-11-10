@@ -254,6 +254,7 @@ de:
         check: Geprüft
         check_tooltip: "Bestätige, dass du das angesehen hast und der Standard stimmt. Das wird für das Projekt gespeichert, nicht in OpenStreetMap, und braucht keinen Upload."
         uncheck_tooltip: "Geprüft. Klicken, um die Prüfung zu entfernen."
+        reminder_tooltip: "Bestätige, dass du danach geschaut hast. Das wird für das Projekt gespeichert, nicht in OpenStreetMap, und braucht keinen Upload."
         checked_by: "Geprüft von {user}, {date}"
         verify: Verifiziert
         verify_tooltip: "Diesen Weg als verifiziert markieren (zweiter Blick durch eine andere Person). Das wird für das Projekt gespeichert, nicht in OpenStreetMap, und braucht keinen Upload."
@@ -802,6 +803,7 @@ de-CH:
         check: Geprüft
         check_tooltip: "Bestätige, dass du das angesehen hast und der Standard stimmt. Das wird für das Projekt gespeichert, nicht in OpenStreetMap, und braucht keinen Upload."
         uncheck_tooltip: "Geprüft. Klicken, um die Prüfung zu entfernen."
+        reminder_tooltip: "Bestätige, dass du danach geschaut hast. Das wird für das Projekt gespeichert, nicht in OpenStreetMap, und braucht keinen Upload."
         checked_by: "Geprüft von {user}, {date}"
         verify: Verifiziert
         verify_tooltip: "Diesen Weg als verifiziert markieren (zweiter Blick durch eine andere Person). Das wird für das Projekt gespeichert, nicht in OpenStreetMap, und braucht keinen Upload."

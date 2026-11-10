@@ -417,3 +417,21 @@ button.tilda-check.active .icon {
     font-weight: bold;
     margin-inline-end: 4px;
 }
+.tilda-reminder .tilda-check {
+    margin-top: 4px;
+}
+/* looked for it: one line, quieter */
+.tilda-reminder.checked {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-left-color: #2e9d3a;
+    color: var(--passive-text-color);
+}
+.tilda-reminder.checked .tilda-reminder-body {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+.tilda-reminder.checked .tilda-check {
+    margin-top: 0;
+}

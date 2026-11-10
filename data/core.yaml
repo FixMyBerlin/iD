@@ -892,6 +892,7 @@ en:
         check: Checked
         check_tooltip: "Confirm that you looked at this and that the default is right. This is saved for the project, not in OpenStreetMap, and needs no upload."
         uncheck_tooltip: "Checked. Click to remove the check."
+        reminder_tooltip: "Confirm that you looked for it. This is saved for the project, not in OpenStreetMap, and needs no upload."
         checked_by: "Checked by {user}, {date}"
         verify: Verified
         verify_tooltip: "Mark this way as verified (second look by another mapper). This is saved for the project, not in OpenStreetMap, and needs no upload."

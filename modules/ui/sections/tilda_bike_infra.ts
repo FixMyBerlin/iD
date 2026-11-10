@@ -439,19 +439,48 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
     }
 
 
-    /** Hints without an indicator in the tags: look for it, so it is not forgotten */
+    /**
+     * Hints without an indicator in the tags: look for it, so it is not forgotten. "Checked" says
+     * someone looked (stored like the other checks, as `reminder:<id>`); a checked hint folds into
+     * one line.
+     */
     function drawReminders(selection: d3.Selection<HTMLDivElement>, ids: string[]) {
-        const rows = selection.selectAll<HTMLDivElement, string>('.tilda-reminder')
+        const reminderCheck = (id: string) => `reminder:${id}`;
+        const stored = (id: string) => checkOf(reminderCheck(id));
+
+        let rows = selection.selectAll<HTMLDivElement, string>('.tilda-reminder')
             .data(ids, d => d);
         rows.exit().remove();
-        rows.enter()
+        const rowsEnter = rows.enter()
             .append('div')
-            .attr('class', d => `tilda-reminder tilda-reminder-${d}`)
-            .each(function(d) {
-                const row = d3_select(this);
-                const text = reminderText(d, packageLanguage());
-                row.append('span').attr('class', 'tilda-reminder-title').text(text?.title ?? d);
-                row.append('span').text(text?.text ?? '');
+            .attr('class', d => `tilda-reminder tilda-reminder-${d}`);
+        const textEnter = rowsEnter.append('div').attr('class', 'tilda-reminder-body');
+        textEnter.append('span').attr('class', 'tilda-reminder-title');
+        textEnter.append('span').attr('class', 'tilda-reminder-text');
+        rowsEnter.append('button')
+            .attr('class', 'tilda-check')
+            .call(svgIcon('#iD-icon-apply', ''))
+            .append('span')
+            .call(t.append('inspector.tilda.checks.check'));
+
+        rows = rows.merge(rowsEnter)
+            .classed('checked', d => !!stored(d));
+        rows.select('.tilda-reminder-title').text(d => reminderText(d, packageLanguage())?.title ?? d);
+        rows.select('.tilda-reminder-text').text(d => {
+            const check = stored(d);
+            return check ? byline('checked_by', check) : reminderText(d, packageLanguage())?.text ?? '';
+        });
+
+        const disabled = disabledTitle();
+        rows.select<HTMLButtonElement>('.tilda-check')
+            .classed('active', d => !!stored(d))
+            .attr('disabled', disabled ? 'true' : null)
+            .attr('aria-pressed', d => stored(d) ? 'true' : 'false')
+            .attr('title', d => disabled ?? t(`inspector.tilda.checks.${stored(d) ? 'uncheck' : 'reminder'}_tooltip`))
+            .on('click', function(this: HTMLButtonElement, d3_event: MouseEvent, d: string) {
+                d3_event.preventDefault();
+                this.blur();
+                toggleCheck(reminderCheck(d), '', stored(d));
             });
         selection.style('display', ids.length ? '' : 'none');
     }
