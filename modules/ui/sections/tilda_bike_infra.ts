@@ -80,6 +80,8 @@ type SideCard = {
     /** can be collapsed: the way itself when its bike infrastructure is mapped on the sides */
     collapsible: boolean;
     collapsed: boolean;
+    /** the right side, when both sides are the same and show as one card ("Both sides") */
+    twin?: SideCard;
 };
 
 const SIDE_ORDER: Side[] = ['self', 'left', 'right'];
@@ -150,6 +152,37 @@ function onewayToMove(attribute: RequiredAttribute) {
 }
 
 
+/**
+ * The key for both sides when two keys differ only in `left` / `right` (`cycleway:left:surface`,
+ * `cycleway:right:surface` → `cycleway:both:surface`); otherwise undefined
+ */
+export function bothSidesKey(leftKey: string, rightKey: string) {
+    const a = leftKey.split(':');
+    const b = rightKey.split(':');
+    if (a.length !== b.length) return undefined;
+    const differ = a.flatMap((part, i) => part === b[i] ? [] : [i]);
+    if (differ.length !== 1 || a[differ[0]] !== 'left' || b[differ[0]] !== 'right') return undefined;
+    return a.map((part, i) => i === differ[0] ? 'both' : part).join(':');
+}
+
+
+/** One update for both sides: the `:both` key, the side keys removed; or both side keys */
+function bothSidesUpdate(left: TagsUpdate, right: TagsUpdate): TagsUpdate {
+    const update: TagsUpdate = {};
+    const rightKeys = Object.keys(right);
+    for (const [i, key] of Object.keys(left).entries()) {
+        const twinKey = rightKeys[i];
+        const both = twinKey ? bothSidesKey(key, twinKey) : undefined;
+        if (both && left[key] === right[twinKey]) {
+            Object.assign(update, { [key]: undefined, [twinKey]: undefined, [both]: left[key] });
+        } else {
+            Object.assign(update, { [key]: left[key] }, twinKey ? { [twinKey]: right[twinKey] } : {});
+        }
+    }
+    return update;
+}
+
+
 /** A value as TILDA names it (`oneway=implicit_yes` → "Eine Richtung (abgeleitet)"); German only */
 function tildaValueLabel(attribute: RequiredAttribute, value: string | undefined) {
     if (value === undefined || packageLanguage() !== 'de') return value;
@@ -185,6 +218,8 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
     let _editing = new Set<Side>();
     /** checklists (side and list) that show their rows that are in order */
     let _showDone = new Set<string>();
+    /** in a "Both sides" card: the row of the right side for each row of the left side */
+    let _twins = new Map<RequiredAttribute, RequiredAttribute>();
     /** keys TILDA reads whose tag is missing, for the field titles */
     let _fieldStatus = new Map<string, 'required' | 'optional'>();
 
@@ -237,6 +272,20 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
         return check?.answer === attribute.default ? check : undefined;
     }
 
+    /** A checklist row needs nothing more: tagged, taken from other tags, or a default someone confirmed */
+    function attributeDone(attribute: RequiredAttribute) {
+        return (attribute.state === 'ok' || attribute.state === 'inherited' || !!confirmed(attribute)) && !onewayToMove(attribute);
+    }
+
+    const reminderCheck = (id: string) => `reminder:${id}`;
+
+    /** What is still open on a side: the category question, checklist rows, reminders nobody checked */
+    function openCount(card: SideCard) {
+        return card.gaps.length
+            + [...card.attributes, ...card.roadAttributes].filter(attribute => !attributeDone(attribute)).length
+            + card.reminders.filter(id => !checkOf(reminderCheck(id))).length;
+    }
+
     function byline(stringID: string, check: TildaCheck) {
         return t(`inspector.tilda.checks.${stringID}`, {
             user: checks.isMine(check) ? t('inspector.tilda.checks.you') : check.user,
@@ -272,7 +321,8 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
     function attributeUpdate(attribute: RequiredAttribute, value: string): TagsUpdate {
         const update: TagsUpdate = { [attribute.key]: value };
         if (attribute.key === 'oneway:bicycle' && _tags.oneway === value) update.oneway = undefined;
-        return update;
+        const twin = _twins.get(attribute);
+        return twin ? bothSidesUpdate(update, { [twin.key]: value }) : update;
     }
 
 
@@ -348,8 +398,35 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
     }
 
 
+    /** Left and right look the same in every row: one card "Both sides" (halves the box on a road) */
+    function sidesMatch(left: SideCard, right: SideCard) {
+        if (left.choice || right.choice || _editing.has(left.side) || _editing.has(right.side)) return false;
+        if (left.result.category !== right.result.category || categoryWithLifecycle(left) !== categoryWithLifecycle(right)) return false;
+        const gapID = (card: SideCard) => card.gaps.map(gap => `${gap.key}=${gap.values.join('|')}`).join(';');
+        if (gapID(left) !== gapID(right)) return false;
+        if (left.reminders.join() !== right.reminders.join()) return false;
+        if (left.attributes.length !== right.attributes.length) return false;
+        return left.attributes.every((a, i) => {
+            const b = right.attributes[i];
+            // an untagged default may read differently per side and mean the same (`oneway`: -1 left, yes right)
+            const sameTilda = a.tilda === b.tilda || (a.state === 'assumed' && a.options.join() === b.options.join());
+            return a.id === b.id && a.state === b.state && sameTilda && a.value === b.value
+                && !!confirmed(a) === !!confirmed(b) && !!onewayToMove(a) === !!onewayToMove(b);
+        });
+    }
+
+    function mergeSides(list: SideCard[]): SideCard[] {
+        _twins = new Map();
+        const left = list.find(card => card.side === 'left');
+        const right = list.find(card => card.side === 'right');
+        if (!left || !right || !sidesMatch(left, right)) return list;
+        left.attributes.forEach((attribute, i) => _twins.set(attribute, right.attributes[i]));
+        return list.filter(card => card !== right).map(card => card === left ? { ...left, twin: right } : card);
+    }
+
+
     function renderDisclosureContent(selection: d3.Selection) {
-        const data = cards();
+        const data = mergeSides(cards());
 
         const intro = selection.selectAll('.tilda-intro')
             .data(_showIntro ? [0] : []);
@@ -360,13 +437,13 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
             .call(t.append('inspector.tilda.intro'));
 
         let cardSelection = selection.selectAll<HTMLDivElement, SideCard>('.tilda-card')
-            .data(data, d => d.side);
+            .data(data, d => d.twin ? 'both' : d.side);
         cardSelection.exit().remove();
 
         const cardEnter = cardSelection.enter()
             .append('div')
-            .attr('class', d => `tilda-card tilda-card-${d.side}`)
-            .on('mouseenter', (_d3_event: MouseEvent, d: SideCard) => showSide(d.side))
+            .attr('class', d => `tilda-card tilda-card-${d.twin ? 'both' : d.side}`)
+            .on('mouseenter', (_d3_event: MouseEvent, d: SideCard) => showSide(d.twin ? undefined : d.side))
             .on('mouseleave', () => showSide(undefined));
 
         // header bar like a field label, body like a field input
@@ -385,6 +462,8 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
         const headlineEnter = headerEnter.append('div').attr('class', 'tilda-headline');
         headlineEnter.append('span').attr('class', 'tilda-category');
         headlineEnter.append('span').attr('class', 'tilda-target-name');
+        // how much is still open on this side, readable without opening or scrolling
+        headlineEnter.append('span').attr('class', 'tilda-progress');
         headlineEnter.append('button')
             .attr('class', 'tilda-edit')
             .call(uiPaneTooltip()
@@ -424,11 +503,20 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
             .classed('active', d => _editing.has(d.side) || !!d.choice)
             .attr('aria-label', t('inspector.tilda.edit'));
 
+        cardSelection.select('.tilda-progress')
+            .each(function(d) {
+                const open = openCount(d);
+                d3_select(this)
+                    .classed('done', !open)
+                    .text(open ? t('inspector.tilda.open_count', { n: open }) : '✓')
+                    .attr('title', open ? null : t('inspector.tilda.nothing_open'));
+            });
+
         cardSelection.select('.tilda-card-hint')
             .text(d => d.collapsed ? t('inspector.tilda.collapsed_hint') : '');
 
         cardSelection.select('.tilda-side')
-            .text(d => t(`inspector.tilda.side.${d.side}`));
+            .text(d => t(`inspector.tilda.side.${d.twin ? 'both' : d.side}`));
         cardSelection.select('.tilda-category')
             .attr('class', d => [
                 'tilda-category',
@@ -467,7 +555,6 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
      * one line.
      */
     function drawReminders(selection: d3.Selection<HTMLDivElement>, ids: string[]) {
-        const reminderCheck = (id: string) => `reminder:${id}`;
         const stored = (id: string) => checkOf(reminderCheck(id));
 
         let rows = selection.selectAll<HTMLDivElement, string>('.tilda-reminder')
@@ -586,7 +673,11 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
             .attr('title', d => d.reason.replace(/\s*\(transformed from [^)]*\)/, ''));
         rows.select('.tilda-gap-title').text(t('inspector.tilda.gap_title'));
         rows.select('.tilda-gap-key')
-            .text(d => t('inspector.tilda.gap_key', { key: gapWriteKey(d, card.result) }));
+            .text(d => {
+                const key = gapWriteKey(d, card.result);
+                const both = card.twin && bothSidesKey(key, gapWriteKey(d, card.twin.result));
+                return t('inspector.tilda.gap_key', { key: both ?? key });
+            });
 
         const buttons = rows.select('.tilda-buttons')
             .selectAll<HTMLButtonElement, string>('button')
@@ -604,7 +695,8 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
             })
             .on('click', function(_d3_event: MouseEvent, value: string) {
                 const gap = d3_select(this.parentElement!.parentElement!).datum() as CategoryGap;
-                changeTags(definedTags(gapTags(gap, card.result, value)));
+                const own = definedTags(gapTags(gap, card.result, value));
+                changeTags(card.twin ? bothSidesUpdate(own, definedTags(gapTags(gap, card.twin.result, value))) : own);
             });
     }
 
@@ -738,7 +830,7 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
      */
     function drawAttributes(selection: d3.Selection<HTMLDivElement>, attributes: RequiredAttribute[], listID: string,
         headerText?: string, quickValues: Record<string, string> = {}) {
-        const done = (d: RequiredAttribute) => (d.state === 'ok' || d.state === 'inherited' || !!confirmed(d)) && !onewayToMove(d);
+        const done = attributeDone;
         const open = attributes.filter(d => !done(d))
             .sort((a, b) => attributeRank(a) - attributeRank(b));
         const doneRows = attributes.filter(done);
@@ -825,10 +917,14 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
         rows.select<HTMLSpanElement>('.tilda-attribute-tags')
             .each(function(d) {
                 const cell = d3_select(this).text('');
-                if (d.tagged.length) {
-                    for (const tag of d.tagged) cell.append('code').text(`${tag.key}=${tag.value}`);
+                const twin = _twins.get(d);
+                const tagged = [...d.tagged, ...(twin?.tagged ?? [])]
+                    .map(tag => `${tag.key}=${tag.value}`)
+                    .filter((tag, i, all) => all.indexOf(tag) === i);
+                if (tagged.length) {
+                    for (const tag of tagged) cell.append('code').text(tag);
                 } else {
-                    cell.append('code').text(d.key);
+                    cell.append('code').text((twin && bothSidesKey(d.key, twin.key)) ?? d.key);
                 }
             });
         rows.select('.tilda-attribute-note').text(d => {
@@ -848,6 +944,8 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
                 d3_event.preventDefault();
                 this.blur();
                 if (d.default) toggleCheck(d.key, d.default, confirmed(d));
+                const twin = _twins.get(d);
+                if (twin?.default && !!confirmed(twin) === !!confirmed(d)) toggleCheck(twin.key, twin.default, confirmed(twin));
             });
 
         // values as buttons only where no field below can edit the tag

@@ -131,6 +131,21 @@
     cursor: help;
 }
 .tilda-category.incomplete { background: #b27c00; }
+/* open things on this side: a count in the header; nothing open: a check mark */
+.tilda-progress {
+    flex: none;
+    padding: 1px 6px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: bold;
+    white-space: nowrap;
+    color: var(--tilda-required-color);
+    border: 1px solid var(--tilda-required-color);
+}
+.tilda-progress.done {
+    color: #2e9d3a;
+    border-color: #2e9d3a;
+}
 .tilda-category.needs-clarification { background: #c62828; }
 .tilda-category.absent { background: #666; }
 
