@@ -444,7 +444,7 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
             .classed('active', d => d === 'no' && !!stored)
             .attr('disabled', d => d === 'no' && disabled ? 'true' : null)
             .attr('title', d => d === 'no' ? (disabled ?? t(`inspector.tilda.${stored ? 'checks.uncheck_tooltip' : 'foot_no_tooltip'}`))
-                : `traffic_mode:${d}=foot`)
+                : d === 'left' ? `traffic_mode:left=foot\n${t('inspector.tilda.foot_left_hint')}` : `traffic_mode:${d}=foot`)
             .text(d => t(`inspector.tilda.foot_${d}`))
             .on('click', function(this: HTMLButtonElement, d3_event: MouseEvent, d: Answer) {
                 d3_event.preventDefault();
