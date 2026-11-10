@@ -56,6 +56,8 @@ import { drawTagPlan, tagPlanChanges, type TagPlanRow } from '../tag_plan';
 import { sideWidthKeys } from './side_width_fields';
 import { isWidthValueKey, normalizeDecimalComma } from '../../tilda/value_input';
 import { addableRelatedKeys } from '../../presets/related_tags';
+import { footwayNextTo, TRAFFIC_MODE_FOOT_CHECK } from '../../validations/cycleway_traffic_mode';
+import type { osmWay } from '../../osm';
 
 type Side = ResultSide;
 
@@ -80,6 +82,8 @@ type SideCard = {
     /** can be collapsed: the way itself when its bike infrastructure is mapped on the sides */
     collapsible: boolean;
     collapsed: boolean;
+    /** the way itself is a cycleway with a footway right next to it and no `traffic_mode` for it */
+    footway?: { side: 'left' | 'right' | undefined; answered: boolean };
     /** the right side, when both sides are the same and show as one card ("Both sides") */
     twin?: SideCard;
 };
@@ -281,7 +285,7 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
 
     /** What is still open on a side: the category question, checklist rows, reminders nobody checked */
     function openCount(card: SideCard) {
-        return card.gaps.length
+        return card.gaps.length + (card.footway && !card.footway.answered ? 1 : 0)
             + [...card.attributes, ...card.roadAttributes].filter(attribute => !attributeDone(attribute)).length
             + card.reminders.filter(id => !checkOf(reminderCheck(id))).length;
     }
@@ -382,10 +386,72 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
                 roadAttributes: side === 'self' && !selfIsInfrastructure
                     ? roadAttributes(_tags, { profile: radnetzBerlin, edited }).filter(notAGap) : [],
                 reminders: reminders(result, _tags, radnetzBerlin, targetCategory),
+                footway: side === 'self' ? footwayQuestion() : undefined,
                 collapsible,
                 collapsed: collapsible && !(_selfExpanded ?? !!choice)
             };
         });
+    }
+
+
+    /** The selected cycleway has a footway right next to it: does it belong to it (`traffic_mode=foot`)? */
+    function footwayQuestion(): SideCard['footway'] {
+        const way = _entityIDs.length === 1 ? context.hasEntity(_entityIDs[0] as Parameters<iD.Context['hasEntity']>[0]) : undefined;
+        if (way?.type !== 'way') return undefined;
+        const found = footwayNextTo(context, way as unknown as osmWay, context.graph(), true);
+        return found ? { side: found.side, answered: !!checkOf(TRAFFIC_MODE_FOOT_CHECK) } : undefined;
+    }
+
+
+    /**
+     * The open question about the footway next to the cycleway: it makes the category
+     * (`footAndCyclewaySegregated` needs `traffic_mode:right=foot`), so it sits with the category question.
+     * "No" is stored like the other checks; then one quiet line with who said it.
+     */
+    function drawFootway(selection: d3.Selection<HTMLDivElement>, card: SideCard) {
+        const question = card.footway;
+        let box = selection.selectAll<HTMLDivElement, NonNullable<SideCard['footway']>>('.tilda-foot-question')
+            .data(question ? [question] : []);
+        box.exit().remove();
+        const boxEnter = box.enter().append('div').attr('class', 'tilda-foot-question');
+        boxEnter.append('div').attr('class', 'tilda-gap-title');
+        boxEnter.append('div').attr('class', 'tilda-foot-text');
+        boxEnter.append('div').attr('class', 'tilda-buttons');
+        boxEnter.append('div').attr('class', 'tilda-gap-key');
+        box = box.merge(boxEnter)
+            .classed('tilda-gap', d => !d.answered)
+            .classed('tilda-foot-answered', d => d.answered);
+
+        const stored = checkOf(TRAFFIC_MODE_FOOT_CHECK);
+        box.select('.tilda-gap-title').text(d => d.answered ? '' : t('inspector.tilda.foot_title'));
+        box.select('.tilda-foot-text').text(d => d.answered && stored
+            ? `${t('inspector.tilda.foot_no')} · ${byline('checked_by', stored)}`
+            : t('inspector.tilda.foot_text', { side: t(`inspector.tilda.foot_side_${d.side ?? 'unknown'}`) }));
+        box.select('.tilda-gap-key').text(d => !d.answered && d.side === 'left' ? t('inspector.tilda.foot_left_hint') : '');
+
+        type Answer = 'right' | 'left' | 'no';
+        const answers = (d: NonNullable<SideCard['footway']>): Answer[] => d.answered ? ['no']
+            : d.side === 'left' ? ['left', 'right', 'no'] : ['right', 'left', 'no'];
+        const disabled = disabledTitle();
+        const buttons = box.select('.tilda-buttons')
+            .selectAll<HTMLButtonElement, Answer>('button')
+            .data(answers, d => d);
+        buttons.exit().remove();
+        buttons.enter()
+            .append('button')
+            .merge(buttons)
+            .attr('class', d => d === 'no' ? 'tilda-check' : 'button tilda-value tilda-gap-answer')
+            .classed('active', d => d === 'no' && !!stored)
+            .attr('disabled', d => d === 'no' && disabled ? 'true' : null)
+            .attr('title', d => d === 'no' ? (disabled ?? t(`inspector.tilda.${stored ? 'checks.uncheck_tooltip' : 'foot_no_tooltip'}`))
+                : `traffic_mode:${d}=foot`)
+            .text(d => t(`inspector.tilda.foot_${d}`))
+            .on('click', function(this: HTMLButtonElement, d3_event: MouseEvent, d: Answer) {
+                d3_event.preventDefault();
+                this.blur();
+                if (d === 'no') toggleCheck(TRAFFIC_MODE_FOOT_CHECK, 'no', stored);
+                else changeTags({ [`traffic_mode:${d}`]: 'foot' });
+            });
     }
 
 
@@ -485,6 +551,7 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
             })
             .call(svgIcon('#iD-icon-edit', ''));
         const bodyEnter = cardEnter.append('div').attr('class', 'tilda-card-body');
+        bodyEnter.append('div').attr('class', 'tilda-foot');
         bodyEnter.append('div').attr('class', 'tilda-gaps');
         bodyEnter.append('div').attr('class', 'tilda-target');
         bodyEnter.append('div').attr('class', 'tilda-attributes');
@@ -530,6 +597,7 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
                 ? `${categoryName(d.result.category)}\n${t('inspector.tilda.category_id', { id: d.result.category })}`
                 : null);
 
+        cardSelection.select<HTMLDivElement>('.tilda-foot').each(function(d) { drawFootway(d3_select(this), d); });
         cardSelection.select<HTMLDivElement>('.tilda-gaps').each(function(d) { drawGaps(d3_select(this), d); });
         cardSelection.select<HTMLDivElement>('.tilda-target').each(function(d) { drawTarget(d3_select(this), d); });
         cardSelection.select<HTMLDivElement>('.tilda-attributes').each(function(d) {

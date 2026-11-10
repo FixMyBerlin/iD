@@ -180,6 +180,25 @@
     margin-top: 6px;
     color: var(--passive-text-color);
 }
+.tilda-gap-key:empty {
+    display: none;
+}
+.tilda-foot-text {
+    margin-top: 2px;
+}
+/* "no, it does not belong": one quiet line */
+.tilda-foot-answered {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 12px;
+    color: var(--passive-text-color);
+}
+.tilda-foot-answered .tilda-gap-title,
+.tilda-foot-answered .tilda-gap-key {
+    display: none;
+}
 .tilda-buttons {
     display: inline-flex;
     flex-wrap: wrap;

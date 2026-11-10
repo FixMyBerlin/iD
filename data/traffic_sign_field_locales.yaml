@@ -230,8 +230,12 @@ de:
       title: Gehweg neben dem Radweg
       tip: "Findet Radwege mit einem Gehweg direkt daneben, bei denen „traffic_mode“ das noch nicht angibt."
       message: "{feature}: Daneben verläuft ein Gehweg, „traffic_mode“ ist möglicherweise sinnvoll"
-      reference: "Ein Gehweg verläuft in höchstens {meters} m Abstand zu diesem Radweg. Wenn nichts anderes dazwischen liegt, wähle im Feld „Verkehr daneben“ für diese Seite „Fußgänger“ (traffic_mode:left=foot oder traffic_mode:right=foot). Links und rechts beziehen sich auf die Richtung, in der die Linie gezeichnet ist."
+      reference: "Ein Gehweg verläuft in höchstens {meters} m Abstand zu diesem Radweg. Liegt nichts anderes dazwischen, ist das ein getrennter Rad- und Gehweg, als zwei Linien gezeichnet: Setze traffic_mode=foot für die Seite des Gehwegs. TILDA erkennt bisher nur traffic_mode:right=foot. Links und rechts beziehen sich auf die Richtung, in der die Linie gezeichnet ist."
     fix:
+      cycleway_traffic_mode_foot:
+        right: "traffic_mode:right=foot setzen (Gehweg rechts)"
+        left: "traffic_mode:left=foot setzen (Gehweg links)"
+        annotation: Gehweg neben dem Radweg gesetzt.
       width_stone_source:
         title: "{key} auf {stones} m setzen (aus den Steinen)"
         annotation: "{key} aus den gezählten Steinen gesetzt."
@@ -282,6 +286,16 @@ de:
       todo: Zu erledigen
       done_rows: "{n} weitere in Ordnung"
       done_hide: Zeilen in Ordnung ausblenden
+      foot_title: "Offene Frage: Gehört der Gehweg daneben zu diesem Radweg?"
+      foot_text: "Direkt daneben verläuft ein Gehweg ({side}). Liegt nichts dazwischen, ist das ein getrennter Rad- und Gehweg; TILDA liest dafür traffic_mode:right=foot."
+      foot_side_left: links
+      foot_side_right: rechts
+      foot_side_unknown: Seite unklar
+      foot_right: "Ja, Gehweg rechts"
+      foot_left: "Ja, Gehweg links"
+      foot_left_hint: "TILDA erkennt bisher nur traffic_mode:right=foot als getrennten Rad- und Gehweg; mit „links“ bleibt es vorerst ein Radweg."
+      foot_no: "Nein, gehört nicht dazu"
+      foot_no_tooltip: "Wird für das Projekt gespeichert, nicht in OpenStreetMap: Der Gehweg daneben gehört nicht zu diesem Radweg. Der Hinweis verschwindet."
       open_count: "{n} offen"
       nothing_open: An dieser Seite ist nichts offen
       move_oneway: "Als {tag} taggen"

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { footwaysNextTo } from '../../../modules/validations/cycleway_traffic_mode';
+import { footwaysNextTo, sideOfWay } from '../../../modules/validations/cycleway_traffic_mode';
 import type { osmWay } from '../../../modules/osm';
 
 describe('footwaysNextTo (traffic_mode hint on separate cycleways)', () => {
@@ -19,6 +19,19 @@ describe('footwaysNextTo (traffic_mode hint on separate cycleways)', () => {
         ] as unknown as iD.Graph);
         const ways = [graph.entity('w1'), graph.entity('w2')] as unknown as osmWay[];
         return footwaysNextTo(graph, ways[0], ways);
+    }
+
+    /** The side of a footway at `y` meters next to a cycleway drawn from west to east */
+    function side(y: number) {
+        const graph = new iD.coreGraph([
+            new iD.osmNode({ id: 'n1', loc: [lon(0), lat(0)] }),
+            new iD.osmNode({ id: 'n2', loc: [lon(100), lat(0)] }),
+            new iD.osmWay({ id: 'w1', nodes: ['n1', 'n2'], tags: cycleway }),
+            new iD.osmNode({ id: 'n3', loc: [lon(0), lat(y)] }),
+            new iD.osmNode({ id: 'n4', loc: [lon(100), lat(y)] }),
+            new iD.osmWay({ id: 'w2', nodes: ['n3', 'n4'], tags: { highway: 'footway' } })
+        ] as unknown as iD.Graph);
+        return sideOfWay(graph, graph.entity('w1') as unknown as osmWay, ['w2' as never]);
     }
 
     const cycleway = { highway: 'cycleway', oneway: 'yes' };
@@ -40,6 +53,11 @@ describe('footwaysNextTo (traffic_mode hint on separate cycleways)', () => {
         expect(setup({ ...cycleway, 'traffic_mode:left': 'motor_vehicle', 'traffic_mode:right': 'no' }, -2)).toEqual([]);
         // one side set: the other may still be the footway
         expect(setup({ ...cycleway, 'traffic_mode:left': 'motor_vehicle' }, -2)).toEqual(['w2']);
+    });
+
+    it('finds the side of the footway in the drawing direction', () => {
+        expect(side(-2)).toBe('right');
+        expect(side(2)).toBe('left');
     });
 
     it('not on a crossing (its own TILDA category)', () => {

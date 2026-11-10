@@ -880,6 +880,16 @@ en:
       todo: To do
       done_rows: "{n} more in order"
       done_hide: Hide the rows in order
+      foot_title: "Open question: does the footway next to it belong to this cycleway?"
+      foot_text: "A footway runs right next to it ({side}). If nothing lies between them, this is a segregated foot and cycle path; TILDA reads traffic_mode:right=foot for it."
+      foot_side_left: on the left
+      foot_side_right: on the right
+      foot_side_unknown: side unclear
+      foot_right: "Yes, footway on the right"
+      foot_left: "Yes, footway on the left"
+      foot_left_hint: "TILDA only recognizes traffic_mode:right=foot as a segregated foot and cycle path so far; with “left” it stays a cycleway for now."
+      foot_no: "No, it does not belong"
+      foot_no_tooltip: "Saved for the project, not in OpenStreetMap: the footway next to it is not part of this cycleway. The hint goes away."
       open_count: "{n} open"
       nothing_open: Nothing open on this side
       move_oneway: "Tag as {tag}"
@@ -2291,7 +2301,7 @@ en:
       title: Footway Next to the Cycleway
       tip: "Find cycleways with a footway right next to them where “traffic_mode” does not say so yet."
       message: "{feature}: a footway runs next to it, “traffic_mode” may be useful"
-      reference: "A footway runs within {meters} m of this cycleway. If nothing else lies between the two, set “Pedestrians” in the field “Traffic Next To It” for that side (traffic_mode:left=foot or traffic_mode:right=foot). Left and right refer to the direction the way is drawn in."
+      reference: "A footway runs within {meters} m of this cycleway. If nothing else lies between the two, it is a segregated foot and cycle path mapped as two ways: set traffic_mode=foot for the side of the footway. TILDA only recognizes traffic_mode:right=foot so far. Left and right refer to the direction the way is drawn in."
     mutually_exclusive_tags:
       title: Contradictory Tags
       tip: "Find features that have contradictory tags."
@@ -2376,6 +2386,10 @@ en:
       max_changeset_elements:
         reference: "You've edited {changesetElements} elements in this changeset, but the maximum number allowed is {maxChangesetElements}. Therefore, your edit is too large to upload. You need to export your changes as an osmChange file and use a different editor to upload it."
     fix:
+      cycleway_traffic_mode_foot:
+        right: "Set traffic_mode:right=foot (footway on the right)"
+        left: "Set traffic_mode:left=foot (footway on the left)"
+        annotation: Set the footway next to the cycleway.
       add_a_bridge:
         title: Add a bridge
         annotation: Added a bridge.
