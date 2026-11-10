@@ -4,7 +4,6 @@ import {
     analyzeCategoryGaps,
     isIncompleteCategoryId,
     processBikelanes,
-    writeKeyForSide,
     type BikelaneResult,
     type CategoryGap
 } from '@tilda-geo/bicycle-infrastructure';
@@ -17,6 +16,8 @@ import {
     attributeFeedsText,
     attributeLabel,
     attributeNote,
+    gapTags,
+    gapWriteKey,
     groupMappingKinds,
     lifecycleForSide,
     mappingChoiceForCategory,
@@ -45,6 +46,7 @@ import { localizer, t } from '../../core/localizer';
 import { svgIcon } from '../../svg/icon';
 import { utilRebind } from '../../util/rebind';
 import { categoryName, packageLanguage } from '../../tilda/package_texts';
+import { definedTags } from '../../tilda/tags';
 import { tildaChecks, VERIFIED, type TildaCheck } from '../../tilda/checks';
 import { trafficSignTagKeysFromTags } from '../../presets/traffic_sign_fields';
 import { presetFieldsOf } from '../fields/side_prerequisite';
@@ -129,6 +131,24 @@ function attributeSeverity(attribute: RequiredAttribute): 'required' | 'optional
 }
 
 
+/** Order of the open rows of a checklist: what blocks TILDA first, defaults to confirm last */
+function attributeRank(attribute: RequiredAttribute) {
+    if (attribute.state === 'ignored') return 0;
+    if (attribute.state === 'missing') return attribute.optional ? 3 : 1;
+    if (attribute.state === 'guess') return 2;
+    return 4;
+}
+
+
+/** A value as TILDA names it (`oneway=implicit_yes` → "Eine Richtung (abgeleitet)"); German only */
+function tildaValueLabel(attribute: RequiredAttribute, value: string | undefined) {
+    if (value === undefined || packageLanguage() !== 'de') return value;
+    const labels: Record<string, string> = TILDA_LABELS.de;
+    const label = labels[`${attribute.id}=${value}`];
+    return label ? `„${label}“` : value;
+}
+
+
 /**
  * Inspector section "TILDA bike infrastructure": how TILDA classifies each side of
  * the selected way, what is missing for an exact category, how to reach a chosen
@@ -153,6 +173,8 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
     let _showIntro = false;
     /** sides whose "Change to" select is open */
     let _editing = new Set<Side>();
+    /** checklists (side and list) that show their rows that are in order */
+    let _showDone = new Set<string>();
     /** keys TILDA reads whose tag is missing, for the field titles */
     let _fieldStatus = new Map<string, 'required' | 'optional'>();
 
@@ -267,6 +289,10 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
 
         return results.map(result => {
             const side = result._side;
+            const sideGaps = gaps.find(gap => gap._side === side)?.missing ?? [];
+            // the open question of the category asks for these keys; the checklist does not repeat them
+            const gapKeys = new Set(sideGaps.map(gap => gapWriteKey(gap, result)));
+            const notAGap = (attribute: RequiredAttribute) => attribute.state !== 'missing' || !gapKeys.has(attribute.key);
             const choice = _choices.get(side);
             const target = choice && resolveMappingChoice(choice, side)?.categoryId;
             const plan = choice ? planForMappingChoice(_tags, choice, side) : undefined;
@@ -276,12 +302,13 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
             return {
                 side,
                 result,
-                gaps: gaps.find(gap => gap._side === side)?.missing ?? [],
+                gaps: sideGaps,
                 choice,
                 target,
                 plan,
-                attributes: requiredAttributes(result, _tags, { profile: radnetzBerlin, targetCategory, edited }),
-                roadAttributes: side === 'self' && !selfIsInfrastructure ? roadAttributes(_tags, { profile: radnetzBerlin, edited }) : [],
+                attributes: requiredAttributes(result, _tags, { profile: radnetzBerlin, targetCategory, edited }).filter(notAGap),
+                roadAttributes: side === 'self' && !selfIsInfrastructure
+                    ? roadAttributes(_tags, { profile: radnetzBerlin, edited }).filter(notAGap) : [],
                 reminders: reminders(result, _tags, radnetzBerlin, targetCategory),
                 collapsible,
                 collapsed: collapsible && !(_selfExpanded ?? !!choice)
@@ -399,11 +426,11 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
             const header = d.target && d.target !== d.result.category
                 ? t('inspector.tilda.required_for', { category: categoryName(d.target) })
                 : t('inspector.tilda.required');
-            drawAttributes(d3_select(this), d.attributes, header);
+            drawAttributes(d3_select(this), d.attributes, `${d.side}-attributes`, header);
         });
         cardSelection.select<HTMLDivElement>('.tilda-road-attributes').each(function(d) {
             // no header: "mixed traffic" is the category above, why the data is needed is in the info text
-            drawAttributes(d3_select(this), d.roadAttributes, undefined, MIXED_TRAFFIC_QUICK_VALUES);
+            drawAttributes(d3_select(this), d.roadAttributes, `${d.side}-road`, undefined, MIXED_TRAFFIC_QUICK_VALUES);
         });
 
         cardSelection.select<HTMLDivElement>('.tilda-reminders').each(function(d) { drawReminders(d3_select(this), d.reminders); });
@@ -467,7 +494,27 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
     }
 
 
-    /** Questions that make an incomplete category exact, one button per answer */
+    /** The category a side gets when the open question is answered with `value` */
+    function gapAnswerLabel(gap: CategoryGap, card: SideCard, value: string) {
+        const tags = definedTags({ ..._tags, ...gapTags(gap, card.result, value) });
+        const category = processBikelanes(tags).find(result => result._side === card.side)?.category;
+        return category && category !== card.result.category ? categoryName(category) : value;
+    }
+
+    /** The answers of a gap; a start all of them share (`Getrennter Rad- und Gehweg, `) is left out */
+    function gapAnswerLabels(gap: CategoryGap, card: SideCard) {
+        const labels = gap.values.map(value => gapAnswerLabel(gap, card, value));
+        const first = labels[0] ?? '';
+        const cut = first.lastIndexOf(', ') + 2;
+        const shared = cut > 1 && labels.length > 1 && labels.every(label => label.startsWith(first.slice(0, cut)));
+        return new Map(gap.values.map((value, i) => [value, shared ? labels[i].slice(cut) : labels[i]]));
+    }
+
+
+    /**
+     * The open question that makes an incomplete category exact: first in the card, one button per
+     * answer, named by the category it leads to (the tag in the tooltip)
+     */
     function drawGaps(selection: d3.Selection<HTMLDivElement>, card: SideCard) {
         let rows = selection.selectAll<HTMLDivElement, CategoryGap>('.tilda-gap')
             .data(card.gaps, d => d.key);
@@ -476,17 +523,16 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
         const rowsEnter = rows.enter()
             .append('div')
             .attr('class', 'tilda-gap');
-        rowsEnter.append('div').attr('class', 'tilda-gap-reason');
+        rowsEnter.append('div').attr('class', 'tilda-gap-title');
         rowsEnter.append('div').attr('class', 'tilda-buttons');
+        rowsEnter.append('div').attr('class', 'tilda-gap-key');
 
-        rows = rows.merge(rowsEnter);
-        rows.select('.tilda-gap-reason')
-            .each(function(d) {
-                const reason = d3_select(this).text('');
-                reason.append('code').text(writeKeyForSide(d.key, card.side, card.result._prefix));
-                // the library adds a note about its internal key names; not useful here
-                reason.append('span').text(` ${d.reason.replace(/\s*\(transformed from [^)]*\)/, '')}`);
-            });
+        rows = rows.merge(rowsEnter)
+            // the library adds a note about its internal key names; not useful here
+            .attr('title', d => d.reason.replace(/\s*\(transformed from [^)]*\)/, ''));
+        rows.select('.tilda-gap-title').text(t('inspector.tilda.gap_title'));
+        rows.select('.tilda-gap-key')
+            .text(d => t('inspector.tilda.gap_key', { key: gapWriteKey(d, card.result) }));
 
         const buttons = rows.select('.tilda-buttons')
             .selectAll<HTMLButtonElement, string>('button')
@@ -494,12 +540,17 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
         buttons.exit().remove();
         buttons.enter()
             .append('button')
-            .attr('class', 'button tilda-value')
+            .attr('class', 'button tilda-value tilda-gap-answer')
             .merge(buttons)
-            .text(d => d)
+            .each(function(value) {
+                const gap = d3_select(this.parentElement!.parentElement!).datum() as CategoryGap;
+                d3_select(this)
+                    .text(gapAnswerLabels(gap, card).get(value) ?? value)
+                    .attr('title', `${gapWriteKey(gap, card.result)}=${value}`);
+            })
             .on('click', function(_d3_event: MouseEvent, value: string) {
                 const gap = d3_select(this.parentElement!.parentElement!).datum() as CategoryGap;
-                changeTags({ [writeKeyForSide(gap.key, card.side, card.result._prefix)]: value });
+                changeTags(definedTags(gapTags(gap, card.result, value)));
             });
     }
 
@@ -625,17 +676,25 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
 
 
     /**
-     * Checklist of tags the Radnetz dataset needs, as the tags themselves: `key=value` with a state,
-     * the attribute name as tooltip. A missing tag links to its field below; only tags without a
-     * field get the values TILDA accepts as buttons (plus a free input).
+     * Checklist of tags the Radnetz dataset needs: the attribute name, its state and the tags. Open
+     * rows first (what TILDA cannot use or misses, then guesses, then defaults to confirm); rows in
+     * order fold into one line (`listID` remembers it was opened). A missing tag links to its field
+     * below; only tags without a field get the values TILDA accepts as buttons, a free input only
+     * when there are no or too many values.
      */
-    function drawAttributes(selection: d3.Selection<HTMLDivElement>, attributes: RequiredAttribute[], headerText?: string,
-        quickValues: Record<string, string> = {}) {
+    function drawAttributes(selection: d3.Selection<HTMLDivElement>, attributes: RequiredAttribute[], listID: string,
+        headerText?: string, quickValues: Record<string, string> = {}) {
+        const done = (d: RequiredAttribute) => d.state === 'ok' || d.state === 'inherited' || !!confirmed(d);
+        const open = attributes.filter(d => !done(d))
+            .sort((a, b) => attributeRank(a) - attributeRank(b));
+        const doneRows = attributes.filter(done);
+        const showDone = _showDone.has(listID);
+
         const header = selection.selectAll<HTMLDivElement, string>('.tilda-attributes-header')
             .data(attributes.length && headerText ? [headerText] : []);
         header.exit().remove();
         header.enter()
-            .append('div')
+            .insert('div', ':first-child')
             .attr('class', 'tilda-attributes-header')
             .merge(header)
             .text(d => d);
@@ -644,14 +703,15 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
         const hasField = (d: RequiredAttribute) => d.lookup.some(key => withField.has(key));
 
         let rows = selection.selectAll<HTMLDivElement, RequiredAttribute>('.tilda-attribute')
-            .data(attributes, d => d.key);
+            .data(showDone ? [...open, ...doneRows] : open, d => d.key);
         rows.exit().remove();
 
         const rowsEnter = rows.enter()
-            .append('div')
+            .insert('div', '.tilda-done-toggle')
             .attr('class', 'tilda-attribute');
         rowsEnter.append('span').attr('class', 'tilda-attribute-state');
         const mainEnter = rowsEnter.append('span').attr('class', 'tilda-attribute-main');
+        mainEnter.append('span').attr('class', 'tilda-attribute-title');
         mainEnter.append('span').attr('class', 'tilda-attribute-tags');
         mainEnter.append('span').attr('class', 'tilda-attribute-note');
         const inputs = rowsEnter.append('span').attr('class', 'tilda-attribute-inputs');
@@ -677,32 +737,26 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
         inputs.append('datalist');
 
         rows = rows.merge(rowsEnter)
+            .order()
             .attr('class', d => {
                 const severity = attributeSeverity(d);
                 return `tilda-attribute state-${d.state}${d.optional ? ' optional' : ''}${severity ? ` severity-${severity}` : ''}${confirmed(d) ? ' checked' : ''}`;
             })
-            .attr('title', d => [
-                attributeLabel(d.id, packageLanguage()),
-                attributeFeedsText(d, packageLanguage())
-            ].filter(Boolean).join('\n'));
+            .attr('title', d => attributeFeedsText(d, packageLanguage()) ?? null);
 
         rows.select('.tilda-attribute-state').text(d => confirmed(d) ? STATE_ICON.ok : STATE_ICON[d.state]);
 
-        // the tags as they are tagged, or "`key` is missing; add below"
-        rows.select<HTMLSpanElement>('.tilda-attribute-tags')
+        // the attribute name, and for an untagged one "is missing; add below"
+        rows.select<HTMLSpanElement>('.tilda-attribute-title')
             .each(function(d) {
                 const cell = d3_select(this).text('');
-                if (d.tagged.length) {
-                    for (const tag of d.tagged) cell.append('code').text(`${tag.key}=${tag.value}`);
-                    return;
-                }
+                cell.append('span').attr('class', 'tilda-attribute-label').text(attributeLabel(d.id, packageLanguage()));
+                if (d.tagged.length || d.state === 'inherited') return;
                 const line = cell.append('span').attr('class', 'tilda-attribute-missing');
-                line.append('code').text(d.key);
-                if (d.state === 'inherited') return;
                 // assumed: a default to confirm, not a request to tag it
                 line.append('span').text(` ${stateText(d.state === 'assumed' ? 'not_tagged' : 'missing')}`);
                 if (!hasField(d) || confirmed(d)) return;
-                line.append('span').text('; ');
+                line.append('span').text(' · ');
                 line.append('a')
                     .attr('href', '#')
                     .attr('class', 'tilda-reveal')
@@ -713,9 +767,19 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
                         dispatch.call('reveal', section, d.lookup);
                     });
             });
+        // the tags as they are tagged, or the key to tag
+        rows.select<HTMLSpanElement>('.tilda-attribute-tags')
+            .each(function(d) {
+                const cell = d3_select(this).text('');
+                if (d.tagged.length) {
+                    for (const tag of d.tagged) cell.append('code').text(`${tag.key}=${tag.value}`);
+                } else {
+                    cell.append('code').text(d.key);
+                }
+            });
         rows.select('.tilda-attribute-note').text(d => {
             const check = confirmed(d);
-            const note = attributeNote(d, packageLanguage()) ?? '';
+            const note = attributeNote({ ...d, tilda: tildaValueLabel(d, d.tilda) }, packageLanguage()) ?? '';
             return check ? `${byline('checked_by', check)}. ${note}` : note;
         });
 
@@ -738,9 +802,11 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
         const quickValue = (d: RequiredAttribute) => !needsInputs(d) && d.state === 'missing' ? quickValues[d.key] : undefined;
         rows.select<HTMLSpanElement>('.tilda-attribute-inputs')
             .style('display', d => needsInputs(d) || d.state === 'assumed' || quickValue(d) ? null : 'none');
-        // a default: only the listed values say something else, no free value
+        // a free value only when there are no values to click, or too many (a default: only the listed values)
+        const freeInput = (d: RequiredAttribute) => needsInputs(d) && d.state !== 'assumed' && !quickValue(d)
+            && (!d.options.length || d.options.length > MAX_BUTTONS);
         rows.select<HTMLInputElement>('input.tilda-attribute-input')
-            .style('display', d => d.state === 'assumed' || quickValue(d) ? 'none' : null);
+            .style('display', d => freeInput(d) ? null : 'none');
 
         // many options: the first few as buttons, all of them as suggestions in the input
         const datalistID = (d: RequiredAttribute) => `tilda-options-${d.key.replace(/[^\w-]/g, '_')}`;
@@ -764,6 +830,24 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
                 const attribute = d3_select(this.closest('.tilda-attribute')!).datum() as RequiredAttribute;
                 changeTags({ [attribute.key]: value });
             });
+
+        // the rows in order: one line that opens them
+        const toggle = selection.selectAll<HTMLButtonElement, number>('.tilda-done-toggle')
+            .data(doneRows.length ? [doneRows.length] : []);
+        toggle.exit().remove();
+        toggle.enter()
+            .append('button')
+            .attr('class', 'tilda-done-toggle')
+            .on('click', function(this: HTMLButtonElement, d3_event: MouseEvent) {
+                d3_event.preventDefault();
+                this.blur();
+                if (_showDone.has(listID)) _showDone.delete(listID);
+                else _showDone.add(listID);
+                section.reRender();
+            })
+            .merge(toggle)
+            .classed('expanded', showDone)
+            .text(n => showDone ? t('inspector.tilda.done_hide') : `✓ ${t('inspector.tilda.done_rows', { n })}`);
     }
 
 
@@ -797,6 +881,7 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
             _choices = new Map();
             _selfExpanded = undefined;
             _editing = new Set();
+            _showDone = new Set();
         }
         _entityIDs = val;
         return section;
