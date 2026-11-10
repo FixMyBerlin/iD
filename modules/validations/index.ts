@@ -19,6 +19,7 @@ export { validationUnsquareWay } from './unsquare_way';
 export {
     validationCyclewayOnewayRedundant,
     validationCyclewayOnewayWrong,
+    validationUnexpectedOnewayDirection,
     validationWidthPartSum,
     validationWidthPartUnsegregated,
     validationWidthPartWhole

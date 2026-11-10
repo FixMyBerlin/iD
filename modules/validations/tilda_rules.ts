@@ -1,5 +1,6 @@
 import {
     RADNETZ_RULES,
+    TILDA_GEO_RULES,
     applyTagFix,
     renderMessage,
     ruleDescription,
@@ -111,7 +112,7 @@ function createValidator(context: iD.Context, ruleId: string): Validator {
 
 /** An iD validator for one rule of the package */
 function tildaRuleValidator(ruleId: string): CreateValidator {
-    if (!RADNETZ_RULES.some(rule => rule.id === ruleId)) throw new Error(`Unknown TILDA rule ${ruleId}`);
+    if (![...RADNETZ_RULES, ...TILDA_GEO_RULES].some(rule => rule.id === ruleId)) throw new Error(`Unknown TILDA rule ${ruleId}`);
     return context => {
         const validation = createValidator(context, ruleId);
         if (CONFIRMABLE.has(ruleId)) {
@@ -131,3 +132,6 @@ export const validationWidthPartWhole = tildaRuleValidator('width_part_whole');
 export const validationWidthPartUnsegregated = tildaRuleValidator('width_part_unsegregated');
 export const validationCyclewayOnewayWrong = tildaRuleValidator('cycleway_oneway_wrong');
 export const validationCyclewayOnewayRedundant = tildaRuleValidator('cycleway_oneway_redundant');
+// From the tilda-geo rules: on a road in both directions, `cycleway_oneway_wrong` reports only the
+// contraflow case; a side `oneway` against the traffic of its side is this rule.
+export const validationUnexpectedOnewayDirection = tildaRuleValidator('unexpected_oneway_direction');

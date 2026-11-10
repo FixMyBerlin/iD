@@ -69,7 +69,7 @@
     "@rapideditor/country-coder": "~5.6.0",
     "@rapideditor/location-conflation": "~3.0.0",
     "@tilda-geo/bicycle-infrastructure": "^0.2.0",
-    "@tilda-geo/bicycle-infrastructure-tagging": "^0.1.0",
+    "@tilda-geo/bicycle-infrastructure-tagging": "^0.1.1",
     "@tmcw/togeojson": "^7.1.2",
     "@turf/bbox": "^7.2.0",
     "@turf/bbox-clip": "^7.2.0",
@@ -157,8 +157,5 @@
   },
   "browserslist": [
     "> 0.3%, last 6 major versions, Firefox ESR, not Safari < 14.1, not iOS <= 14, not dead, maintained node versions"
-  ],
-  "overrides": {
-    "@tilda-geo/bicycle-infrastructure": "$@tilda-geo/bicycle-infrastructure"
-  }
+  ]
 }

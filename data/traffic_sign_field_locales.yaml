@@ -223,6 +223,9 @@ de:
     cycleway_oneway_redundant:
       title: Richtung der Radspur nicht nötig
       tip: "Findet Straßen, bei denen das „oneway“-Tag einer Radspur oder eines Radwegs an der Seite nur den Standard wiederholt."
+    unexpected_oneway_direction:
+      title: Radspur gegen den Verkehr ihrer Seite
+      tip: "Findet Straßen in beide Richtungen, bei denen das „oneway“-Tag einer Radspur oder eines Radwegs sie gegen den Verkehr ihrer Seite fahren lässt."
     cycleway_traffic_mode_foot:
       title: Gehweg neben dem Radweg
       tip: "Findet Radwege mit einem Gehweg direkt daneben, bei denen „traffic_mode“ das noch nicht angibt."
@@ -779,6 +782,9 @@ de-CH:
     cycleway_oneway_redundant:
       title: Richtung der Radspur nicht nötig
       tip: "Findet Straßen, bei denen das „oneway“-Tag einer Radspur oder eines Radwegs an der Seite nur den Standard wiederholt."
+    unexpected_oneway_direction:
+      title: Radspur gegen den Verkehr ihrer Seite
+      tip: "Findet Straßen in beide Richtungen, bei denen das „oneway“-Tag einer Radspur oder eines Radwegs sie gegen den Verkehr ihrer Seite fahren lässt."
     fix:
       width_stone_source:
         title: "{key} auf {stones} m setzen (aus den Steinen)"

@@ -2273,6 +2273,9 @@ en:
     cycleway_oneway_redundant:
       title: Bike Lane Direction Not Needed
       tip: "Find roads where the “oneway” tag of a bike lane or cycle track on the side only repeats the default."
+    unexpected_oneway_direction:
+      title: Bike Lane Against the Traffic of Its Side
+      tip: "Find roads in both directions where the “oneway” tag of a bike lane or cycle track makes it run against the traffic of its side."
     cycleway_traffic_mode_foot:
       title: Footway Next to the Cycleway
       tip: "Find cycleways with a footway right next to them where “traffic_mode” does not say so yet."
