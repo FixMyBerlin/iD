@@ -42,6 +42,11 @@ describe('footwaysNextTo (traffic_mode hint on separate cycleways)', () => {
         expect(setup({ ...cycleway, 'traffic_mode:left': 'motor_vehicle' }, -2)).toEqual(['w2']);
     });
 
+    it('not on a crossing (its own TILDA category)', () => {
+        expect(setup({ highway: 'cycleway', cycleway: 'crossing' }, -2)).toEqual([]);
+        expect(setup({ highway: 'path', path: 'crossing', bicycle: 'designated' }, -2)).toEqual([]);
+    });
+
     it('only on cycleways, and only next to footways', () => {
         expect(setup({ highway: 'path', bicycle: 'designated', foot: 'designated' }, -2)).toEqual([]);
         expect(setup({ highway: 'residential' }, -2)).toEqual([]);

@@ -21,8 +21,15 @@ export const NEXT_TO_METERS = 5;
 const SIDE_KEYS = ['traffic_mode:left', 'traffic_mode:right', 'traffic_mode:both'];
 
 
-/** `traffic_mode` already says a footway is next to it, or is set on both sides */
+/** A crossing is its own TILDA category: we never tag `traffic_mode` there (Tobias) */
+function isCrossing(tags: Tags) {
+    return tags.cycleway === 'crossing' || tags.path === 'crossing' || tags.footway === 'crossing';
+}
+
+
+/** `traffic_mode` already says a footway is next to it, or is set on both sides; or it is not needed (a crossing) */
 function trafficModeKnown(tags: Tags) {
+    if (isCrossing(tags)) return true;
     if (SIDE_KEYS.some(key => tags[key] === 'foot')) return true;
     if (tags['traffic_mode:both'] !== undefined) return true;
     return tags['traffic_mode:left'] !== undefined && tags['traffic_mode:right'] !== undefined;
