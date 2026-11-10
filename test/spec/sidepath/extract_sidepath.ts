@@ -1,17 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
 import { planSidepathExtraction } from '../../../modules/actions/extract_sidepath';
-import { reverseWayTags } from '../../../modules/sidepath/reverse_tags';
-
-
-describe('sidepath/reverse_tags', () => {
-    it('turns oneway:bicycle too, besides what the package turns', () => {
-        expect(reverseWayTags({ oneway: 'no', 'oneway:bicycle': '-1', 'separation:left': 'kerb' }))
-            .toEqual({ oneway: 'no', 'oneway:bicycle': 'yes', 'separation:right': 'kerb' });
-        expect(reverseWayTags({ 'oneway:bicycle': 'yes' })).toEqual({ 'oneway:bicycle': '-1' });
-        expect(reverseWayTags({ 'oneway:bicycle': 'no' })).toEqual({ 'oneway:bicycle': 'no' });
-    });
-});
 
 
 describe('actions/extract_sidepath planSidepathExtraction', () => {

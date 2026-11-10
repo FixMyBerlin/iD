@@ -38,19 +38,6 @@ function samplePoints(locs: Loc[], step: number): Loc[] {
 
 
 /**
- * A footway that can be the other half of a cycle track: `partKind` says `foot`. Until tagging 0.2.0
- * (tilda-schemas 883ccb4) the package gives no part for a sidewalk where bicycles are only allowed
- * (`highway=footway` + `bicycle=yes|permissive`, `highway=path` + `foot=designated` + `bicycle=yes`,
- * TILDA's `footwayBicycleYes`); those count here too. Remove the second part with 0.2.0.
- */
-export function isFootPart(tags: Tags) {
-    if (partKind(tags) === 'foot') return true;
-    if (tags.highway === 'footway') return tags.bicycle === 'yes' || tags.bicycle === 'permissive';
-    return tags.highway === 'path' && tags.foot === 'designated' && tags.bicycle === 'yes';
-}
-
-
-/**
  * The footways among `ways` that run along the cycleway (WORKDOC feature 30): footways (or paths
  * for pedestrians, see `partKind`) of which at least half runs within a few meters of it, or that
  * run along a third of it (a long sidewalk beside a short road piece). A footway that crosses the
@@ -70,7 +57,7 @@ export function sidewalkCandidates(graph: coreGraph, bikeWayID: WayId, ways: osm
         if (way.id === bikeWayID || way.type !== 'way' || way.isClosed()) continue;
         // the way may be deleted or changed since it was found
         const current = graph.hasEntity(way.id);
-        if (!current || current.type !== 'way' || !isFootPart(current.tags as Tags)) continue;
+        if (!current || current.type !== 'way' || partKind(current.tags) !== 'foot') continue;
         if (!current.nodes.every(id => graph.hasEntity(id))) continue;
 
         const locs = wayLocs(graph, current as osmWay);

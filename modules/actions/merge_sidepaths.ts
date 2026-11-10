@@ -3,10 +3,9 @@ import { actionDeleteWay } from './delete_way';
 import { actionSplit } from './split';
 import { distanceToLineMeters, lineLengthMeters, projectOnLine } from '../sidepath/offset_line';
 import {
-    combinedPathTags, commonTags, mergeSelection,
+    combinedPathTags, commonTags, mergeSelection, reverseTags,
     type JoinSigns, type MergeSelection, type MergeWay, type PartKind, type SignRecommend
 } from '@tilda-geo/bicycle-infrastructure-tagging';
-import { reverseWayTags } from '../sidepath/reverse_tags';
 import { definedTags } from '../tilda/tags';
 import type { Action } from '../core/history';
 import type { coreGraph } from '../core';
@@ -68,7 +67,7 @@ function mergedTags(
     recommend: SignRecommend | undefined, joinSigns: JoinSigns | undefined
 ) {
     const along = direction(wayLocs(graph, survivor));
-    const other = commonTags(deleted.map(way => dot(along, direction(wayLocs(graph, way))) < 0 ? reverseWayTags(way.tags) : way.tags));
+    const other = commonTags(deleted.map(way => dot(along, direction(wayLocs(graph, way))) < 0 ? definedTags(reverseTags(way.tags)) : way.tags));
     const [bike, foot] = surviving === 'bike' ? [survivor.tags, other] : [other, survivor.tags];
     return combinedPathTags(bike, foot, { recommend, joinSigns, primary: surviving });
 }

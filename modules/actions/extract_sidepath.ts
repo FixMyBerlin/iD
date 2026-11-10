@@ -3,9 +3,9 @@ import { osmWay } from '../osm/way';
 import { lineLengthMeters, offsetLine } from '../sidepath/offset_line';
 import {
     planExtraction,
+    reverseTags,
     type ExtractVariant, type JoinSigns, type Side, type SignRecommend
 } from '@tilda-geo/bicycle-infrastructure-tagging';
-import { reverseWayTags } from '../sidepath/reverse_tags';
 import { definedTags } from '../tilda/tags';
 import type { Action } from '../core/history';
 import type { coreGraph } from '../core';
@@ -40,7 +40,7 @@ export function planSidepathExtraction(
     const plan = planExtraction(road, variant, side, { recommend, joinSigns });
     const wayTags = definedTags(plan.wayTags);
     const reversed = wayTags.oneway === '-1' || wayTags['oneway:bicycle'] === '-1';
-    return { ...plan, wayTags: reversed ? reverseWayTags(wayTags) : wayTags, roadTags: definedTags(plan.roadTags), reversed };
+    return { ...plan, wayTags: reversed ? definedTags(reverseTags(wayTags)) : wayTags, roadTags: definedTags(plan.roadTags), reversed };
 }
 
 /** Ways shorter than this are not extracted */
