@@ -36,12 +36,17 @@ export function tildaNotesConfigured(): boolean {
 }
 
 
-/** The notes page of the folder in TILDA, centered on `loc` ([lon, lat]) when given */
-export function tildaNotesPageUrl(loc?: [number, number]): string {
+/**
+ * The notes page of the folder in TILDA, centered on `loc` ([lon, lat]) when given.
+ * With `noteId` (and `loc`) the note is selected, like a click on it: `f=33|<id>|<lon>|<lat>`
+ * (33 = `internal-notes-source` in TILDA's `numericSourceIds`).
+ */
+export function tildaNotesPageUrl(loc?: [number, number], noteId?: string): string {
     const { origin, regionSlug, folderId } = _config;
     const params = [];
     if (loc) params.push(`map=17/${loc[1].toFixed(5)}/${loc[0].toFixed(5)}`);
     params.push('v=3');
+    if (loc && noteId) params.push(`f=${['33', noteId, loc[0].toFixed(6), loc[1].toFixed(6)].join('|')}`);
     params.push(`notes=${encodeURIComponent(JSON.stringify({ key: folderId }))}`);
     return `${origin}/regionen/${regionSlug}/hinweise?${params.join('&')}`;
 }

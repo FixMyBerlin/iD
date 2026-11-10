@@ -75,7 +75,7 @@ export function uiTildaNoteEditor(context: iD.Context) {
                 .attr('class', 'view-on-osm')
                 .attr('target', '_blank')
                 .attr('rel', 'noopener')
-                .attr('href', tildaNotesPageUrl(_note.loc))
+                .attr('href', tildaNotesPageUrl(_note.loc, _note.id))
                 .call(svgIcon('#iD-icon-out-link', 'inline'))
                 .append('span')
                 .call(t.append('tilda_notes.open_in_tilda'));
@@ -122,8 +122,14 @@ export function uiTildaNoteEditor(context: iD.Context) {
         meta.append('span')
             .attr('class', 'tilda-note-status ' + _note.status)
             .call(t.append('tilda_notes.status.' + _note.status));
-        meta.append('span')
-            .text(` · #${_note.id}`);
+        meta.append('span').text(' · ');
+        meta.append('a')
+            .attr('class', 'tilda-note-link')
+            .attr('target', '_blank')
+            .attr('rel', 'noopener')
+            .attr('href', tildaNotesPageUrl(_note.loc, _note.id))
+            .attr('title', t('tilda_notes.open_in_tilda'))
+            .text(`#${_note.id}`);
         if (!_note.isLoaded() && _note.commentCount) {
             meta.append('span').text(' · ');
             meta.append('span').call(t.append('tilda_notes.replies', { count: _note.commentCount }));
