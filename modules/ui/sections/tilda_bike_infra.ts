@@ -473,9 +473,11 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
         let rows = selection.selectAll<HTMLDivElement, string>('.tilda-reminder')
             .data(ids, d => d);
         rows.exit().remove();
+        // like a row of the checklist: state, title, text, "Checked" below
         const rowsEnter = rows.enter()
             .append('div')
             .attr('class', d => `tilda-reminder tilda-reminder-${d}`);
+        rowsEnter.append('span').attr('class', 'tilda-attribute-state');
         const textEnter = rowsEnter.append('div').attr('class', 'tilda-reminder-body');
         textEnter.append('span').attr('class', 'tilda-reminder-title');
         textEnter.append('span').attr('class', 'tilda-reminder-text');
@@ -487,6 +489,7 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
 
         rows = rows.merge(rowsEnter)
             .classed('checked', d => !!stored(d));
+        rows.select('.tilda-attribute-state').text(d => stored(d) ? STATE_ICON.ok : STATE_ICON.assumed);
         rows.select('.tilda-reminder-title').text(d => reminderText(d, packageLanguage())?.title ?? d);
         rows.select('.tilda-reminder-text').text(d => {
             const check = stored(d);
