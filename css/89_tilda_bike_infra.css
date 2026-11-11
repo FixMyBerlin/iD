@@ -243,7 +243,8 @@
 .tilda-option-row .tilda-buttons {
     margin: 0;
 }
-.tilda-card .tilda-option-row button.tilda-value.active {
+.tilda-card .tilda-option-row button.tilda-value.active,
+.tilda-card .tag-plan-choice button.tilda-value.active {
     background: var(--link-color, #7092ff);
     color: #fff;
 }

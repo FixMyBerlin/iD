@@ -77,3 +77,20 @@
 .ideditor .tag-plan button.tag-plan-apply-row:hover {
     background: var(--bg-color-3);
 }
+
+/* a planned tag with several values to pick (the separation of a protected lane) */
+.tag-plan .tag-plan-choice {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px;
+    margin: 6px 0;
+}
+.tag-plan .tag-plan-choice-key {
+    font-size: 12px;
+}
+.tag-plan .tag-plan-choice-values {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}

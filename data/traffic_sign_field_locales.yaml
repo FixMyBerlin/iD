@@ -207,7 +207,13 @@ de:
   issues:
     cycleway_oneway_wrong:
       title: Richtung der Radspur vermutlich falsch
-      tip: "Findet Straßen, bei denen das „oneway“-Tag einer Radspur oder eines Radwegs an der Seite sehr wahrscheinlich die falsche Richtung angibt."
+      tip: "Findet Einbahnstraßen mit Radverkehr in Gegenrichtung, deren linke Radspur mit der Einbahn fahren soll (cycleway:left:oneway=yes). Meist ist -1 gemeint; ein echtes yes mit „Das ist hier richtig“ bestätigen."
+    cycleway_oneway_contraflow_missing:
+      title: Gegenrichtungs-Radspur ohne Richtung
+      tip: "Findet Einbahnstraßen mit Radverkehr in Gegenrichtung, die links Radinfrastruktur ohne cycleway:left:oneway haben. Ohne Angabe fährt sie mit der Einbahn."
+    sidewalk_shared_path:
+      title: Gehweg für Radverkehr bestimmt
+      tip: "Findet Gehwege mit bicycle=designated und foot=designated (oder ohne foot). Das ist ein Geh- und Radweg: highway=path mit is_sidepath=yes."
     width_stone_source:
       title: Breite passt nicht zu den gezählten Steinen
       tip: "Findet Breiten, deren Quelle Pflastersteine zählt („7,5 Steine à 20 cm“), die aber eine andere Breite ergeben."
@@ -234,7 +240,7 @@ de:
       title: Gehweg neben dem Radweg
       tip: "Findet Radwege mit einem Gehweg direkt daneben, bei denen „traffic_mode“ das noch nicht angibt."
       message: "{feature}: Daneben verläuft ein Gehweg, „traffic_mode“ ist möglicherweise sinnvoll"
-      reference: "Ein Gehweg verläuft in höchstens {meters} m Abstand zu diesem Radweg. Liegt nichts anderes dazwischen, ist das ein getrennter Rad- und Gehweg, als zwei Linien gezeichnet: Setze traffic_mode=foot für die Seite des Gehwegs. TILDA erkennt bisher nur traffic_mode:right=foot. Links und rechts beziehen sich auf die Richtung, in der die Linie gezeichnet ist."
+      reference: "Ein Gehweg verläuft in höchstens {meters} m Abstand zu diesem Radweg. Liegt nichts anderes dazwischen, ist das ein getrennter Rad- und Gehweg, als zwei Linien gezeichnet: Setze traffic_mode=foot für die Seite des Gehwegs. Links und rechts beziehen sich auf die Richtung, in der die Linie gezeichnet ist."
     fix:
       cycleway_traffic_mode_foot:
         right: "traffic_mode:right=foot setzen (Gehweg rechts)"
@@ -284,13 +290,12 @@ de:
       done_rows: "{n} weitere in Ordnung"
       done_hide: Zeilen in Ordnung ausblenden
       foot_title: "Offene Frage: Gehört der Gehweg daneben zu diesem Radweg?"
-      foot_text: "Direkt daneben verläuft ein Gehweg ({side}). Liegt nichts dazwischen, ist das ein getrennter Rad- und Gehweg; TILDA liest dafür traffic_mode:right=foot."
+      foot_text: "Direkt daneben verläuft ein Gehweg ({side}). Liegt nichts dazwischen, ist das ein getrennter Rad- und Gehweg; TILDA liest dafür traffic_mode:right=foot oder traffic_mode:left=foot."
       foot_side_left: links
       foot_side_right: rechts
       foot_side_unknown: Seite unklar
       foot_right: "Ja, Gehweg rechts"
       foot_left: "Ja, Gehweg links"
-      foot_left_hint: "TILDA erkennt bisher nur traffic_mode:right=foot als getrennten Rad- und Gehweg; mit „links“ bleibt es vorerst ein Radweg."
       foot_no: "Nein, gehört nicht dazu"
       foot_no_tooltip: "Wird für das Projekt gespeichert, nicht in OpenStreetMap: Der Gehweg daneben gehört nicht zu diesem Radweg. Der Hinweis verschwindet."
       open_count: "{n} offen"
@@ -796,7 +801,13 @@ de-CH:
   issues:
     cycleway_oneway_wrong:
       title: Richtung der Radspur vermutlich falsch
-      tip: "Findet Straßen, bei denen das „oneway“-Tag einer Radspur oder eines Radwegs an der Seite sehr wahrscheinlich die falsche Richtung angibt."
+      tip: "Findet Einbahnstraßen mit Radverkehr in Gegenrichtung, deren linke Radspur mit der Einbahn fahren soll (cycleway:left:oneway=yes). Meist ist -1 gemeint; ein echtes yes mit „Das ist hier richtig“ bestätigen."
+    cycleway_oneway_contraflow_missing:
+      title: Gegenrichtungs-Radspur ohne Richtung
+      tip: "Findet Einbahnstraßen mit Radverkehr in Gegenrichtung, die links Radinfrastruktur ohne cycleway:left:oneway haben. Ohne Angabe fährt sie mit der Einbahn."
+    sidewalk_shared_path:
+      title: Gehweg für Radverkehr bestimmt
+      tip: "Findet Gehwege mit bicycle=designated und foot=designated (oder ohne foot). Das ist ein Geh- und Radweg: highway=path mit is_sidepath=yes."
     width_stone_source:
       title: Breite passt nicht zu den gezählten Steinen
       tip: "Findet Breiten, deren Quelle Pflastersteine zählt („7,5 Steine à 20 cm“), die aber eine andere Breite ergeben."

@@ -880,13 +880,12 @@ en:
       done_rows: "{n} more in order"
       done_hide: Hide the rows in order
       foot_title: "Open question: does the footway next to it belong to this cycleway?"
-      foot_text: "A footway runs right next to it ({side}). If nothing lies between them, this is a segregated foot and cycle path; TILDA reads traffic_mode:right=foot for it."
+      foot_text: "A footway runs right next to it ({side}). If nothing lies between them, this is a segregated foot and cycle path; TILDA reads traffic_mode:right=foot or traffic_mode:left=foot for it."
       foot_side_left: on the left
       foot_side_right: on the right
       foot_side_unknown: side unclear
       foot_right: "Yes, footway on the right"
       foot_left: "Yes, footway on the left"
-      foot_left_hint: "TILDA only recognizes traffic_mode:right=foot as a segregated foot and cycle path so far; with “left” it stays a cycleway for now."
       foot_no: "No, it does not belong"
       foot_no_tooltip: "Saved for the project, not in OpenStreetMap: the footway next to it is not part of this cycleway. The hint goes away."
       open_count: "{n} open"
@@ -2273,7 +2272,13 @@ en:
         message: "{feature} is a relation without a type"
     cycleway_oneway_wrong:
       title: Bike Lane Direction Likely Wrong
-      tip: "Find roads where the “oneway” tag of a bike lane or cycle track on the side most likely says the wrong direction."
+      tip: "Find one-way roads with contraflow cycling where the left bike lane is tagged to ride with the one-way (cycleway:left:oneway=yes). Usually -1 is meant; confirm a real yes with “This is correct here”."
+    cycleway_oneway_contraflow_missing:
+      title: Contraflow Lane Without Direction
+      tip: "Find one-way roads with contraflow cycling with bicycle infrastructure on the left but no cycleway:left:oneway. Without it, the lane rides with the one-way."
+    sidewalk_shared_path:
+      title: Sidewalk Designated for Bicycles
+      tip: "Find sidewalks with bicycle=designated and foot=designated (or no foot). They are foot and cycle paths: highway=path with is_sidepath=yes."
     width_stone_source:
       title: Width Does Not Match the Counted Stones
       tip: "Find widths whose source counts paving stones (“7,5 Steine à 20 cm”) but that give another width."
@@ -2300,7 +2305,7 @@ en:
       title: Footway Next to the Cycleway
       tip: "Find cycleways with a footway right next to them where “traffic_mode” does not say so yet."
       message: "{feature}: a footway runs next to it, “traffic_mode” may be useful"
-      reference: "A footway runs within {meters} m of this cycleway. If nothing else lies between the two, it is a segregated foot and cycle path mapped as two ways: set traffic_mode=foot for the side of the footway. TILDA only recognizes traffic_mode:right=foot so far. Left and right refer to the direction the way is drawn in."
+      reference: "A footway runs within {meters} m of this cycleway. If nothing else lies between the two, it is a segregated foot and cycle path mapped as two ways: set traffic_mode=foot for the side of the footway. Left and right refer to the direction the way is drawn in."
     mutually_exclusive_tags:
       title: Contradictory Tags
       tip: "Find features that have contradictory tags."

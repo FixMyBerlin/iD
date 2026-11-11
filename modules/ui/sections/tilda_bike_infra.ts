@@ -121,7 +121,10 @@ function planReached(tags: Tags, plan: CategoryChangePlan) {
     if (plan.conflicts.length || !plan.aligned) return false;
     const after = applyCategoryPlan(tags, plan);
     const keys = new Set([...Object.keys(tags), ...Object.keys(after)]);
-    return [...keys].every(key => tags[key] === after[key]);
+    // a key with choices (the separation of a protected lane) is reached with any of its values
+    const choices = new Map<string, readonly string[]>();
+    for (const entry of [...plan.add, ...plan.change]) if (entry.choices?.length) choices.set(entry.key, entry.choices);
+    return [...keys].every(key => tags[key] === after[key] || choices.get(key)?.includes(tags[key]!) === true);
 }
 
 
@@ -223,6 +226,8 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
     let _tags: Tags = {};
     /** "Change to" per side: kind and options, chosen by the user */
     let _choices = new Map<Side, MappingChoice>();
+    /** values picked from the `choices` of a planned tag, per side and key (`left|separation:left`) */
+    let _planValues = new Map<string, string>();
     /** the user opened or closed the card of the way itself; undefined = automatic */
     let _selfExpanded: boolean | undefined;
     let _showIntro = false;
@@ -417,7 +422,7 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
 
     /**
      * The open question about the footway next to the cycleway: it makes the category
-     * (`footAndCyclewaySegregated` needs `traffic_mode:right=foot`), so it sits with the category question.
+     * (`footAndCyclewaySegregated` needs `traffic_mode:right|left=foot`), so it sits with the category question.
      * "No" is stored like the other checks; then one quiet line with who said it.
      */
     function drawFootway(selection: d3.Selection<HTMLDivElement>, card: SideCard) {
@@ -439,7 +444,7 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
         box.select('.tilda-foot-text').text(d => d.answered && stored
             ? `${t('inspector.tilda.foot_no')} · ${byline('checked_by', stored)}`
             : t('inspector.tilda.foot_text', { side: t(`inspector.tilda.foot_side_${d.side ?? 'unknown'}`) }));
-        box.select('.tilda-gap-key').text(d => !d.answered && d.side === 'left' ? t('inspector.tilda.foot_left_hint') : '');
+        box.select('.tilda-gap-key').text('');
 
         type Answer = 'right' | 'left' | 'no';
         const answers = (d: NonNullable<SideCard['footway']>): Answer[] => d.answered ? ['no']
@@ -456,7 +461,7 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
             .classed('active', d => d === 'no' && !!stored)
             .attr('disabled', d => d === 'no' && disabled ? 'true' : null)
             .attr('title', d => d === 'no' ? (disabled ?? t(`inspector.tilda.${stored ? 'checks.uncheck_tooltip' : 'foot_no_tooltip'}`))
-                : d === 'left' ? `traffic_mode:left=foot\n${t('inspector.tilda.foot_left_hint')}` : `traffic_mode:${d}=foot`)
+                : `traffic_mode:${d}=foot`)
             .text(d => t(`inspector.tilda.foot_${d}`))
             .on('click', function(this: HTMLButtonElement, d3_event: MouseEvent, d: Answer) {
                 d3_event.preventDefault();
@@ -836,13 +841,18 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
 
         const plan = card.plan;
         const textOptions = planTextOptions();
+        const plannedValue = (side: Side, key: string, planned: string) => _planValues.get(`${side}|${key}`) ?? planned;
         const tagRows: TagPlanRow[] = plan ? [
             ...plan.remove.map(key => ({ kind: 'remove' as const, key, value: _tags[key] ?? '', reason: t('inspector.tilda.remove_reason') })),
-            // add only what is still missing (the plan may repeat existing tags)
-            ...plan.add.filter(entry => _tags[entry.key] !== entry.value)
-                .map(entry => ({ kind: 'add' as const, key: entry.key, value: entry.value, reason: renderPlanReason(entry, lang, textOptions) })),
+            // add only what is still missing (the plan may repeat existing tags, or one of the choices is tagged)
+            ...plan.add.filter(entry => _tags[entry.key] !== entry.value && !(entry.choices?.includes(_tags[entry.key]!) && !_planValues.has(`${card.side}|${entry.key}`)))
+                .map(entry => ({
+                    kind: 'add' as const, key: entry.key, value: plannedValue(card.side, entry.key, entry.value),
+                    choices: entry.choices, reason: renderPlanReason(entry, lang, textOptions)
+                })),
             ...plan.change.map(entry => ({
-                kind: 'change' as const, key: entry.key, value: entry.to, from: entry.from, reason: renderPlanReason(entry, lang, textOptions)
+                kind: 'change' as const, key: entry.key, value: plannedValue(card.side, entry.key, entry.to), from: entry.from,
+                choices: entry.choices, reason: renderPlanReason(entry, lang, textOptions)
             })),
             ...plan.conflicts.map(entry => ({
                 kind: 'conflict' as const, key: entry.key, value: entry.value, reason: renderPlanConflict(entry, lang, textOptions)
@@ -854,7 +864,12 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
             canApply: plan.aligned && tagRows.some(row => row.kind !== 'conflict'),
             applyLabel: t('inspector.tilda.apply_all'),
             onApply: () => changeTags(tagPlanChanges(tagRows)),
-            diff: true
+            diff: true,
+            // e.g. the separation of a protected lane: bollard, flex_post, …
+            onChoose: (row, value) => {
+                _planValues.set(`${card.side}|${row.key}`, value);
+                section.reRender();
+            }
         });
     }
 
@@ -978,6 +993,7 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
                     cell.append('code').text((twin && bothSidesKey(d.key, twin.key)) ?? d.key);
                 }
             });
+        // the package's note, also the hint when the attribute applies (`protection`: a barrier or parked cars)
         rows.select('.tilda-attribute-note').text(d => {
             const check = confirmed(d);
             const note = attributeNote({ ...d, tilda: tildaValueLabel(d, d.tilda) }, packageLanguage()) ?? '';
@@ -1092,6 +1108,7 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
             // others may have changed the checks of this way
             if (val.length === 1) checks.loadWay(val[0]);
             _choices = new Map();
+            _planValues = new Map();
             _selfExpanded = undefined;
             _editing = new Set();
             _showDone = new Set();

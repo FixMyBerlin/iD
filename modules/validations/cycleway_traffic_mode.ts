@@ -14,8 +14,8 @@ import type { osmWay, WayId } from '../osm';
  * A separate cycleway with a footway right next to it: `traffic_mode:<side>=foot` likely says
  * something (the bike part of a foot and cycle path that is mapped as two ways). The mapper picks
  * the side (fixes for both, the side the footway lies on first) or says "no" in the TILDA box
- * (check `traffic_mode_foot`, key-value DB). TILDA (LUA and package) reads only
- * `traffic_mode:right=foot` for `footAndCyclewaySegregated` so far (asked to accept left too).
+ * (check `traffic_mode_foot`, key-value DB). TILDA (LUA and package 0.3.0) reads
+ * `traffic_mode:right=foot` and `traffic_mode:left=foot` for `footAndCyclewaySegregated`.
  * Reversing the way is no way out: iD keeps `oneway=yes`, so a one-way cycleway would point the wrong way.
  */
 
@@ -98,7 +98,7 @@ export const validationCyclewayTrafficModeFoot: CreateValidator = context => {
         const found = footwayNextTo(context, entity as osmWay, graph);
         if (!found) return [];
         const { footIDs, side } = found;
-        // the side the footway lies on first; right when unclear (TILDA reads only right)
+        // the side the footway lies on first; right when unclear (the usual case)
         const sides: ('left' | 'right')[] = side === 'left' ? ['left', 'right'] : ['right', 'left'];
 
         return [new validationIssue({

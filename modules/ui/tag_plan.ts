@@ -11,6 +11,8 @@ export type TagPlanRow = {
     /** old value, for `change` */
     from?: string;
     reason: string;
+    /** values the mapper can pick instead of `value` (add / change), shown as buttons */
+    choices?: readonly string[];
 };
 
 export type TagPlanView = {
@@ -27,6 +29,8 @@ export type TagPlanView = {
     /** a small button per tag row that applies only that row (list mode) */
     onApplyRow?: (row: TagPlanRow) => void;
     applyRowLabel?: string;
+    /** a value picked from a row's `choices` */
+    onChoose?: (row: TagPlanRow, value: string) => void;
 };
 
 
@@ -91,6 +95,8 @@ export function drawTagPlan<E extends HTMLElement>(selection: d3.Selection<E>, p
             li.append('span').attr('class', 'tag-plan-reason').text(d.reason);
         });
 
+    drawChoices(merged, plan);
+
     merged.select('.tag-plan-apply')
         .classed('hide', !plan.canApply)
         .text(plan.applyLabel)
@@ -139,5 +145,35 @@ function drawDiff(box: d3.Selection<HTMLDivElement>, plan: TagPlanView) {
         .attr('class', d => `tagDiff-cell ${d.type === '+' ? 'tagDiff-cell-add' : 'tagDiff-cell-remove'}`)
         .each(function(d) {
             d.render(d3_select(this as HTMLElement).text('') as unknown as Parameters<typeof d.render>[0]);
+        });
+}
+
+
+/** Rows with `choices`: the key and one button per value, the planned one pressed */
+function drawChoices(box: d3.Selection<HTMLDivElement>, plan: TagPlanView) {
+    const rows = plan.onChoose ? plan.rows.filter(row => row.choices?.length && row.kind !== 'conflict') : [];
+    const choiceRows = box.selectAll<HTMLDivElement, TagPlanRow>('.tag-plan-choice')
+        .data(rows, d => d.key)
+        .join(enter => {
+            const row = enter.insert('div', '.tag-plan-apply').attr('class', 'tag-plan-choice').attr('role', 'group');
+            row.append('code').attr('class', 'tag-plan-choice-key');
+            row.append('span').attr('class', 'tag-plan-choice-values');
+            return row;
+        })
+        .attr('aria-label', d => d.key)
+        .attr('title', d => d.reason);
+    choiceRows.select('.tag-plan-choice-key').text(d => `${d.key}=`);
+    choiceRows.select('.tag-plan-choice-values')
+        .selectAll<HTMLButtonElement, { row: TagPlanRow; value: string }>('button')
+        .data(row => (row.choices ?? []).map(value => ({ row, value })), d => d.value)
+        .join('button')
+        .attr('type', 'button')
+        .attr('class', d => `button tilda-value${d.value === d.row.value ? ' active' : ''}`)
+        .attr('aria-pressed', d => d.value === d.row.value ? 'true' : 'false')
+        .text(d => d.value)
+        .on('click', function(this: HTMLButtonElement, d3_event: MouseEvent, d) {
+            d3_event.preventDefault();
+            this.blur();
+            plan.onChoose!(d.row, d.value);
         });
 }

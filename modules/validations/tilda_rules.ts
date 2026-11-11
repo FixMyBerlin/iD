@@ -28,7 +28,7 @@ import { utilDisplayLabel } from '../util/utilDisplayLabel';
 const SEVERITY = { error: 'error', warning: 'warning', info: 'suggestion' } as const;
 
 /** Rules a mapper can confirm with "this is correct here" (stored in the key-value DB, not in OSM) */
-const CONFIRMABLE = new Set(['cycleway_oneway_wrong']);
+const CONFIRMABLE = new Set(['cycleway_oneway_wrong', 'cycleway_oneway_contraflow_missing']);
 
 type EntityID = Parameters<typeof actionChangeTags>[0];
 
@@ -131,7 +131,9 @@ export const validationWidthPartSum = tildaRuleValidator('width_part_sum');
 export const validationWidthPartWhole = tildaRuleValidator('width_part_whole');
 export const validationWidthPartUnsegregated = tildaRuleValidator('width_part_unsegregated');
 export const validationCyclewayOnewayWrong = tildaRuleValidator('cycleway_oneway_wrong');
+export const validationCyclewayOnewayContraflowMissing = tildaRuleValidator('cycleway_oneway_contraflow_missing');
 export const validationCyclewayOnewayRedundant = tildaRuleValidator('cycleway_oneway_redundant');
+export const validationSidewalkSharedPath = tildaRuleValidator('sidewalk_shared_path');
 // From the tilda-geo rules: on a road in both directions, `cycleway_oneway_wrong` reports only the
 // contraflow case; a side `oneway` against the traffic of its side is this rule.
 export const validationUnexpectedOnewayDirection = tildaRuleValidator('unexpected_oneway_direction');
