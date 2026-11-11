@@ -283,7 +283,6 @@ de:
       choose_kind: Art wählen …
       gap_title: "Offene Frage: Welche Kategorie ist es?"
       gap_key: "Setzt {key}"
-      todo: Zu erledigen
       done_rows: "{n} weitere in Ordnung"
       done_hide: Zeilen in Ordnung ausblenden
       foot_title: "Offene Frage: Gehört der Gehweg daneben zu diesem Radweg?"

@@ -877,7 +877,6 @@ en:
       choose_kind: Choose a kind …
       gap_title: "Open question: which category is it?"
       gap_key: "Sets {key}"
-      todo: To do
       done_rows: "{n} more in order"
       done_hide: Hide the rows in order
       foot_title: "Open question: does the footway next to it belong to this cycleway?"
