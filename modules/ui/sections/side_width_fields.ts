@@ -38,9 +38,15 @@ function taggedSides(tags: TagsMulti, prefix: Prefix): SideKey[] {
 }
 
 
-/** Width keys to show: for each tagged side, plus width keys that are already set */
-export function sideWidthKeys(tags: TagsMulti): string[] {
-    const keys = new Set<string>();
+export const isSideWidthKey = (key: string) => WIDTH_KEY.test(key);
+
+
+/**
+ * Width keys to show: for each tagged side, plus width keys that are already set, plus `extra`
+ * (asked for by the TILDA checklist, e.g. `sidewalk:right:width` on a road with `sidewalk=both`)
+ */
+export function sideWidthKeys(tags: TagsMulti, extra: Iterable<string> = []): string[] {
+    const keys = new Set<string>([...extra].filter(isSideWidthKey));
     for (const prefix of ['cycleway', 'sidewalk'] as const) {
         for (const side of taggedSides(tags, prefix)) keys.add(`${prefix}:${side}:width`);
     }
@@ -59,6 +65,8 @@ export function sideWidthKeys(tags: TagsMulti): string[] {
 export function uiSideWidthFields(context: iD.Context, dispatch: Dispatch<object>) {
     let _signature = '';
     let _fields: unknown[] = [];
+    /** side width keys the TILDA checklist asked for ("add below"), until another feature is selected */
+    const _requested = new Set<string>();
 
     function createField(key: string, entityIDs: string[], widthField: Partial<Field>) {
         // take the schema's width settings (type, units, minValue), but not its id-based texts
@@ -83,7 +91,7 @@ export function uiSideWidthFields(context: iD.Context, dispatch: Dispatch<object
     return {
         /** The fields for `tags`; rebuilt only when the list of keys changes */
         fields(tags: TagsMulti, entityIDs: string[], widthField: Partial<Field> | undefined, shownKeys: Set<string>) {
-            const keys = sideWidthKeys(tags).filter(key => !shownKeys.has(key));
+            const keys = sideWidthKeys(tags, _requested).filter(key => !shownKeys.has(key));
             const signature = `${entityIDs.join()}|${keys.join()}`;
             if (signature !== _signature) {
                 _signature = signature;
@@ -92,9 +100,17 @@ export function uiSideWidthFields(context: iD.Context, dispatch: Dispatch<object
             return _fields;
         },
 
+        /** Shows the field for `key` even if the road does not tag that side on its own; false for other keys */
+        request(key: string) {
+            if (!isSideWidthKey(key)) return false;
+            _requested.add(key);
+            return true;
+        },
+
         reset() {
             _signature = '';
             _fields = [];
+            _requested.clear();
         }
     };
 }

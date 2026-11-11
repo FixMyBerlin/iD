@@ -31,4 +31,8 @@ describe('ui/sections/side_width_fields', () => {
     it('keeps width keys that are already tagged', () => {
         expect(sideWidthKeys({ 'cycleway:left:width': '1.5' })).toEqual(['cycleway:left:width']);
     });
+
+    it('adds one side asked for by the TILDA checklist, also with a sidewalk on both sides', () => {
+        expect(sideWidthKeys({ sidewalk: 'both' }, ['sidewalk:right:width', 'width'])).toEqual(['sidewalk:both:width', 'sidewalk:right:width']);
+    });
 });

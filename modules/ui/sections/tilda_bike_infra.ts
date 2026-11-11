@@ -53,7 +53,7 @@ import { presetFieldsOf } from '../fields/side_prerequisite';
 import { uiPaneTooltip } from '../pane_tooltip';
 import { uiSection } from '../section';
 import { drawTagPlan, tagPlanChanges, type TagPlanRow } from '../tag_plan';
-import { sideWidthKeys } from './side_width_fields';
+import { isSideWidthKey, sideWidthKeys } from './side_width_fields';
 import { isWidthValueKey, normalizeDecimalComma } from '../../tilda/value_input';
 import { addableRelatedKeys } from '../../presets/related_tags';
 import { footwayNextTo, TRAFFIC_MODE_FOOT_CHECK } from '../../validations/cycleway_traffic_mode';
@@ -1056,7 +1056,10 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
             for (const attribute of [...card.attributes, ...card.roadAttributes]) {
                 const severity = attributeSeverity(attribute);
                 if (!severity) continue;
-                for (const key of attribute.lookup) {
+                // one side of a road (`sidewalk:right:width`): only its own field, "add below" opens it;
+                // the "both sides" field is read too, but would ask for a width of the other side
+                const keys = isSideWidthKey(attribute.lookup[0] ?? '') ? attribute.lookup.slice(0, 1) : attribute.lookup;
+                for (const key of keys) {
                     if (_fieldStatus.get(key) !== 'required') _fieldStatus.set(key, severity);
                 }
             }

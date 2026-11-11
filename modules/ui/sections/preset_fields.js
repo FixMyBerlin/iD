@@ -227,15 +227,24 @@ export function uiSectionPresetFields(context) {
         return section;
     };
 
-    /** Shows the field for one of `keys` (also a "more field"), scrolls to it and highlights it */
+    /**
+     * Shows the field for one of `keys` (also a "more field"), scrolls to it and highlights it.
+     * `keys` are in order of preference: the key to tag first, then keys that are read instead
+     * (`sidewalk:right:width`, `sidewalk:both:width`, …).
+     */
     section.revealField = function(keys) {
         var container = d3_select('.entity-editor .section-preset-fields');
         var summary = container.select('summary.hide-toggle');
         if (!summary.empty() && !summary.classed('expanded')) summary.node().click();   // renders the fields
 
-        var field = _allFields.find(function(f) {
-            return fieldKeys(f).some(function(key) { return keys.indexOf(key) !== -1; });
-        });
+        var hasFieldFor = function(key) {
+            return _allFields.some(function(f) { return fieldKeys(f).indexOf(key) !== -1; });
+        };
+        // a side width (one side of a road with a sidewalk on both): its own field, not the "both" one
+        if (keys.length && !hasFieldFor(keys[0]) && _sideWidthFields.request(keys[0])) section.reRender();
+
+        var firstKey = keys.find(hasFieldFor);
+        var field = firstKey && _allFields.find(function(f) { return fieldKeys(f).indexOf(firstKey) !== -1; });
         // a related tag (`source:width`): opens its editor below the field
         if (!field) {
             field = _relatedTags.reveal(keys, _allFields.filter(function(f) { return f.isShown(); }));
