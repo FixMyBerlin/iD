@@ -151,6 +151,10 @@ de:
     empty: Wähle einen Weg aus, um seine Tags mit dem vorherigen und dem nächsten Weg zu vergleichen.
     previous: Vorherigen Weg auswählen
     next: Nächsten Weg auswählen
+    step:
+      shortcut_hint: "Taste {key}"
+      ambiguous: "Hier gehen mehrere Wege weiter. Wähle einen in der Wege-Tabelle ({table_key})."
+      none: "In dieser Richtung geht kein weiterer Weg weiter."
     reversed: Dieser Weg zeigt in die Gegenrichtung. Seine left/right-Tags sind getauscht dargestellt.
     edited: In dieser Sitzung geändert
     junction:
@@ -416,6 +420,9 @@ de:
         map_display: "Kartendarstellung ein-/ausblenden"
         photos: "Fotos ein-/ausblenden"
         way_table: "Wege-Tabelle ein-/ausblenden"
+      way_selected:
+        next_way: "Den nächsten Weg der Linie auswählen (gleiche Art, gleicher Name), wie in der Wege-Tabelle"
+        previous_way: "Den vorherigen Weg der Linie auswählen"
       with_selected:
         progress_done: Die ausgewählte Linie einer Datenebene mit Fortschrittsverfolgung als erledigt markieren oder die Markierung wieder wegnehmen
     editing:
@@ -756,6 +763,10 @@ de-CH:
     empty: Wähle einen Weg aus, um seine Tags mit dem vorherigen und dem nächsten Weg zu vergleichen.
     previous: Vorherigen Weg auswählen
     next: Nächsten Weg auswählen
+    step:
+      shortcut_hint: "Taste {key}"
+      ambiguous: "Hier gehen mehrere Wege weiter. Wähle einen in der Wege-Tabelle ({table_key})."
+      none: "In dieser Richtung geht kein weiterer Weg weiter."
     reversed: Dieser Weg zeigt in die Gegenrichtung. Seine left/right-Tags sind getauscht dargestellt.
     edited: In dieser Sitzung geändert
     junction:
@@ -864,3 +875,6 @@ de-CH:
         map_display: "Kartendarstellung ein-/ausblenden"
         photos: "Fotos ein-/ausblenden"
         way_table: "Wege-Tabelle ein-/ausblenden"
+      way_selected:
+        next_way: "Den nächsten Weg der Linie auswählen (gleiche Art, gleicher Name), wie in der Wege-Tabelle"
+        previous_way: "Den vorherigen Weg der Linie auswählen"

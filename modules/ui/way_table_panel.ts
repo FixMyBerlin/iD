@@ -54,6 +54,11 @@ export function uiWayTablePanel(context: iD.Context) {
     /** chosen way per ambiguous junction node, reset when the selection leaves the chain */
     let _junctionChoices = new Map<NodeId, WayId>();
     let _chain: WayChain | undefined;
+    /**
+     * The way the `.`/`,` keys reached last, and whether it points against the direction of travel.
+     * Then `.` goes to its previous way, so the keys keep following the line over reversed ways.
+     */
+    let _travel: { wayID: WayId; flipped: boolean } | undefined;
 
 
     function selectedWayID(): WayId | undefined {
@@ -187,6 +192,52 @@ export function uiWayTablePanel(context: iD.Context) {
 
     function neighborID(offset: -1 | 1) {
         return _chain?.segments[_chain.centerIndex + offset]?.wayID;
+    }
+
+
+    function travelFlipped(wayID: WayId) {
+        return _travel?.wayID === wayID && _travel.flipped;
+    }
+
+
+    /** The table column (relative to the selected way) that `.` (1) or `,` (-1) selects */
+    function stepColumn(offset: -1 | 1, wayID: WayId): -1 | 1 {
+        return travelFlipped(wayID) ? (-offset as -1 | 1) : offset;
+    }
+
+
+    function flash(text: string) {
+        (context.ui().flash as any)
+            .duration(5000)
+            .iconName('#iD-icon-info')
+            .label((selection: d3.Selection) => selection.text(text))();
+    }
+
+
+    /**
+     * `.` / `,`: select the next / previous way of the line, the way the table shows next to the
+     * selected one (same kind preferred, then same name). Works with the table closed, too.
+     */
+    function step(offset: -1 | 1) {
+        const wayID = selectedWayID();
+        if (!wayID) return false;
+        const chain = buildWayChain(context.graph(), wayID, 1, _junctionChoices);
+        if (!chain) return false;
+
+        const column = stepColumn(offset, wayID);
+        const target = chain.segments[chain.centerIndex + column];
+        if (!target) {
+            const direction = column > 0 ? 'forward' : 'backward';
+            flash(chain.junctions.some(junction => junction.direction === direction)
+                ? t('way_table.step.ambiguous', { table_key: t('way_table.key') })
+                : t('way_table.step.none'));
+            return true;
+        }
+
+        // `reversed` is relative to the selected way, which may itself point against the travel
+        _travel = { wayID: target.wayID, flipped: travelFlipped(wayID) !== target.reversed };
+        selectWay(target.wayID);
+        return true;
     }
 
 
@@ -412,6 +463,19 @@ export function uiWayTablePanel(context: iD.Context) {
                     .append('span')
                     .attr('class', 'way-table-way-id')
                     .text(d.wayID);
+                // the key that selects this way: `.` next, `,` previous
+                const centerID = chain.segments[chain.centerIndex].wayID;
+                const column = chain.segments.indexOf(d) - chain.centerIndex;
+                const key = column === stepColumn(1, centerID) ? t('way_table.step.next_key')
+                    : column === stepColumn(-1, centerID) ? t('way_table.step.previous_key')
+                    : undefined;
+                if (key) {
+                    title
+                        .append('kbd')
+                        .attr('class', 'way-table-way-key')
+                        .attr('title', t('way_table.step.shortcut_hint', { key }))
+                        .text(key);
+                }
             })
             .attr('role', d => d ? 'button' : null)
             .attr('tabindex', (d, i) => d && i - 1 !== chain.centerIndex ? 0 : null)
@@ -515,6 +579,15 @@ export function uiWayTablePanel(context: iD.Context) {
             d3_event.preventDefault();
             wayTablePanel.toggle();
         }, false);
+
+    for (const [key, offset] of [['way_table.step.next_key', 1], ['way_table.step.previous_key', -1]] as const) {
+        context.keybinding()
+            .on(t(key), (d3_event: KeyboardEvent) => {
+                if (!step(offset)) return;
+                d3_event.stopImmediatePropagation();
+                d3_event.preventDefault();
+            }, false);
+    }
 
     return wayTablePanel;
 }

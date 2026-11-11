@@ -194,6 +194,14 @@
             "modifiers": ["⌘"],
             "shortcuts": ["↓"],
             "text": "shortcuts.browsing.way_selected.child"
+          },
+          {
+            "shortcuts": ["way_table.step.next_key"],
+            "text": "shortcuts.browsing.way_selected.next_way"
+          },
+          {
+            "shortcuts": ["way_table.step.previous_key"],
+            "text": "shortcuts.browsing.way_selected.previous_way"
           }
         ]
       }

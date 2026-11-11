@@ -1304,6 +1304,12 @@ en:
     key: K
     previous: Select the previous way
     next: Select the next way
+    step:
+      next_key: "."
+      previous_key: ","
+      shortcut_hint: "Key {key}"
+      ambiguous: "Several ways continue here. Choose one in the way table ({table_key})."
+      none: "No further way in this direction."
     tooltip: Compare the tags of the selected way with the previous and next ways, below the map.
     empty: Select a way to compare its tags with the previous and next ways.
     reversed: This way points in the opposite direction. Its left/right tags are shown swapped.
@@ -2875,6 +2881,8 @@ en:
       way_selected:
         title: "With way selected"
         child: "Select child nodes"
+        next_way: "Select the next way of the line (same type and name), as in the way table"
+        previous_way: "Select the previous way of the line"
       enable:
         streetlevel: "Toggle active street level photo layers"
     editing:
