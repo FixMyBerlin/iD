@@ -47,7 +47,7 @@ import { svgIcon } from '../../svg/icon';
 import { utilRebind } from '../../util/rebind';
 import { categoryName, packageLanguage } from '../../tilda/package_texts';
 import { definedTags } from '../../tilda/tags';
-import { tildaChecks, VERIFIED, type TildaCheck } from '../../tilda/checks';
+import { tildaChecks, type TildaCheck } from '../../tilda/checks';
 import { trafficSignTagKeysFromTags } from '../../presets/traffic_sign_fields';
 import { presetFieldsOf } from '../fields/side_prerequisite';
 import { uiPaneTooltip } from '../pane_tooltip';
@@ -201,8 +201,8 @@ function tildaValueLabel(attribute: RequiredAttribute, value: string | undefined
  * the selected way, what is missing for an exact category, how to reach a chosen
  * category, and which attributes the Radnetz dataset needs.
  * Uses `@tilda-geo/bicycle-infrastructure`, the TypeScript port of TILDA's processing.
- * Defaults that need no tag are confirmed with "Checked", the whole way with "Verified"; both are
- * stored in our key-value DB, not in OSM (`modules/tilda/checks.ts`, WORKDOC feature 33).
+ * Defaults that need no tag and reminders are confirmed with "Checked", stored in our key-value
+ * DB, not in OSM (`modules/tilda/checks.ts`, WORKDOC feature 33).
  *
  * Events:
  *   'change' - (entityIDs, changed tags), handled by the entity editor like other sections
@@ -614,8 +614,6 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
         });
 
         cardSelection.select<HTMLDivElement>('.tilda-reminders').each(function(d) { drawReminders(d3_select(this), d); });
-
-        drawVerified(selection);
     }
 
 
@@ -671,44 +669,6 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
                 }
             });
         selection.style('display', ids.length ? '' : 'none');
-    }
-
-
-    /** "Verified": a second mapper looked at the way; below the cards, after everything to look at */
-    function drawVerified(selection: d3.Selection) {
-        const verified = checkOf(VERIFIED);
-        const disabled = disabledTitle();
-        const version = context.hasEntity(_entityIDs[0] as Parameters<iD.Context['hasEntity']>[0])?.version;
-
-        let row = selection.selectAll<HTMLDivElement, number>('.tilda-verified')
-            .data([0]);
-        const rowEnter = row.enter()
-            .append('div')
-            .attr('class', 'tilda-verified');
-        rowEnter.append('button')
-            .attr('class', 'tilda-check tilda-verify')
-            .call(svgIcon('#iD-icon-apply', ''))
-            .append('span')
-            .call(t.append('inspector.tilda.checks.verify'));
-        rowEnter.append('span').attr('class', 'tilda-verified-status');
-
-        // after the cards, also after cards that enter later (e.g. "Both sides" splits into two)
-        row = row.merge(rowEnter).raise();
-        row.select<HTMLButtonElement>('.tilda-verify')
-            .classed('active', !!verified)
-            .attr('disabled', disabled ? 'true' : null)
-            .attr('aria-pressed', verified ? 'true' : 'false')
-            .attr('title', disabled ?? t(`inspector.tilda.checks.${verified ? 'unverify' : 'verify'}_tooltip`))
-            .on('click', function(this: HTMLButtonElement, d3_event: MouseEvent) {
-                d3_event.preventDefault();
-                this.blur();
-                toggleCheck(VERIFIED, '', verified);
-            });
-
-        const changedSince = verified?.wayVersion !== undefined && version !== undefined && verified.wayVersion !== String(version);
-        row.select('.tilda-verified-status')
-            .text(!verified ? t('inspector.tilda.checks.not_verified')
-                : byline('verified_by', verified) + (changedSince ? ` (${t('inspector.tilda.checks.changed_since')})` : ''));
     }
 
 

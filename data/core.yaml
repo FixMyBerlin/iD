@@ -907,12 +907,6 @@ en:
         uncheck_tooltip: "Checked. Click to remove the check."
         reminder_tooltip: "Confirm that you looked for it. This is saved for the project, not in OpenStreetMap, and needs no upload."
         checked_by: "Checked by {user}, {date}"
-        verify: Verified
-        verify_tooltip: "Mark this way as verified (second look by another mapper). This is saved for the project, not in OpenStreetMap, and needs no upload."
-        unverify_tooltip: "Verified. Click to remove it."
-        verified_by: "Verified by {user}, {date}"
-        not_verified: Not verified yet
-        changed_since: the way was changed since
         you: you
         save_failed: "The check could not be saved: {reason}"
         disabled:

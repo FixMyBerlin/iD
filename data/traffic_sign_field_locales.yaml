@@ -264,12 +264,6 @@ de:
         uncheck_tooltip: "Geprüft. Klicken, um die Prüfung zu entfernen."
         reminder_tooltip: "Bestätige, dass du danach geschaut hast. Das wird für das Projekt gespeichert, nicht in OpenStreetMap, und braucht keinen Upload."
         checked_by: "Geprüft von {user}, {date}"
-        verify: Verifiziert
-        verify_tooltip: "Diesen Weg als verifiziert markieren (zweiter Blick durch eine andere Person). Das wird für das Projekt gespeichert, nicht in OpenStreetMap, und braucht keinen Upload."
-        unverify_tooltip: "Verifiziert. Klicken, um es zu entfernen."
-        verified_by: "Verifiziert von {user}, {date}"
-        not_verified: Noch nicht verifiziert
-        changed_since: der Weg wurde seitdem geändert
         you: dir
         save_failed: "Die Prüfung konnte nicht gespeichert werden."
         disabled:
@@ -834,12 +828,6 @@ de-CH:
         uncheck_tooltip: "Geprüft. Klicken, um die Prüfung zu entfernen."
         reminder_tooltip: "Bestätige, dass du danach geschaut hast. Das wird für das Projekt gespeichert, nicht in OpenStreetMap, und braucht keinen Upload."
         checked_by: "Geprüft von {user}, {date}"
-        verify: Verifiziert
-        verify_tooltip: "Diesen Weg als verifiziert markieren (zweiter Blick durch eine andere Person). Das wird für das Projekt gespeichert, nicht in OpenStreetMap, und braucht keinen Upload."
-        unverify_tooltip: "Verifiziert. Klicken, um es zu entfernen."
-        verified_by: "Verifiziert von {user}, {date}"
-        not_verified: Noch nicht verifiziert
-        changed_since: der Weg wurde seitdem geändert
         you: dir
         save_failed: "Die Prüfung konnte nicht gespeichert werden."
         disabled:

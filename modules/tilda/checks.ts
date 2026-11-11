@@ -19,7 +19,7 @@ export const TILDA_CHECKS_BACKEND = {
     apiKey: 'kv_0cbb12c2db6d86642977b41fd922185682711d15'
 };
 
-/** The check id of the verification of the whole way */
+/** The check id of the verification of the whole way; the button is removed (2026-11-11), stored entries stay */
 export const VERIFIED = 'verified';
 
 const RELOAD_MS = 5 * 60 * 1000;

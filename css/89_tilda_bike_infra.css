@@ -386,9 +386,8 @@
     font-size: 12px;
 }
 
-/* "Checked" / "Verified": stored for the project, not in OSM (WORKDOC feature 33) */
-.tilda-card button.tilda-check,
-.tilda-verified button.tilda-check {
+/* "Checked": stored for the project, not in OSM (WORKDOC feature 33) */
+.tilda-card button.tilda-check {
     display: inline-flex;
     align-items: center;
     gap: 4px;
@@ -400,12 +399,10 @@
     font-size: 12px;
     line-height: 1.4;
 }
-.tilda-card button.tilda-check:hover:not([disabled]),
-.tilda-verified button.tilda-check:hover:not([disabled]) {
+.tilda-card button.tilda-check:hover:not([disabled]) {
     background: var(--active-bg-color);
 }
-.tilda-card button.tilda-check[disabled],
-.tilda-verified button.tilda-check[disabled] {
+.tilda-card button.tilda-check[disabled] {
     opacity: 0.5;
     cursor: not-allowed;
 }
@@ -422,17 +419,6 @@ button.tilda-check.active .icon {
     font-family: inherit;
     font-style: normal;
     color: #2e9d3a;
-}
-.tilda-verified {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 8px;
-    font-size: 12px;
-}
-.tilda-verified-status {
-    color: var(--passive-text-color);
 }
 
 /* reminders: something to look for that no tag shows; a row like the checklist above (an open
