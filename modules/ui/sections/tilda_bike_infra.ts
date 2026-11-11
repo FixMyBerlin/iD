@@ -171,7 +171,7 @@ export function bothSidesKey(leftKey: string, rightKey: string) {
 
 
 /** One update for both sides: the `:both` key, the side keys removed; or both side keys */
-function bothSidesUpdate(left: TagsUpdate, right: TagsUpdate): TagsUpdate {
+export function bothSidesUpdate(left: TagsUpdate, right: TagsUpdate): TagsUpdate {
     const update: TagsUpdate = {};
     const rightKeys = Object.keys(right);
     for (const [i, key] of Object.keys(left).entries()) {
@@ -281,13 +281,14 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
         return (attribute.state === 'ok' || attribute.state === 'inherited' || !!confirmed(attribute)) && !onewayToMove(attribute);
     }
 
-    const reminderCheck = (id: string) => `reminder:${id}`;
+    /** The check of a reminder: per side, since both sides may have the same reminder (`reminder:<side>:<id>`; the way itself `reminder:<id>`) */
+    const reminderCheck = (side: Side, id: string) => side === 'self' ? `reminder:${id}` : `reminder:${side}:${id}`;
 
     /** What is still open on a side: the category question, checklist rows, reminders nobody checked */
     function openCount(card: SideCard) {
         return card.gaps.length + (card.footway && !card.footway.answered ? 1 : 0)
             + [...card.attributes, ...card.roadAttributes].filter(attribute => !attributeDone(attribute)).length
-            + card.reminders.filter(id => !checkOf(reminderCheck(id))).length;
+            + card.reminders.filter(id => !checkOf(reminderCheck(card.side, id))).length;
     }
 
     function byline(stringID: string, check: TildaCheck) {
@@ -471,6 +472,7 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
         const gapID = (card: SideCard) => card.gaps.map(gap => `${gap.key}=${gap.values.join('|')}`).join(';');
         if (gapID(left) !== gapID(right)) return false;
         if (left.reminders.join() !== right.reminders.join()) return false;
+        if (left.reminders.some(id => !!checkOf(reminderCheck('left', id)) !== !!checkOf(reminderCheck('right', id)))) return false;
         if (left.attributes.length !== right.attributes.length) return false;
         return left.attributes.every((a, i) => {
             const b = right.attributes[i];
@@ -611,7 +613,7 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
             drawAttributes(d3_select(this), d.roadAttributes, `${d.side}-road`, undefined, MIXED_TRAFFIC_QUICK_VALUES);
         });
 
-        cardSelection.select<HTMLDivElement>('.tilda-reminders').each(function(d) { drawReminders(d3_select(this), d.reminders); });
+        cardSelection.select<HTMLDivElement>('.tilda-reminders').each(function(d) { drawReminders(d3_select(this), d); });
 
         drawVerified(selection);
     }
@@ -619,11 +621,12 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
 
     /**
      * Hints without an indicator in the tags: look for it, so it is not forgotten. "Checked" says
-     * someone looked (stored like the other checks, as `reminder:<id>`); a checked hint folds into
-     * one line.
+     * someone looked (stored like the other checks, per side, see `reminderCheck`); a checked hint
+     * shows ✓ and who checked it instead of the text. In a "Both sides" card it checks both sides.
      */
-    function drawReminders(selection: d3.Selection<HTMLDivElement>, ids: string[]) {
-        const stored = (id: string) => checkOf(reminderCheck(id));
+    function drawReminders(selection: d3.Selection<HTMLDivElement>, card: SideCard) {
+        const ids = card.reminders;
+        const stored = (id: string) => checkOf(reminderCheck(card.side, id));
 
         let rows = selection.selectAll<HTMLDivElement, string>('.tilda-reminder')
             .data(ids, d => d);
@@ -660,7 +663,12 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
             .on('click', function(this: HTMLButtonElement, d3_event: MouseEvent, d: string) {
                 d3_event.preventDefault();
                 this.blur();
-                toggleCheck(reminderCheck(d), '', stored(d));
+                const was = stored(d);
+                toggleCheck(reminderCheck(card.side, d), '', was);
+                if (card.twin) {
+                    const twinCheck = reminderCheck(card.twin.side, d);
+                    if (!!checkOf(twinCheck) === !!was) toggleCheck(twinCheck, '', checkOf(twinCheck));
+                }
             });
         selection.style('display', ids.length ? '' : 'none');
     }
@@ -684,7 +692,8 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
             .call(t.append('inspector.tilda.checks.verify'));
         rowEnter.append('span').attr('class', 'tilda-verified-status');
 
-        row = row.merge(rowEnter).order();
+        // after the cards, also after cards that enter later (e.g. "Both sides" splits into two)
+        row = row.merge(rowEnter).raise();
         row.select<HTMLButtonElement>('.tilda-verify')
             .classed('active', !!verified)
             .attr('disabled', disabled ? 'true' : null)
@@ -893,8 +902,9 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
      * Checklist of tags the Radnetz dataset needs: the attribute name, its state and the tags. Open
      * rows first (what TILDA cannot use or misses, then guesses, then defaults to confirm); rows in
      * order fold into one line (`listID` remembers it was opened). A missing tag links to its field
-     * below; only tags without a field get the values TILDA accepts as buttons, a free input only
-     * when there are no or too many values.
+     * below; tags without a field get the values TILDA accepts as buttons (a free input only when
+     * there are no or too many values); a field row gets a button only for a one-click answer
+     * (`quickValues`, moving `oneway` to `oneway:bicycle`).
      */
     function drawAttributes(selection: d3.Selection<HTMLDivElement>, attributes: RequiredAttribute[], listID: string,
         headerText?: string, quickValues: Record<string, string> = {}) {
