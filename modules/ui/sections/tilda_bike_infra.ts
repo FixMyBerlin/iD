@@ -187,6 +187,14 @@ export function bothSidesUpdate(left: TagsUpdate, right: TagsUpdate): TagsUpdate
 }
 
 
+/**
+ * Reminders that are only a hint, without "Checked": nobody can confirm "no damage sign here" for
+ * good, so it does not count as open either. Stored checks of them stay in the key-value DB.
+ */
+const HINT_ONLY_REMINDERS = new Set(['damage_signs']);
+const checkableReminder = (id: string) => !HINT_ONLY_REMINDERS.has(id);
+
+
 /** A value as TILDA names it (`oneway=implicit_yes` → "Eine Richtung (abgeleitet)"); German only */
 function tildaValueLabel(attribute: RequiredAttribute, value: string | undefined) {
     if (value === undefined || packageLanguage() !== 'de') return value;
@@ -284,11 +292,14 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
     /** The check of a reminder: per side, since both sides may have the same reminder (`reminder:<side>:<id>`; the way itself `reminder:<id>`) */
     const reminderCheck = (side: Side, id: string) => side === 'self' ? `reminder:${id}` : `reminder:${side}:${id}`;
 
+    /** A reminder's check, if it can be checked and someone did */
+    const reminderChecked = (side: Side, id: string) => checkableReminder(id) ? checkOf(reminderCheck(side, id)) : undefined;
+
     /** What is still open on a side: the category question, checklist rows, reminders nobody checked */
     function openCount(card: SideCard) {
         return card.gaps.length + (card.footway && !card.footway.answered ? 1 : 0)
             + [...card.attributes, ...card.roadAttributes].filter(attribute => !attributeDone(attribute)).length
-            + card.reminders.filter(id => !checkOf(reminderCheck(card.side, id))).length;
+            + card.reminders.filter(id => checkableReminder(id) && !reminderChecked(card.side, id)).length;
     }
 
     function byline(stringID: string, check: TildaCheck) {
@@ -472,7 +483,7 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
         const gapID = (card: SideCard) => card.gaps.map(gap => `${gap.key}=${gap.values.join('|')}`).join(';');
         if (gapID(left) !== gapID(right)) return false;
         if (left.reminders.join() !== right.reminders.join()) return false;
-        if (left.reminders.some(id => !!checkOf(reminderCheck('left', id)) !== !!checkOf(reminderCheck('right', id)))) return false;
+        if (left.reminders.some(id => !!reminderChecked('left', id) !== !!reminderChecked('right', id))) return false;
         if (left.attributes.length !== right.attributes.length) return false;
         return left.attributes.every((a, i) => {
             const b = right.attributes[i];
@@ -621,10 +632,11 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
      * Hints without an indicator in the tags: look for it, so it is not forgotten. "Checked" says
      * someone looked (stored like the other checks, per side, see `reminderCheck`); a checked hint
      * shows ✓ and who checked it instead of the text. In a "Both sides" card it checks both sides.
+     * Hint-only reminders (`HINT_ONLY_REMINDERS`) have no "Checked".
      */
     function drawReminders(selection: d3.Selection<HTMLDivElement>, card: SideCard) {
         const ids = card.reminders;
-        const stored = (id: string) => checkOf(reminderCheck(card.side, id));
+        const stored = (id: string) => reminderChecked(card.side, id);
 
         let rows = selection.selectAll<HTMLDivElement, string>('.tilda-reminder')
             .data(ids, d => d);
@@ -654,6 +666,7 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
 
         const disabled = disabledTitle();
         rows.select<HTMLButtonElement>('.tilda-check')
+            .style('display', d => checkableReminder(d) ? null : 'none')
             .classed('active', d => !!stored(d))
             .attr('disabled', disabled ? 'true' : null)
             .attr('aria-pressed', d => stored(d) ? 'true' : 'false')
