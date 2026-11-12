@@ -96,6 +96,7 @@ export function uiEntityEditor(context) {
             var presetFieldsSection = uiSectionPresetFields(context).on('change', changeTags).on('revert', revertTags)
                 .fieldStatus(tildaSection.fieldStatus);
             tildaSection.on('reveal', presetFieldsSection.revealField);
+            tildaSection.on('fieldStatus', function() { presetFieldsSection.reRender(); });
             _sections = [
                 uiSectionSelectionList(context),
                 uiSectionFeatureType(context).on('choose', function(presets) {

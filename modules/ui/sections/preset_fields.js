@@ -259,6 +259,9 @@ export function uiSectionPresetFields(context) {
         wrap.classed('field-reveal', false);
         wrap.node().getBoundingClientRect();   // restart the animation (reflow)
         wrap.classed('field-reveal', true);
+        // the cursor in the field, to type right away (the smooth scroll above does the scrolling)
+        var input = wrap.select('input:not([type="hidden"]):not([type="checkbox"]):not([readonly]), textarea, select').node();
+        if (input) input.focus({ preventScroll: true });
         return true;
     };
 

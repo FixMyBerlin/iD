@@ -218,9 +218,10 @@ function tildaValueLabel(attribute: RequiredAttribute, value: string | undefined
  * Events:
  *   'change' - (entityIDs, changed tags), handled by the entity editor like other sections
  *   'reveal' - (keys), show the inspector field for one of these keys
+ *   'fieldStatus' - the colors of the field titles changed without a tag change (a check was stored)
  */
 export function uiSectionTildaBikeInfra(context: iD.Context) {
-    const dispatch = d3_dispatch('change', 'reveal');
+    const dispatch = d3_dispatch('change', 'reveal', 'fieldStatus');
 
     let _entityIDs: string[] = [];
     let _tags: Tags = {};
@@ -239,6 +240,8 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
     let _twins = new Map<RequiredAttribute, RequiredAttribute>();
     /** keys TILDA reads whose tag is missing, for the field titles */
     let _fieldStatus = new Map<string, 'required' | 'optional'>();
+    /** keys of defaults to confirm ("check below"), colored until someone confirmed them */
+    let _assumedFields = new Map<string, RequiredAttribute>();
 
     const checks = tildaChecks(context);
 
@@ -275,6 +278,7 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
     // checks were loaded or changed (also by other mappers)
     checks.on('change.tildaSection', () => {
         if (section.shouldDisplay()()) section.reRender();
+        dispatch.call('fieldStatus', section);
     });
 
 
@@ -1080,9 +1084,14 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
     /** Field title colors: for each key TILDA reads, how badly its tag is missing */
     function updateFieldStatus() {
         _fieldStatus = new Map();
+        _assumedFields = new Map();
         if (!(section as any).shouldDisplay()()) return;
         for (const card of cards()) {
             for (const attribute of [...card.attributes, ...card.roadAttributes]) {
+                // a default to confirm: its field too, the confirmation is loaded later (`fieldStatus`)
+                if (attribute.state === 'assumed' && !attribute.tagged.length) {
+                    for (const key of attribute.lookup) _assumedFields.set(key, attribute);
+                }
                 const severity = attributeSeverity(attribute);
                 if (!severity) continue;
                 // one side of a road (`sidewalk:right:width`): only its own field, "add below" opens it;
@@ -1098,6 +1107,7 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
     section.fieldStatus = function(keys: string[]) {
         if (keys.some(key => _fieldStatus.get(key) === 'required')) return 'required';
         if (keys.some(key => _fieldStatus.get(key) === 'optional')) return 'optional';
+        if (keys.some(key => { const a = _assumedFields.get(key); return a && !confirmed(a); })) return 'optional';
         return undefined;
     };
 

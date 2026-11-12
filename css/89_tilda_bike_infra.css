@@ -272,7 +272,7 @@
 .tilda-attribute.state-ok .tilda-attribute-state,
 .tilda-attribute.state-inherited .tilda-attribute-state { color: #2e9d3a; }
 .tilda-attribute.state-inherited .tilda-attribute-state { opacity: 0.6; }
-/* assumed default: a notice, not a request (no color, also not on the field title) */
+/* assumed default: a notice, not a request (no color here; its field title is colored until confirmed) */
 .tilda-attribute.state-assumed .tilda-attribute-state {
     font-family: serif;
     font-style: italic;
