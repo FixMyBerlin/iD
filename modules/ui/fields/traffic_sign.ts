@@ -4,6 +4,7 @@ import * as countryCoder from '@rapideditor/country-coder';
 
 import { t } from '../../core/localizer';
 import { importableAssetUrl } from '../../traffic_sign/asset_url';
+import { dropNoneSigns } from '../../traffic_sign/drop_none';
 import { loadSignRecommender } from '../../traffic_sign/recommender';
 import { signTagPlan, type Recommend, type SignPlanRow } from '../../traffic_sign/sign_tag_plan';
 import { svgIcon } from '../../svg/icon';
@@ -201,7 +202,8 @@ export function uiFieldTrafficSign(field: unknown, context: iD.Context) {
                 return context.asset('traffic-sign-converter/data-svgs/' + countryPrefix + '/svgs/' + svgName + '.svg');
             }
         }).on('change', function(tags: TagsUpdate) {
-            dispatch.call('change', trafficSign, tags);
+            // a sign added to `traffic_sign=none`: the field keeps `none` in front of it
+            dispatch.call('change', trafficSign, dropNoneSigns(tags));
         });
     }
 
