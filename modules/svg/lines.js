@@ -6,6 +6,7 @@ import {
 } from './helpers';
 import { svgTagClasses } from './tag_classes';
 
+import { geoWayStraightnessInViewport } from '../geo';
 import { osmIdManager } from '../osm';
 import { utilArrayFlatten, utilArrayGroupBy } from '../util';
 import { utilDetect } from '../util/detect';
@@ -19,6 +20,17 @@ function onewayArrowColour(tags) {
     if (tags.aeroway === 'runway') return 'white';
 
     return 'black';
+}
+
+/**
+ * Radnetz Berlin: bicycles ride one way although the way is not one-way for all
+ * (`oneway:bicycle=yes` or `-1` without `oneway`): the direction that matters for bike infrastructure.
+ * @param {iD.OsmWay} entity
+ * @returns {'yes' | '-1' | undefined}
+ */
+function bicycleOneway(entity) {
+    const value = entity.tags['oneway:bicycle'];
+    return (value === 'yes' || value === '-1') && !entity.isOneWay() ? value : undefined;
 }
 
 export function svgLines(projection, context) {
@@ -244,7 +256,36 @@ export function svgLines(projection, context) {
         var ways = [];
         var onewaydata = {};
         var sideddata = {};
+        var directionalComboData = {};
         var oldMultiPolygonOuters = {};
+
+        /**
+         * Computes marker path segments for active directional combo indicator.
+         * @param {number} layer
+         * @returns {Array<{id: string, index: number, d: string}>}
+         */
+        function getDirectionalComboLayerData(layer) {
+            const indicator = context.directionalComboIndicator && context.directionalComboIndicator();
+            if (!indicator || !indicator.entityIDs || !indicator.entityIDs.length) return [];
+
+            const straightEntityIDs = indicator.entityIDs.filter(function(id) {
+                const entity = graph.hasEntity(id);
+                if (!entity || entity.geometry(graph) !== 'line') return false;
+                if (typeof projection !== 'function') return true;
+                const nodes = graph.childNodes(entity);
+                return geoWayStraightnessInViewport(projection, nodes, entity.isClosed()).isStraightEnough;
+            });
+            if (!straightEntityIDs.length) return [];
+
+            const candidates = (pathdata[layer] || []).filter(function(entity) {
+                return straightEntityIDs.indexOf(entity.id) !== -1;
+            });
+            if (!candidates.length) return [];
+
+            // Keep way direction so marker orientation matches left/right marker refY offsets.
+            const markerSegments = svgMarkerSegments(projection, graph, 30, function() { return false; });
+            return utilArrayFlatten(candidates.map(markerSegments));
+        }
 
         for (var i = 0; i < entities.length; i++) {
             var entity = entities[i];
@@ -262,11 +303,11 @@ export function svgLines(projection, context) {
 
         Object.keys(pathdata).forEach(function(k) {
             var v = pathdata[k];
-            var onewayArr = v.filter(function(d) { return d.isOneWay(); });
+            var onewayArr = v.filter(function(d) { return d.isOneWay() || bicycleOneway(d); });
             var onewaySegments = svgMarkerSegments(
                 projection, graph, 36,
-                entity => entity.isOneWayBackwards(),
-                entity => entity.isBiDirectional(),
+                entity => bicycleOneway(entity) ? bicycleOneway(entity) === '-1' : entity.isOneWayBackwards(),
+                entity => !bicycleOneway(entity) && entity.isBiDirectional(),
             );
             onewaydata[k] = utilArrayFlatten(onewayArr.map(onewaySegments));
 
@@ -275,6 +316,8 @@ export function svgLines(projection, context) {
                 projection, graph, 30
             );
             sideddata[k] = utilArrayFlatten(sidedArr.map(sidedSegments));
+
+            directionalComboData[k] = getDirectionalComboLayerData(k);
         });
 
 
@@ -323,6 +366,13 @@ export function svgLines(projection, context) {
                 function marker(d) {
                     var category = graph.entity(d.id).sidednessIdentifier();
                     return 'url(#ideditor-sided-marker-' + category + ')';
+                }
+            );
+            addMarkers(layergroup, 'directionalcombo', 'directional-combo-group', directionalComboData,
+                function marker() {
+                    const indicator = context.directionalComboIndicator && context.directionalComboIndicator();
+                    const side = indicator && indicator.side || 'right';
+                    return 'url(#ideditor-directionalcombo-marker-' + side + ')';
                 }
             );
         });

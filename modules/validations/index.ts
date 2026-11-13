@@ -1,6 +1,7 @@
 export { validationAlmostJunction } from './almost_junction';
 export { validationCloseNodes } from './close_nodes';
 export { validationCrossingWays } from './crossing_ways';
+export { validationCyclewayTrafficModeFoot } from './cycleway_traffic_mode';
 export { validationDisconnectedWay } from './disconnected_way';
 export { validationFormatting } from './invalid_format';
 export { validationHelpRequest } from './help_request';
@@ -15,3 +16,14 @@ export { validationOutdatedTags } from './outdated_tags';
 export { validationPrivateData } from './private_data';
 export { validationSuspiciousName } from './suspicious_name';
 export { validationUnsquareWay } from './unsquare_way';
+export {
+    validationCyclewayOnewayContraflowMissing,
+    validationCyclewayOnewayRedundant,
+    validationCyclewayOnewayWrong,
+    validationSidewalkSharedPath,
+    validationUnexpectedOnewayDirection,
+    validationWidthPartSum,
+    validationWidthPartUnsegregated,
+    validationWidthPartWhole
+} from './tilda_rules';
+export { validationWidthStoneSource } from './width_stone_source';

@@ -40,6 +40,9 @@ export function uiEditMenu(context) {
 
     var _tooltips = [];
 
+    // Radnetz fork: the menu is left of the anchor (flyouts open to the left, too)
+    var _menuLeft = false;
+
     var editMenu = function(selection) {
 
         var isTouchMenu = _triggerType.includes('touch') || _triggerType.includes('pen');
@@ -56,8 +59,11 @@ export function uiEditMenu(context) {
         // since the mapper's hand likely obscures the screen below the anchor
         _menuTop = isTouchMenu;
 
+        // A menu opened with a key shows labels, too: its entries can share an icon
+        var isKeyboardMenu = _triggerType === 'keyboard';
+
         // Show labels for touch input since there aren't hover tooltips
-        var showLabels = isTouchMenu;
+        var showLabels = isTouchMenu || isKeyboardMenu;
 
         var buttonHeight = showLabels ? 32 : 34;
         if (showLabels) {
@@ -75,6 +81,7 @@ export function uiEditMenu(context) {
             .append('div')
             .attr('class', 'edit-menu')
             .classed('touch-menu', isTouchMenu)
+            .classed('keyboard-menu', isKeyboardMenu)
             .style('padding', _verticalPadding + 'px 0');
 
         var buttons = _menu.selectAll('.edit-menu-item')
@@ -91,6 +98,13 @@ export function uiEditMenu(context) {
             .on('pointerdown mousedown', function pointerdown(d3_event) {
                 // don't let button presses also act as map input - #1869
                 d3_event.stopPropagation();
+            })
+            .on('mouseenter.flyout', function(d3_event, d) {
+                if (d.flyout) {
+                    openFlyout(this, d, false);
+                } else {
+                    closeFlyout();
+                }
             })
             .on('mouseenter.highlight', function(d3_event, d) {
                 if (d3_select(this).classed('disabled')) return;
@@ -114,11 +128,23 @@ export function uiEditMenu(context) {
             });
 
         buttonsEnter.each(function(d) {
+            if (d.flyout) {
+                // the flyout shows the entries as text: no tooltip on top of it
+                d3_select(this)
+                    .attr('aria-haspopup', 'true')
+                    .append('div')
+                    .attr('class', 'icon-wrap')
+                    .call(svgIcon(d.icon && d.icon() || '#iD-operation-' + d.id, 'operation'));
+                d3_select(this).append('span')
+                    .attr('class', 'flyout-caret')
+                    .text(_menuLeft ? '‹' : '›');
+                return;
+            }
             var tooltip = uiTooltip()
                 .scrollContainer(context.container().select('.over-map'))
                 .heading(() => d.title)
                 .title(d.tooltip)
-                .keys([d.keys[0]]);
+                .keys(d.keys.length ? [d.keys[0]] : null);
 
             _tooltips.push(tooltip);
 
@@ -146,6 +172,24 @@ export function uiEditMenu(context) {
                 return reason && !d.interrupts?.[reason];
             });
 
+        if (isKeyboardMenu) {
+            // the labels decide the width; arrow keys move between the enabled entries
+            _menuWidth = _menu.node().offsetWidth;
+            var enabledItems = function() { return _menu.selectAll('.edit-menu-item:not(.disabled)').nodes(); };
+            _menu.on('keydown', function(d3_event) {
+                var step = { ArrowDown: 1, ArrowUp: -1 }[d3_event.key];
+                if (!step) return;
+                d3_event.preventDefault();
+                d3_event.stopPropagation();
+                var nodes = enabledItems();
+                var index = nodes.indexOf(document.activeElement);
+                nodes[(index + step + nodes.length) % nodes.length].focus();
+            });
+            // Enter picks the focused entry
+            var first = enabledItems()[0];
+            if (first) first.focus();
+        }
+
         updatePosition();
 
         var initialScale = context.projection.scale();
@@ -167,6 +211,18 @@ export function uiEditMenu(context) {
 
         function click(d3_event, operation) {
             d3_event.stopPropagation();
+
+            if (operation.flyout) {
+                var isOpen = !_menu.select('.edit-menu-flyout').empty() &&
+                    _menu.select('.edit-menu-flyout').datum() === operation;
+                if (isOpen && d3_event.detail) {
+                    // a second pointer click closes it; Enter keeps it open and focuses it
+                    closeFlyout();
+                } else {
+                    openFlyout(this, operation, true);
+                }
+                return;
+            }
 
             if (operation.relatedEntityIds) {
                 utilHighlightEntities(operation.relatedEntityIds(), false, context);
@@ -202,6 +258,126 @@ export function uiEditMenu(context) {
             lastPointerUpType = null;
         }
 
+        // Radnetz fork: an entry with `flyout` groups opens a panel with text entries beside it
+        function closeFlyout() {
+            _menu.selectAll('.edit-menu-flyout').remove();
+            _menu.selectAll('.edit-menu-item').classed('flyout-open', false);
+            drawAuxiliaryGeometry(context, []);
+        }
+
+        function openFlyout(itemNode, operation, focus) {
+            var existing = _menu.select('.edit-menu-flyout');
+            if (existing.empty() || existing.datum() !== operation) {
+                closeFlyout();
+                renderFlyout(itemNode, operation);
+            }
+            if (focus) {
+                var first = _menu.select('.edit-menu-flyout-item:not(.disabled)').node();
+                if (first) first.focus();
+            }
+        }
+
+        function textOf(renderer) {
+            var span = document.createElement('span');
+            d3_select(span).call(renderer);
+            return span.textContent;
+        }
+
+        function renderFlyout(itemNode, operation) {
+            d3_select(itemNode).classed('flyout-open', true);
+
+            var flyout = _menu.append('div')
+                .datum(operation)
+                .attr('class', 'edit-menu-flyout')
+                .attr('role', 'menu')
+                .classed('flyout-left', _menuLeft)
+                .on('pointerdown mousedown', function(d3_event) { d3_event.stopPropagation(); })
+                .on('keydown', function(d3_event) {
+                    var step = { ArrowDown: 1, ArrowUp: -1 }[d3_event.key];
+                    var back = d3_event.key === (_menuLeft ? 'ArrowRight' : 'ArrowLeft');
+                    if (!step && !back) return;
+                    d3_event.preventDefault();
+                    d3_event.stopPropagation();
+                    if (back) {
+                        closeFlyout();
+                        itemNode.focus();
+                        return;
+                    }
+                    var nodes = flyout.selectAll('.edit-menu-flyout-item:not(.disabled)').nodes();
+                    if (!nodes.length) return;
+                    var index = nodes.indexOf(document.activeElement);
+                    nodes[(index + step + nodes.length) % nodes.length].focus();
+                });
+
+            var groups = flyout.selectAll('.edit-menu-flyout-group')
+                .data(operation.flyout)
+                .enter()
+                .append('div')
+                .attr('class', function(group) { return 'edit-menu-flyout-group edit-menu-flyout-group-' + group.id; });
+
+            groups.append('div')
+                .attr('class', 'edit-menu-flyout-title')
+                .each(function(group) { d3_select(this).call(group.title); });
+
+            groups.selectAll('.edit-menu-flyout-item')
+                .data(function(group) { return group.operations; })
+                .enter()
+                .append('button')
+                .attr('class', 'edit-menu-flyout-item')
+                .attr('role', 'menuitem')
+                .classed('disabled', function(d) {
+                    var reason = d.disabled();
+                    return reason && !d.interrupts?.[reason];
+                })
+                .attr('title', function(d) { return textOf(d.tooltip()); })
+                .each(function(d) {
+                    var label = d3_select(this).append('span').attr('class', 'label');
+                    label.call(d.title);
+                    if (d.keys && d.keys.length) {
+                        d3_select(this).append('kbd').text(d.keys[0]);
+                    }
+                })
+                .on('mouseenter focus', function(d3_event, d) {
+                    if (d3_select(this).classed('disabled')) {
+                        drawAuxiliaryGeometry(context, []);
+                        return;
+                    }
+                    if (d.getAuxiliaryGeometry) drawAuxiliaryGeometry(context, d.getAuxiliaryGeometry());
+                })
+                .on('mouseleave blur', function() {
+                    drawAuxiliaryGeometry(context, []);
+                })
+                .on('click', function(d3_event, d) {
+                    d3_event.stopPropagation();
+                    var disabled = d.disabled();
+                    if (disabled) {
+                        var interrupt = d.interrupts?.[disabled];
+                        if (interrupt) {
+                            interrupt();
+                        } else {
+                            context.ui().flash
+                                .duration(4000)
+                                .iconName('#iD-operation-' + d.id)
+                                .iconClass('operation disabled')
+                                .label(d.tooltip())();
+                        }
+                        return;
+                    }
+                    d();
+                    editMenu.close();
+                });
+
+            // beside the entry; up when it would run out of the map at the bottom
+            var top = itemNode.offsetTop;
+            flyout.style('top', top + 'px');
+            var container = context.container().select('.main-map').node() || context.container().node();
+            var bottom = container.getBoundingClientRect().bottom - _vpBottomMargin;
+            var rect = flyout.node().getBoundingClientRect();
+            if (rect.bottom > bottom) {
+                flyout.style('top', Math.max(top - (rect.bottom - bottom), -_menu.node().getBoundingClientRect().top + _vpTopMargin) + 'px');
+            }
+        }
+
         dispatch.call('toggled', this, true);
     };
 
@@ -224,6 +400,8 @@ export function uiEditMenu(context) {
         }
 
         var menuLeft = displayOnLeft(viewport);
+        _menuLeft = menuLeft;
+        _menu.select('.edit-menu-flyout').classed('flyout-left', menuLeft);
 
         var offset = [0, 0];
 

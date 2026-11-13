@@ -13,10 +13,20 @@ of iD (e.g. `https://ideditor-release.netlify.app`), the following parameters ar
   or a custom tile URL. A custom URL is specified in the format `custom:<url>`,
   where the URL can contain the standard tile URL placeholders `{x}`, `{y}` and
   `{z}`/`{zoom}`, `{ty}` for flipped TMS-style Y coordinates, and `{switch:a,b,c}` for
-  DNS multiplexing.<br/>
+  DNS multiplexing. A `custom:<url>` value is added to the user's saved list of
+  custom backgrounds in localStorage (if not already present) and selected.
+  Conversely, the URL reflects only the *currently selected* custom background,
+  so it cannot share the full list of saved custom backgrounds at once.<br/>
   _Example:_ `background=custom:https://tile.openstreetmap.org/{zoom}/{x}/{y}.png`
 * __`comment`__ - Prefills the changeset comment.<br/>
   _Example:_ `comment=CAR%20crisis%2C%20refugee%20areas%20in%20Cameroon`
+* __`readonly_features`__ - (Radnetz Berlin fork) Feature categories that stay visible but cannot be selected. Same category names as `disable_features`.<br/>
+  _Example:_ `readonly_features=buildings,landuse`<br/>
+* __`data_layers`__ - (Radnetz Berlin fork) The enabled custom data layers: `url|name|color|filter|o|tracker` per layer, joined with `;`. Only `url` is required; `color` is a hex color without `#`, `filter` is `key=value`, `o` makes the layer an overlay that cannot be selected, `tracker` (`mapping` or `track`) turns on progress tracking for its lines. A link enables exactly its layers (unknown ones are added to the stored layers) and turns the other stored layers off.<br/>
+  _Example:_ `data_layers=https://example.com/a.pmtiles|Radnetz|ff26d4;https://example.com/b.geojson`<br/>
+* __`lens`__ - (Radnetz Berlin fork) The map style lens: the id of a bundled lens, or `default` for none. Lenses imported from a CSS file cannot be linked.<br/>
+  _Example:_ `lens=radnetz-qa`<br/>
+* __`way_table`__ - (Radnetz Berlin fork) `true` opens the way table below the map, `false` closes it.<br/>
 * __`disable_features`__ - Disables features in the list.<br/>
   _Example:_ `disable_features=water,service_roads,points,paths,boundaries`<br/>
   _Available features:_ `points`, `traffic_roads`, `service_roads`, `paths`, `buildings`, `building_parts`, `indoor`, `landuse`,
@@ -37,7 +47,9 @@ of iD (e.g. `https://ideditor-release.netlify.app`), the following parameters ar
 * __`map`__ - A slash-separated `zoom/latitude/longitude`.<br/>
   _Example:_ `map=20.00/38.90085/-77.02271`
 * __`notes`__ - Enables the notes layer by default.<br/>
-  _Example:_ `notes=true`
+  _Example:_ `notes=true`<br/>
+  (Radnetz Berlin fork) Also a list of the note layers that are on: `osm` (OpenStreetMap notes, the same as `true`) and `tilda` (internal TILDA notes). With the parameter, exactly the listed layers are on.<br/>
+  _Example:_ `notes=osm,tilda`
 * __`offset`__ - Background imagery alignment offset in meters, formatted as `east,north`.<br/>
   _Example:_ `offset=-10,5`
 * __`photo_overlay`__ - The street-level photo overlay layers to enable.<br/>

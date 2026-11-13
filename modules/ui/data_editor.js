@@ -3,11 +3,13 @@ import { modeBrowse } from '../modes/browse';
 import { svgIcon } from '../svg/icon';
 import { stringifyProperties } from '../util/object';
 import { uiDataHeader } from './data_header';
+import { uiProgressTracking } from './progress_tracking';
 import { uiSectionRawTagEditor } from './sections/raw_tag_editor';
 
 
 export function uiDataEditor(context) {
     var dataHeader = uiDataHeader();
+    var progressTracking = uiProgressTracking(context);
     var rawTagEditor = uiSectionRawTagEditor('custom-data-tag-editor', context)
         .expandedByDefault(true)
         .readOnlyTags([/.*/]);
@@ -55,6 +57,9 @@ export function uiDataEditor(context) {
             .merge(editor)
             .call(dataHeader.datum(_datum));
 
+        // Radnetz Berlin: done / not done for lines of a layer with a progress tracker
+        body.call(progressTracking.datum(_datum));
+
         var rte = body.selectAll('.raw-tag-editor')
             .data([0]);
 
@@ -72,6 +77,12 @@ export function uiDataEditor(context) {
             .attr('readonly', true)
             .classed('readonly', true);
     }
+
+
+    /** done / not done for the shown line, see uiProgressTracking */
+    dataEditor.toggleProgressDone = function() {
+        progressTracking.toggle();
+    };
 
 
     dataEditor.datum = function(val) {

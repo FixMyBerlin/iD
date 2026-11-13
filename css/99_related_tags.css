@@ -1,0 +1,88 @@
+/* Related tags buttons in the field title (feature 25): FontAwesome icons fill their box while
+   iD's drawings have padding, so ours are smaller to look the same size. An open one stays visible. */
+.ideditor[dir] .entity-editor .form-field > .field-label > button.field-related-toggle .icon {
+    width: 11px;
+    height: 11px;
+}
+.entity-editor .field-label > button.field-related-toggle.active {
+    opacity: 1;
+    visibility: visible;
+}
+/* the close button of an open editor is always visible */
+.entity-editor .field-related-editor .field-label > button.field-related-close {
+    opacity: 1;
+    visibility: visible;
+}
+
+
+/* Related tags below a field (feature 25): "Source: Luftbild 2026 ✎"
+   (`.form-field` is a wrapping flex row: take a full row, never wider than the field) */
+.entity-editor .field-related {
+    flex: 1 1 100%;
+    min-width: 0;
+    padding-top: 3px;
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--muted-text-color, #767676);
+}
+.entity-editor .field-related-line {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 20px;
+}
+.entity-editor .field-related-label {
+    flex: none;
+}
+.entity-editor .field-related-value {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: var(--text-color);
+}
+.entity-editor .field-related-value.empty {
+    font-style: italic;
+    color: inherit;
+}
+.entity-editor .field-related button.field-related-button {
+    flex: none;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    background: none;
+    border-radius: 3px;
+    color: var(--text-color);
+}
+.entity-editor .field-related button.field-related-button:hover,
+.entity-editor .field-related button.field-related-edit.active {
+    background: var(--active-bg-color);
+}
+.entity-editor .field-related button.field-related-button .icon {
+    width: 12px;
+    height: 12px;
+}
+
+/* the open editors: full fields in one light rounded box */
+.entity-editor .field-related-editors.open {
+    margin-top: 4px;
+    padding: 6px 8px;
+    background: var(--bg-color-2);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+}
+.entity-editor .field-related .field-related-editor {
+    min-width: 0;
+    font-size: inherit;
+}
+.entity-editor .field-related .field-related-editor .form-field-input-wrap,
+.entity-editor .field-related .field-related-editor input {
+    min-width: 0;
+}
+.entity-editor .field-related .field-related-editor + .field-related-editor {
+    margin-top: 6px;
+}
+.entity-editor .field-related .field-related-editor .form-field {
+    margin-bottom: 0;
+    padding: 0;
+}

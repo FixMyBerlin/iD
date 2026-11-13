@@ -1,0 +1,264 @@
+/* Surface/smoothness field: photos first, in two steps. Uses iD theme variables with standalone
+   fallbacks so it renders both inside iD and in the demo app. */
+
+.surface-smoothness-field {
+  --ssf-sidebar-bg: var(--bg-color-2, #f6f6f6);
+  --ssf-input-bg: var(--bg-color, #fff);
+  --ssf-hover-bg: var(--bg-color-3, #eee);
+  --ssf-border: var(--border-color, #ccc);
+  --ssf-text: var(--text-color, #333);
+  --ssf-muted: var(--muted-text-color, #767676);
+  --ssf-accent: var(--link-color, #1e90ff);
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  color: var(--ssf-text);
+  font-size: 12px;
+}
+
+.surface-smoothness-field button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* ---- the two tiles: surface and smoothness ---- */
+
+.ssf-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+}
+.ssf-value {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 0;
+  overflow: hidden;
+  text-align: start;
+  background: var(--ssf-input-bg);
+  border: 0;
+  border-radius: 4px;
+}
+.ssf-value:hover,
+.ssf-value:focus-visible {
+  background: var(--ssf-hover-bg);
+}
+.ssf-value-visual {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 48px;
+  overflow: hidden;
+  background: var(--ssf-sidebar-bg);
+}
+.ssf-value-visual img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ssf-value-emoji {
+  font-size: 20px;
+}
+.ssf-value-title {
+  overflow: hidden;
+  padding: 3px 6px 4px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--ssf-accent);
+}
+/* not set yet: an empty frame in the border color, the name as placeholder */
+.ssf-value.empty {
+  background: none;
+  box-shadow: inset 0 0 0 1px var(--ssf-border);
+}
+.ssf-value.empty .ssf-value-visual {
+  background: none;
+}
+.ssf-value.empty .ssf-value-title {
+  color: var(--ssf-muted);
+}
+.ssf-value.open {
+  outline: 2px solid var(--ssf-accent);
+  outline-offset: -2px;
+}
+
+/* ---- the open picker below the tiles ---- */
+
+/* set apart from the two tiles above */
+.ssf-picker {
+  margin-top: 10px;
+}
+/* label | input row below the photos (iD styles it like its other rows) */
+.ssf-picker-row {
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* ---- step 1: surface photos ---- */
+
+.ssf-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+  gap: 3px;
+}
+.ssf-tile {
+  display: flex;
+  flex-direction: column;
+  padding: 0 0 3px;
+  overflow: hidden;
+  text-align: center;
+  background: var(--ssf-input-bg);
+  border: 0;
+  border-radius: 4px;
+}
+.ssf-tile:hover,
+.ssf-tile:focus-visible {
+  background: var(--ssf-hover-bg);
+}
+.ssf-tile-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 4 / 3;
+  width: 100%;
+  background: var(--ssf-sidebar-bg);
+}
+.ssf-tile-visual img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ssf-tile-title,
+.ssf-card-title {
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+.ssf-tile-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 2px 2px 0;
+  font-size: 10px;
+  line-height: 1.2;
+  color: var(--ssf-accent);
+}
+
+/* ---- step 2: smoothness photos (or levels without photos) ---- */
+
+.ssf-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: 3px;
+}
+.ssf-levels {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.ssf-card {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+  text-align: start;
+  background: var(--ssf-input-bg);
+  border: 0;
+  border-radius: 4px;
+}
+.ssf-levels .ssf-card {
+  border-radius: 0;
+}
+.ssf-levels .ssf-card:first-child {
+  border-radius: 4px 4px 0 0;
+}
+.ssf-levels .ssf-card:last-child {
+  border-radius: 0 0 4px 4px;
+}
+.ssf-card:hover,
+.ssf-card:focus-visible {
+  background: var(--ssf-hover-bg);
+}
+.ssf-card-photo {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  background: var(--ssf-sidebar-bg);
+}
+.ssf-card-head {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 22px;
+  padding: 2px 4px;
+}
+.ssf-card-emoji {
+  flex: 0 0 auto;
+  font-size: 12px;
+}
+.ssf-card-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 10px;
+  line-height: 1.2;
+  color: var(--ssf-accent);
+}
+
+/* the chosen tile / card */
+.ssf-tile.selected,
+.ssf-card.selected {
+  outline: 2px solid var(--ssf-accent);
+  outline-offset: -2px;
+}
+
+/* ---- the input in the row ---- */
+
+.ssf-text-cell {
+  position: relative;
+}
+.ssf-text-input {
+  width: 100%;
+  box-sizing: border-box;
+  color: var(--ssf-accent);
+}
+.ssf-text-input::placeholder {
+  color: var(--ssf-muted);
+}
+.ssf-combo-list {
+  position: absolute;
+  z-index: 50;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin: 1px 0 0;
+  padding: 0;
+  max-height: 220px;
+  overflow-y: auto;
+  list-style: none;
+  background: var(--ssf-input-bg);
+  border: 1px solid var(--ssf-border);
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 20%);
+}
+.ssf-combo-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+.ssf-combo-item:hover {
+  background: var(--ssf-hover-bg);
+}
+.ssf-combo-code {
+  font-family: monospace;
+  font-size: 11px;
+  color: var(--ssf-muted);
+}

@@ -169,6 +169,28 @@ export function coreValidator(context) {
   }
 
 
+  // `revalidateRule()`
+  // Reruns one rule on all loaded entities that pass `filter`, e.g. after data outside of OSM
+  // changed that the rule depends on (WORKDOC feature 33).
+  //
+  validator.revalidateRule = (type, filter) => {
+    [_headCache, _baseCache].forEach(cache => {
+      const rule = _rules[type];
+      if (!cache.graph || typeof rule !== 'function') return;
+
+      cache.uncacheIssuesOfType(type);
+
+      context.history().tree().intersects(geoExtent([-180,-90],[180, 90]), cache.graph)  // everywhere
+        .filter(filter)
+        .forEach(entity => {
+          const detected = rule(entity, cache.graph);
+          if (detected.length) cache.cacheIssues(detected);
+        });
+    });
+    dispatch.call('validated');
+  };
+
+
   // `getIssues()`
   // Gets all issues that match the given options
   // This is called by many other places

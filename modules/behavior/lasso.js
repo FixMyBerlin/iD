@@ -3,6 +3,7 @@ import { select as d3_select } from 'd3-selection';
 import { geoExtent, geoPointInPolygon } from '../geo';
 import { modeSelect } from '../modes/select';
 import { uiLasso } from '../ui/lasso';
+import { isReadOnlyEntity } from '../renderer/readonly_features';
 import { utilArrayIntersection } from '../util/array';
 import { utilGetAllNodes } from '../util/util';
 
@@ -68,7 +69,8 @@ export function behaviorLasso(context) {
                 return entity.type === 'node' &&
                     (!limitToNodes || limitToNodes.has(entity)) &&
                     geoPointInPolygon(context.projection(entity.loc), lasso.coordinates) &&
-                    !context.features().isHidden(entity, graph, entity.geometry(graph));
+                    !context.features().isHidden(entity, graph, entity.geometry(graph)) &&
+                    !isReadOnlyEntity(context, entity, graph);
             });
 
             // sort the lassoed nodes as best we can

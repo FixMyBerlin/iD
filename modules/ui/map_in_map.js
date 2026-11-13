@@ -5,7 +5,9 @@ import { zoom as d3_zoom, zoomIdentity as d3_zoomIdentity } from 'd3-zoom';
 import { t } from '../core/localizer';
 import { geoRawMercator, geoScaleToZoom, geoVecSubtract, geoVecScale, geoZoomToScale } from '../geo';
 import { rendererTileLayer } from '../renderer';
+import { dispatch as d3_dispatch } from 'd3-dispatch';
 import { svgDebug, svgData } from '../svg';
+import { svgCustomData } from '../svg/custom_data';
 import { utilSetTransform } from '../util';
 // import { utilGetDimensions } from '../util/dimensions';
 
@@ -18,6 +20,9 @@ export function uiMapInMap(context) {
         var overlayLayers = {};
         var projection = geoRawMercator();
         var dataLayer = svgData(projection, context).showLabels(false);
+        // custom data layers (WORKDOC feature 4): redrawn when a layer changes or its data arrives
+        var customDataDispatch = d3_dispatch('change');
+        var customDataLayer = svgCustomData(projection, context, customDataDispatch, { minimap: true });
         var debugLayer = svgDebug(projection, context);
         var zoom = d3_zoom()
             .scaleExtent([geoZoomToScale(0.5), geoZoomToScale(24)])
@@ -224,6 +229,7 @@ export function uiMapInMap(context) {
                 .attr('class', 'map-in-map-data')
                 .merge(dataLayers)
                 .call(dataLayer)
+                .call(customDataLayer)
                 .call(debugLayer);
 
 
@@ -252,6 +258,11 @@ export function uiMapInMap(context) {
                     .classed('thick', function(d) { return getPath.area(d) < 30; });
             }
         }
+
+
+        customDataDispatch.on('change.map-in-map', function() {
+            if (!_isHidden) queueRedraw();
+        });
 
 
         function queueRedraw() {

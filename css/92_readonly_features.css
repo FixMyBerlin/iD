@@ -1,0 +1,19 @@
+/* Read-only feature categories: visible for orientation, muted, not interactive */
+
+/* Muted with `stroke-opacity` / `fill-opacity`, which are painted directly. `opacity` (and a
+   `filter`) makes every element its own transparent group: with thousands of them each repaint got
+   so slow that panning at z17 took 2.5x as long as in stock iD (scripts/perf, 2026-10-15). */
+/* not the shadows: they are the invisible hover and selection halo (stroke-opacity 0) */
+.ideditor .layer-osm .readonly-feature:not(.shadow),
+.ideditor .layer-osm .readonly-feature *:not(.shadow) {
+    stroke-opacity: 0.35 !important;
+    fill-opacity: 0.25 !important;
+}
+
+/* no hover, click, lasso start or snapping on read-only features; their click targets get an
+   inline `pointer-events: none` (renderer/readonly_features.ts) */
+.ideditor .layer-osm .readonly-feature,
+.ideditor .layer-osm .readonly-feature * {
+    pointer-events: none !important;
+}
+

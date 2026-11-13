@@ -4,6 +4,7 @@ import { select as d3_select } from 'd3-selection';
 
 import {
     modeAddNote,
+    modeAddTildaNote,
     modeBrowse
 } from '../../modes';
 
@@ -18,32 +19,36 @@ export function uiToolNotes(context) {
         label: t.append('modes.add_note.label')
     };
 
-    var mode = modeAddNote(context);
+    // Public OSM notes and internal TILDA notes (WORKDOC feature 29): one button per enabled layer
+    var osmMode = Object.assign(modeAddNote(context), { layerId: 'notes', title: t.append('tilda_notes.add.osm_title') });
+    var modes = [osmMode, modeAddTildaNote(context)];
 
-    function enabled() {
-        return notesEnabled() && notesEditable();
+    function enabled(d) {
+        return layerEnabled(d) && notesEditable();
     }
 
-    function notesEnabled() {
-        var noteLayer = context.layers().layer('notes');
+    function layerEnabled(d) {
+        var noteLayer = context.layers().layer(d.layerId);
         return noteLayer && noteLayer.enabled();
     }
 
     function notesEditable() {
         var mode = context.mode();
-        return context.map().notesEditable() && mode && mode.id !== 'save';
+        return context.map().withinEditableZoom() && mode && mode.id !== 'save';
     }
 
-    context.keybinding().on(mode.key, function(d3_event) {
-        if (!enabled()) return;
+    modes.forEach(function(mode) {
+        context.keybinding().on(mode.key, function(d3_event) {
+            if (!enabled(mode)) return;
 
-        d3_event.preventDefault();
+            d3_event.preventDefault();
 
-        if (mode.id === context.mode().id) {
-            context.enter(modeBrowse(context));
-        } else {
-            context.enter(mode);
-        }
+            if (mode.id === context.mode().id) {
+                context.enter(modeBrowse(context));
+            } else {
+                context.enter(mode);
+            }
+        });
     });
 
     tool.render = function(selection) {
@@ -61,8 +66,7 @@ export function uiToolNotes(context) {
 
 
         function update() {
-            var showNotes = notesEnabled();
-            var data = showNotes ? [mode] : [];
+            var data = modes.filter(layerEnabled);
 
             var buttons = selection.selectAll('button.add-button')
                 .data(data, function(d) { return d.id; });
@@ -76,7 +80,7 @@ export function uiToolNotes(context) {
                 .append('button')
                 .attr('class', function(d) { return d.id + ' add-button bar-button'; })
                 .on('click.notes', function(d3_event, d) {
-                    if (!enabled()) return;
+                    if (!enabled(d)) return;
 
                     // When drawing, ignore accidental clicks on mode buttons - #4042
                     var currMode = context.mode().id;
@@ -98,7 +102,10 @@ export function uiToolNotes(context) {
             buttonsEnter
                 .each(function(d) {
                     d3_select(this)
-                        .call(svgIcon(d.icon || '#iD-icon-' + d.button));
+                        .call(svgIcon(d.icon || '#iD-icon-' + d.button))
+                        .append('span')
+                        .attr('class', 'label')
+                        .call(d.title);
                 });
 
             // if we are adding/removing the buttons, check if toolbar has overflowed
@@ -109,8 +116,8 @@ export function uiToolNotes(context) {
             // update
             buttons
                 .merge(buttonsEnter)
-                .classed('disabled', function() { return !enabled(); })
-                .attr('aria-disabled', function() { return !enabled(); })
+                .classed('disabled', function(d) { return !enabled(d); })
+                .attr('aria-disabled', function(d) { return !enabled(d); })
                 .classed('active', function(d) { return context.mode() && context.mode().button === d.button; })
                 .attr('aria-pressed', function(d) { return context.mode() && context.mode().button === d.button; });
         }

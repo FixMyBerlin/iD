@@ -55,6 +55,10 @@ export interface Operation {
     interrupts?: {
         [interruptId: string]: () => Promise<void>;
     };
+    /** Radnetz fork: the side an extract entry works on (groups of the extract menu) */
+    side?: 'right' | 'left' | 'both';
+    /** Radnetz fork: an entry that opens a flyout with text entries in groups instead of running */
+    flyout?: { id: string; title: LocalizedTextRenderer; operations: Operation[] }[];
 }
 
 export type CreateOperation = (context: iD.Context, selectedIDs: EntityId[]) => Operation;

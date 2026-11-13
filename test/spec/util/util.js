@@ -1,4 +1,5 @@
 import { omit } from 'es-toolkit';
+import { select as d3_select } from 'd3-selection';
 import { utilStripDiacritics } from '../../../modules/util/util';
 
 describe('iD.util', function() {
@@ -53,6 +54,56 @@ describe('iD.util', function() {
 
             expect(result).to.have.members([a]);
             expect(result).toHaveLength(1);
+        });
+    });
+
+    describe('utilDeepMemberIDs', function() {
+        it('returns the deep members, without the ids passed in and multipolygon members if asked', function() {
+            var graph = new iD.coreGraph([
+                new iD.osmWay({ id: 'w1' }),
+                new iD.osmWay({ id: 'w2' }),
+                new iD.osmRelation({ id: 'r1', tags: { type: 'multipolygon' }, members: [{ id: 'w2', type: 'way' }] }),
+                new iD.osmRelation({ id: 'r2', members: [{ id: 'w1', type: 'way' }, { id: 'r1', type: 'relation' }] })
+            ]);
+            expect(iD.utilDeepMemberIDs(['r2'], graph, false)).toEqual(['w1', 'r1', 'w2']);
+            expect(iD.utilDeepMemberIDs(['r2'], graph, true)).toEqual(['w1', 'r1']);
+            expect(iD.utilDeepMemberIDs(['r2', 'w1'], graph, true)).toEqual(['r1']);
+            expect(iD.utilDeepMemberSelector(['r2'], graph, true)).toBe('.w1,.r1');
+        });
+    });
+
+    describe('utilSelectEntityElements', function() {
+        var root;
+
+        beforeEach(function() {
+            root = d3_select(document.createElement('div'));
+            for (var i = 0; i < 60; i++) {
+                root.append('svg').attr('class', 'way line w' + i)
+                    .append('g').attr('class', 'node vertex n' + i + (i % 2 ? ' w' + i : ''));
+            }
+            root.append('div').attr('class', 'nothing-here');
+        });
+
+        function sameAsSelector(ids) {
+            var expected = root.selectAll(iD.utilEntitySelector(ids)).nodes();
+            var actual = iD.utilSelectEntityElements(root, ids).nodes();
+            expect(actual).toEqual(expected);
+            return actual;
+        }
+
+        it('selects the same elements as the selector for a few ids', function() {
+            expect(sameAsSelector(['w3', 'n4'])).toHaveLength(3);
+        });
+
+        it('selects the same elements as the selector for many ids', function() {
+            var ids = [];
+            for (var i = 0; i < 50; i++) ids.push('w' + i);
+            ids.push('n55', 'r1');
+            expect(sameAsSelector(ids)).toHaveLength(76);
+        });
+
+        it('selects nothing for no ids', function() {
+            expect(sameAsSelector([])).toHaveLength(0);
         });
     });
 

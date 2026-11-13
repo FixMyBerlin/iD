@@ -6,6 +6,7 @@ import {
 
 import { presetManager } from '../presets';
 import { OsmAbstractEntity, osmNote, QAItem } from '../osm';
+import { TildaNote } from '../tilda_notes/note';
 import { utilKeybinding, utilRebind } from '../util';
 
 /*
@@ -168,6 +169,9 @@ export function behaviorHover(context) {
 
                 } else if (datum instanceof osmNote) {
                     selector += ', .note-' + datum.id;
+
+                } else if (datum instanceof TildaNote) {
+                    selector += ', .tilda-note-' + datum.id;
 
                 } else if (datum instanceof OsmAbstractEntity) {
                     selector += ', .' + datum.id;

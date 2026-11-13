@@ -1,0 +1,91 @@
+/* Mapillary layer: age colors, highlighted users/organizations, the selected feature's images (WORKDOC feature 18) */
+
+:root {
+    --mly-age-new: #55ff22;
+    --mly-age-mid: #ffe600;
+    --mly-age-old: #ff9500;
+    --mly-age-outdated: #f0252b;
+    --mly-highlight: #1e6bff;
+    --mly-selected: #ff00cc;
+}
+
+/* age colors: markers (circle and viewfield) and sequences */
+.layer-mapillary .viewfield-group.mly-age-new * { fill: var(--mly-age-new); }
+.layer-mapillary .viewfield-group.mly-age-mid * { fill: var(--mly-age-mid); }
+.layer-mapillary .viewfield-group.mly-age-old * { fill: var(--mly-age-old); }
+.layer-mapillary .viewfield-group.mly-age-outdated * { fill: var(--mly-age-outdated); }
+.layer-mapillary .sequence.mly-age-new { stroke: var(--mly-age-new); }
+.layer-mapillary .sequence.mly-age-mid { stroke: var(--mly-age-mid); }
+.layer-mapillary .sequence.mly-age-old { stroke: var(--mly-age-old); }
+.layer-mapillary .sequence.mly-age-outdated { stroke: var(--mly-age-outdated); }
+
+/* highlighted users/organizations: a dot with a white ring, a thicker sequence */
+.layer-mapillary .viewfield-group circle.mly-highlight-dot {
+    fill: var(--mly-highlight);
+    stroke: #fff;
+    stroke-width: 1.5px;
+}
+.layer-mapillary .sequence.mly-highlighted {
+    stroke-width: 4px;
+}
+
+/* images of the selected feature: a larger ring and a dot */
+.layer-mapillary .viewfield-group.mly-selected-feature-image circle.mly-selected-ring {
+    fill: none;
+    stroke: var(--mly-selected);
+    stroke-width: 3px;
+}
+.layer-mapillary .viewfield-group.mly-selected-feature-image circle:not(.mly-extra) {
+    fill: var(--mly-selected);
+}
+
+/* age slider: cutoff marker and legend */
+.list-item-date-slider {
+    /* the legend goes on its own line below the slider */
+    flex-wrap: wrap;
+}
+.list-item-date-slider > label {
+    flex: 1 1 100%;
+}
+.list-item-date-slider .slider-wrap {
+    position: relative;
+    /* room for the cutoff date above the slider */
+    margin-top: 14px;
+}
+.date-slider-cutoff {
+    position: absolute;
+    top: 0;
+    bottom: 1.4em;
+    width: 0;
+    border-left: 2px dashed var(--mly-age-outdated);
+    pointer-events: none;
+}
+.date-slider-cutoff-label {
+    position: absolute;
+    top: -13px;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    font-size: 10px;
+    color: var(--mly-age-outdated);
+}
+.mly-age-legend {
+    flex: 1 1 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px 10px;
+    padding: 0 10px 8px;
+    font-size: 11px;
+}
+.mly-age-legend .mly-age-band::before {
+    content: '';
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    margin-inline-end: 4px;
+    background: var(--band);
+}
+.mly-age-legend .mly-age-new { --band: var(--mly-age-new); }
+.mly-age-legend .mly-age-mid { --band: var(--mly-age-mid); }
+.mly-age-legend .mly-age-old { --band: var(--mly-age-old); }
+.mly-age-legend .mly-age-outdated { --band: var(--mly-age-outdated); }

@@ -1,0 +1,277 @@
+/* Mapillary traffic signs (WORKDOC feature 26) */
+
+/* the selected sign on the map: full opacity, a yellow frame, and a dotted line to the shown image */
+.layer-mapillary-signs .icon-sign.mly-sign-selected {
+    opacity: 1;
+}
+.layer-mapillary-signs .icon-sign.mly-sign-selected rect {
+    fill: none;
+    stroke: #ffee00;
+    stroke-width: 3px;
+    outline: none;
+    x: -15px;
+    y: -15px;
+    width: 30px;
+    height: 30px;
+    rx: 4px;
+}
+.layer-mapillary-signs .mapillary-sign-link {
+    fill: none;
+    stroke: #ffee00;
+    stroke-width: 2.5px;
+    stroke-dasharray: 2 5;
+    stroke-linecap: round;
+    pointer-events: none;
+}
+/* Mapillary's computed position of the shown image, where the line bends */
+.layer-mapillary-signs .mapillary-sign-computed {
+    fill: #ffee00;
+    stroke: #000;
+    stroke-width: 1px;
+    pointer-events: none;
+}
+
+/* group chips below "Traffic signs" in the Photo Overlays pane (the row wraps them onto their own line) */
+.layer-list li.list-item-mapillary-signs {
+    flex-wrap: wrap;
+    height: auto;
+}
+.mapillary-sign-groups {
+    flex: 1 1 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 0 8px 6px 28px;
+}
+.ideditor .mapillary-sign-groups button.mapillary-sign-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    width: auto;
+    height: 22px;
+    padding: 0 8px;
+    border-radius: 11px;
+    font-size: 12px;
+    background: transparent;
+    color: var(--muted-text-color, #767676);
+    border: 1px dashed var(--border-color, #ccc);
+}
+.ideditor .mapillary-sign-groups button.mapillary-sign-group.active {
+    background: color-mix(in srgb, var(--text-color) 14%, transparent);
+    color: var(--text-color, #333);
+    border-style: solid;
+}
+.ideditor .mapillary-sign-groups button.mapillary-sign-group:hover {
+    background: color-mix(in srgb, var(--text-color) 22%, transparent);
+}
+.mapillary-sign-group-count {
+    font-size: 11px;
+    opacity: 0.7;
+}
+
+/* the bar of the selected sign: above the photo viewer, over the map, so the image stays free */
+.photoviewer .mapillary-sign-bar {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    margin-bottom: 6px;
+    max-width: 100%;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 5px 6px;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    font-size: 12px;
+    pointer-events: auto;
+}
+.mapillary-sign-bar-head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+.mapillary-sign-bar-icons {
+    display: flex;
+    gap: 3px;
+    flex: none;
+}
+.mapillary-sign-bar-icon,
+.mapillary-sign-bar-icon svg {
+    width: 22px;
+    height: 22px;
+    display: block;
+    object-fit: contain;
+}
+.mapillary-sign-bar-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-weight: bold;
+}
+.mapillary-sign-bar-direction {
+    flex: none;
+    padding: 1px 5px;
+    border-radius: 3px;
+    background: rgba(255, 238, 0, 0.25);
+    white-space: nowrap;
+}
+.mapillary-sign-bar-direction.hide {
+    display: none;
+}
+.ideditor .photoviewer .mapillary-sign-bar button {
+    height: 22px;
+    padding: 0 7px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.14);
+}
+.ideditor .photoviewer .mapillary-sign-bar button:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.3);
+}
+.ideditor .photoviewer .mapillary-sign-bar button:disabled {
+    opacity: 0.45;
+}
+.mapillary-sign-bar-days,
+.mapillary-sign-bar-actions {
+    display: flex;
+    gap: 3px;
+}
+/* one row of days, scrolled sideways when there are many */
+.mapillary-sign-bar-days {
+    overflow-x: auto;
+    scrollbar-width: thin;
+}
+.mapillary-sign-bar-days button {
+    flex: none;
+}
+.mapillary-sign-bar-actions {
+    flex-wrap: wrap;
+}
+.ideditor .photoviewer .mapillary-sign-bar button.mapillary-sign-bar-day.active {
+    background: #ffee00;
+    color: #000;
+}
+.ideditor .photoviewer .mapillary-sign-bar button.mapillary-sign-bar-day {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: auto;
+    padding: 3px 8px;
+    text-align: left;
+}
+.mapillary-sign-bar-day-dates {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+.mapillary-sign-bar-day-age {
+    font-size: 11px;
+    opacity: 0.75;
+}
+.mapillary-sign-bar-day-count {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 11px;
+    opacity: 0.8;
+}
+.mapillary-sign-bar-day-count .icon.mapillary-sign-bar-day-icon {
+    width: 11px;
+    height: 11px;
+}
+.ideditor .photoviewer .mapillary-sign-bar button.mapillary-sign-bar-action {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: monospace;
+    white-space: nowrap;
+}
+.mapillary-sign-bar-actions.hide,
+.mapillary-sign-bar-signs.hide,
+.mapillary-sign-bar-write.hide,
+.mapillary-sign-bar-head.hide,
+.mapillary-sign-bar-days.hide {
+    display: none;
+}
+/* the write buttons as their own group below the images */
+.mapillary-sign-bar-write {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 2px;
+    padding-top: 6px;
+    border-top: 1px solid rgba(255, 255, 255, 0.25);
+}
+/* without a sign the bar only has the image keys: no line above them */
+.mapillary-sign-bar:not(.with-sign) .mapillary-sign-bar-write {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+}
+/* with a sign, the image keys are their own group below the sign's buttons */
+.mapillary-sign-bar.with-sign .mapillary-sign-bar-images {
+    padding-top: 4px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.2);
+}
+.mapillary-sign-bar-images {
+    flex-wrap: wrap;
+}
+/* already tagged: green with a check; another value tagged: the arrow label */
+.ideditor .photoviewer .mapillary-sign-bar button.mapillary-sign-bar-action.present {
+    opacity: 1;
+    background: rgba(76, 175, 80, 0.45);
+    color: #fff;
+}
+.ideditor .photoviewer .mapillary-sign-bar button.mapillary-sign-bar-action.present:hover:not(:disabled) {
+    background: rgba(76, 175, 80, 0.7);
+}
+.ideditor .photoviewer .mapillary-sign-bar button.mapillary-sign-bar-action.suggested {
+    box-shadow: inset 0 0 0 1.5px #ffee00;
+}
+.mapillary-sign-bar-signs {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.ideditor .photoviewer .mapillary-sign-bar button.mapillary-sign-bar-action.replaces {
+    background: rgba(255, 152, 0, 0.35);
+}
+
+/* links to the same place in other imagery (infra3D) */
+.mapillary-sign-bar-links {
+    display: flex;
+    gap: 3px;
+}
+.mapillary-sign-bar-links.hide {
+    display: none;
+}
+.mapillary-sign-bar.with-sign .mapillary-sign-bar-links,
+.mapillary-sign-bar-write:not(.hide) + .mapillary-sign-bar-links {
+    padding-top: 4px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.2);
+}
+
+/* infra3D in the inspector's preset header, next to the favorite heart */
+.preset-list-button-wrap button.infra3d-button {
+    width: 32px;
+    flex: 0 0 auto;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    background: var(--bg-color-2);
+    color: var(--text-color);
+    font-size: 11px;
+    font-weight: bold;
+    opacity: 0.75;
+}
+.preset-list-button-wrap button.infra3d-button:hover,
+.preset-list-button-wrap button.infra3d-button:focus {
+    background: var(--bg-color-3);
+    opacity: 1;
+}

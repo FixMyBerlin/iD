@@ -13,10 +13,13 @@ import { utilCleanTags, utilCombinedTags, utilRebind } from '../util';
 import { uiSectionEntityIssues } from './sections/entity_issues';
 import { uiSectionFeatureType } from './sections/feature_type';
 import { uiSectionPresetFields } from './sections/preset_fields';
+import { uiSectionTildaBikeInfra } from './sections/tilda_bike_infra';
 import { uiSectionRawMemberEditor } from './sections/raw_member_editor';
 import { uiSectionRawMembershipEditor } from './sections/raw_membership_editor';
 import { uiSectionRawTagEditor } from './sections/raw_tag_editor';
 import { uiSectionSelectionList } from './sections/selection_list';
+import { presetFieldsOf, removeUnmetSideValues } from './fields/side_prerequisite';
+import { withPathOneway } from '../tilda/path_oneway';
 
 export function uiEntityEditor(context) {
     var dispatch = d3_dispatch('choose');
@@ -88,13 +91,21 @@ export function uiEntityEditor(context) {
             .merge(bodyEnter);
 
         if (!_sections) {
+            // Radnetz Berlin: TILDA helper right below the preset, it is the main task in this editor.
+            // Its checklist colors the field titles and links to the fields.
+            var tildaSection = uiSectionTildaBikeInfra(context).on('change', changeTags);
+            var presetFieldsSection = uiSectionPresetFields(context).on('change', changeTags).on('revert', revertTags)
+                .fieldStatus(tildaSection.fieldStatus);
+            tildaSection.on('reveal', presetFieldsSection.revealField);
+            tildaSection.on('fieldStatus', function() { presetFieldsSection.reRender(); });
             _sections = [
                 uiSectionSelectionList(context),
                 uiSectionFeatureType(context).on('choose', function(presets) {
                     dispatch.call('choose', this, presets);
                 }),
+                tildaSection,
                 uiSectionEntityIssues(context),
-                uiSectionPresetFields(context).on('change', changeTags).on('revert', revertTags),
+                presetFieldsSection,
                 uiSectionRawTagEditor('raw-tag-editor', context).on('change', changeTags),
                 uiSectionRawMemberEditor(context),
                 uiSectionRawMembershipEditor(context)
@@ -183,6 +194,11 @@ export function uiEntityEditor(context) {
 
             if (!onInput) {
                 tags = utilCleanTags(tags);
+                // e.g. `cycleway:right=lane` → `no` also removes `cycleway:right:lane` (side_prerequisite.ts)
+                var setNow = new Set(Object.keys(changed).filter(function(k) { return typeof changed[k] === 'string'; }));
+                tags = removeUnmetSideValues(presetFieldsOf(context, entityID), entity.tags, tags, setNow);
+                // paths and footways: a bike direction leaves pedestrians both ways (`oneway=no`)
+                tags = withPathOneway(tags, setNow);
             }
 
             if (!deepEqual(entity.tags, tags)) {
@@ -206,6 +222,13 @@ export function uiEntityEditor(context) {
                 context.perform(combinedAction, annotation);
             }
             _coalesceChanges = !!onInput;
+        }
+
+        // Radnetz Berlin: a finished change (leaving the field) ends the typing step also when it
+        // changes nothing more. Else the next change, from any field or button, replaced the typing
+        // step instead of being its own, and one undo took back both.
+        if (!onInput) {
+            _coalesceChanges = false;
         }
 
         // if leaving field (blur event), rerun validation
@@ -263,6 +286,8 @@ export function uiEntityEditor(context) {
                 context.perform(combinedAction, annotation);
             }
         }
+        // Radnetz Berlin: a revert is finished, the next change is a step of its own
+        _coalesceChanges = false;
 
         context.validator().validate();
     }

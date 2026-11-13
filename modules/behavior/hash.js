@@ -6,6 +6,7 @@ import { dispatch as d3_dispatch } from 'd3-dispatch';
 import { geoSphericalDistance } from '../geo';
 import { modeBrowse } from '../modes/browse';
 import { modeSelect, modeSelectNote } from '../modes';
+import { isTildaNoteHashId, selectTildaNoteFromHash, tildaNoteHashId } from '../tilda_notes/hash';
 import { utilQsString, utilRebind, utilStringQs } from '../util';
 import { utilArrayIdentical } from '../util/array';
 import { utilDisplayLabel } from '../util/utilDisplayLabel';
@@ -85,6 +86,8 @@ export function behaviorHash(context) {
             newParams.id = selected.join(',');
         } else if (context.selectedNoteID()) {
             newParams.id = `note/${context.selectedNoteID()}`;
+        } else if (tildaNoteHashId()) {
+            newParams.id = tildaNoteHashId();
         }
 
         newParams.map = zoom.toFixed(2) +
@@ -175,6 +178,13 @@ export function behaviorHash(context) {
 
             context.map().centerZoom([mapArgs[2], Math.min(_latitudeLimit, Math.max(-_latitudeLimit, mapArgs[1]))], mapArgs[0]);
 
+            if (q.id && mode && isTildaNoteHashId(q.id)) {
+                if (['browse', 'select-note', 'select-tilda-note', 'select'].includes(mode.id)) {
+                    selectTildaNoteFromHash(context, q.id, false);
+                }
+                return;
+            }
+
             if (q.id && mode) {
                 var ids = q.id.split(',').filter(function(id) {
                     return context.hasEntity(id) || id.startsWith('note/');
@@ -220,7 +230,9 @@ export function behaviorHash(context) {
         if (q.id) {
             // targeting specific features: download, select, and zoom to them
             const selectIds = q.id.split(',');
-            if (selectIds.length === 1 && selectIds[0].startsWith('note/')) {
+            if (selectIds.length === 1 && isTildaNoteHashId(selectIds[0])) {
+                selectTildaNoteFromHash(context, selectIds[0], !q.map);
+            } else if (selectIds.length === 1 && selectIds[0].startsWith('note/')) {
                 const noteId = +selectIds[0].split('/')[1];
                 context.moveToNote(noteId, !q.map);
             } else {
