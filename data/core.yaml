@@ -829,6 +829,8 @@ en:
         label: "Usable Width Source"
       cycleway_surface_colour:
         label: "Cycleway Surface Colour"
+      oneway_bicycle_path:
+        label: "One Way (Bicycles)"
     mapillary_images:
       label: "Mapillary images"
       image_id: "Image ID"

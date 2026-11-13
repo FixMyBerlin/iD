@@ -19,6 +19,7 @@ import { uiSectionRawMembershipEditor } from './sections/raw_membership_editor';
 import { uiSectionRawTagEditor } from './sections/raw_tag_editor';
 import { uiSectionSelectionList } from './sections/selection_list';
 import { presetFieldsOf, removeUnmetSideValues } from './fields/side_prerequisite';
+import { withPathOneway } from '../tilda/path_oneway';
 
 export function uiEntityEditor(context) {
     var dispatch = d3_dispatch('choose');
@@ -196,6 +197,8 @@ export function uiEntityEditor(context) {
                 // e.g. `cycleway:right=lane` → `no` also removes `cycleway:right:lane` (side_prerequisite.ts)
                 var setNow = new Set(Object.keys(changed).filter(function(k) { return typeof changed[k] === 'string'; }));
                 tags = removeUnmetSideValues(presetFieldsOf(context, entityID), entity.tags, tags, setNow);
+                // paths and footways: a bike direction leaves pedestrians both ways (`oneway=no`)
+                tags = withPathOneway(tags, setNow);
             }
 
             if (!deepEqual(entity.tags, tags)) {

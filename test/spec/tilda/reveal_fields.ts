@@ -69,6 +69,11 @@ const CASES: { name: string; presetID: string; tags: Record<string, string> }[] 
         tags: { highway: 'path', bicycle: 'designated', foot: 'designated', segregated: 'no', traffic_sign: 'DE:240' }
     },
     {
+        name: 'footway with bicycle access',
+        presetID: 'highway/footway',
+        tags: { highway: 'footway', bicycle: 'yes', traffic_sign: 'DE:239,1022-10' }
+    },
+    {
         name: 'cycleway',
         presetID: 'highway/cycleway',
         tags: { highway: 'cycleway', is_sidepath: 'yes' }
@@ -80,15 +85,6 @@ const CASES: { name: string; presetID: string; tags: Record<string, string> }[] 
     }
 ];
 
-/**
- * Known exception: on paths and footways TILDA asks for `oneway:bicycle`, the presets only have the
- * `oneway` field. TILDA reads both, and the box then offers to move `oneway` to `oneway:bicycle`
- * (`onewayToMove` in tilda_bike_infra.ts).
- */
-function knownException(attribute: RequiredAttribute, fieldKeys: string[]) {
-    return attribute.key === 'oneway:bicycle' && fieldKeys.includes('oneway');
-}
-
 describe('tilda: "check below" opens the field of the asked key', () => {
     it.each(CASES)('$name', ({ name, presetID, tags }) => {
         const fieldDefs = presetFieldDefs(presetID);
@@ -96,7 +92,6 @@ describe('tilda: "check below" opens the field of the asked key', () => {
         for (const attribute of attributesFor(tags)) {
             const keys = revealedFieldKeys(attribute, fieldDefs);
             if (!keys) continue;   // no field: the box has its own buttons
-            if (knownException(attribute, keys)) continue;
             expect(keys, `${attribute.id} (${attribute.key}) on ${name}`).toContain(attribute.key);
         }
     });

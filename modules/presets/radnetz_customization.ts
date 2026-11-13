@@ -112,6 +112,14 @@ const FIELDS: Record<string, Field> = {
         options: ['no', 'red', 'green', 'red;green'],
         strings: { options: { no: 'Not coloured', red: 'Red', green: 'Green', 'red;green': 'Red and green' } }
     } as Field,
+    // paths and footways: TILDA reads the riding direction from `oneway:bicycle` (no `oneway` needed
+    // first, unlike the schema's `oneway/bicycle`); a value also sets `oneway=no` (tilda/path_oneway.ts)
+    'oneway/bicycle/path': {
+        key: 'oneway:bicycle',
+        type: 'onewayCheck',
+        label: 'One Way (Bicycles)',
+        geometry: ['line']
+    } as Field,
     'sett/length': {
         key: 'sett:length',
         // the three sizes TILDA tells apart (≤ 8 cm mosaic, ≤ 13 cm small, else large), in cm
@@ -240,10 +248,16 @@ function withPartColour(fields: string[]) {
     return [...fields.slice(0, index + 1), 'cycleway/surface/colour', ...fields.slice(index + 1)];
 }
 
+const SHARED_WAY_FIELDS = [...SEPARATE_WAY_FIELDS.slice(0, 2), 'segregated', ...SEPARATE_WAY_FIELDS.slice(2)];
 const SEPARATE_WAY_MORE_FIELDS = withPartColour(['marking', 'buffer', 'traffic_mode', 'segregated', ...WAY_DETAILS_MORE]);
 
 const FOOTWAY_FIELDS = ['name', 'access', 'traffic_sign', 'is_sidepath', 'surface_smoothness', 'width', 'structure'];
-const FOOTWAY_MORE_FIELDS = withPartColour(['oneway', 'segregated', 'tactile_paving', 'wheelchair', ...WAY_DETAILS_MORE]);
+const FOOTWAY_MORE_FIELDS = withPartColour(['oneway/bicycle/path', 'segregated', 'tactile_paving', 'wheelchair', ...WAY_DETAILS_MORE]);
+
+/** paths: the bike direction instead of `oneway` (TILDA reads `oneway:bicycle` there) */
+function pathOneway(fields: string[]) {
+    return fields.map(id => id === 'oneway' ? 'oneway/bicycle/path' : id);
+}
 
 
 const ROAD_PRESETS: Record<string, string[]> = {
@@ -332,8 +346,10 @@ export const RADNETZ_PRESET_CUSTOMIZATION: PresetCustomization = {
             moreFields: [...extraMore, ...ROAD_MORE_FIELDS]
         }])),
         ...Object.fromEntries(SEPARATE_WAY_PRESETS.map(id => [id, {
-            // shared foot and cycle paths: `segregated` decides the TILDA category
-            fields: id.endsWith('bicycle_foot') ? [...SEPARATE_WAY_FIELDS.slice(0, 2), 'segregated', ...SEPARATE_WAY_FIELDS.slice(2)] : SEPARATE_WAY_FIELDS,
+            // shared foot and cycle paths: `segregated` decides the TILDA category; on a path TILDA reads
+            // the riding direction from `oneway:bicycle`
+            fields: id === 'highway/path/bicycle_foot' ? pathOneway(SHARED_WAY_FIELDS)
+                : id.endsWith('bicycle_foot') ? SHARED_WAY_FIELDS : SEPARATE_WAY_FIELDS,
             moreFields: SEPARATE_WAY_MORE_FIELDS.filter(f => !(id.endsWith('bicycle_foot') && f === 'segregated'))
         }])),
         ...Object.fromEntries(FOOTWAY_PRESETS.map(id => [id, { fields: FOOTWAY_FIELDS, moreFields: FOOTWAY_MORE_FIELDS }]))

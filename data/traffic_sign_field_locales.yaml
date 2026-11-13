@@ -265,6 +265,8 @@ de:
         label: Quelle der nutzbaren Breite
       cycleway_surface_colour:
         label: Farbe der Oberfläche Radweg
+      oneway_bicycle_path:
+        label: Einbahnstraße (Fahrrad)
     tilda:
       checks:
         check: Geprüft
