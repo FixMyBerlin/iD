@@ -827,6 +827,8 @@ en:
         hint: "Measure it between the white markings."
       source_width_effective:
         label: "Usable Width Source"
+      cycleway_surface_colour:
+        label: "Cycleway Surface Colour"
     mapillary_images:
       label: "Mapillary images"
       image_id: "Image ID"

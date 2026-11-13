@@ -102,6 +102,16 @@ const FIELDS: Record<string, Field> = {
         options: ['no', 'red', 'green', 'red;green'],
         strings: { options: { no: 'Not coloured', red: 'Red', green: 'Green', 'red;green': 'Red and green' } }
     } as Field,
+    // the cycleway part of a segregated foot and cycle path: TILDA asks for `cycleway:surface:colour` there.
+    // Without this field, "check below" opened `surface/colour` and wrote the plain key.
+    'cycleway/surface/colour': {
+        key: 'cycleway:surface:colour',
+        type: 'combo',
+        label: 'Cycleway Surface Colour',
+        geometry: ['line'],
+        options: ['no', 'red', 'green', 'red;green'],
+        strings: { options: { no: 'Not coloured', red: 'Red', green: 'Green', 'red;green': 'Red and green' } }
+    } as Field,
     'sett/length': {
         key: 'sett:length',
         // the three sizes TILDA tells apart (≤ 8 cm mosaic, ≤ 13 cm small, else large), in cm
@@ -224,10 +234,16 @@ const BICYCLE_ROAD_DETAILS_MORE = WAY_DETAILS_MORE.filter(id => id !== 'width/ef
 const SEPARATE_WAY_FIELDS = [
     'name', 'is_sidepath', 'oneway', ...WAY_DETAILS, 'separation', 'structure', 'access'
 ];
-const SEPARATE_WAY_MORE_FIELDS = ['marking', 'buffer', 'traffic_mode', 'segregated', ...WAY_DETAILS_MORE];
+/** right after `surface/colour`: the colour of the cycleway part of a segregated path */
+function withPartColour(fields: string[]) {
+    const index = fields.indexOf('surface/colour');
+    return [...fields.slice(0, index + 1), 'cycleway/surface/colour', ...fields.slice(index + 1)];
+}
+
+const SEPARATE_WAY_MORE_FIELDS = withPartColour(['marking', 'buffer', 'traffic_mode', 'segregated', ...WAY_DETAILS_MORE]);
 
 const FOOTWAY_FIELDS = ['name', 'access', 'traffic_sign', 'is_sidepath', 'surface_smoothness', 'width', 'structure'];
-const FOOTWAY_MORE_FIELDS = ['oneway', 'segregated', 'tactile_paving', 'wheelchair', ...WAY_DETAILS_MORE];
+const FOOTWAY_MORE_FIELDS = withPartColour(['oneway', 'segregated', 'tactile_paving', 'wheelchair', ...WAY_DETAILS_MORE]);
 
 
 const ROAD_PRESETS: Record<string, string[]> = {

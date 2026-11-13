@@ -263,6 +263,8 @@ de:
         hint: Zwischen den weißen Markierungen messen.
       source_width_effective:
         label: Quelle der nutzbaren Breite
+      cycleway_surface_colour:
+        label: Farbe der Oberfläche Radweg
     tilda:
       checks:
         check: Geprüft
