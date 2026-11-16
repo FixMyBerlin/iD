@@ -75,7 +75,9 @@ function formatMeters(meters: number) {
  * Side bands start at the road edge (half of `width`, or a default by highway type).
  */
 export function svgWidthIndicator(projection: Projection, context: iD.Context, dispatch: Dispatch<object>) {
-    widthIndicator.on('change.svgWidthIndicator', () => dispatch.call('change'));
+    // registered on the first draw, not here: other `svgLayers` (the turn restrictions field) build
+    // this layer too without drawing it, and would take over the listener of the main map
+    let _listening = false;
 
 
     function bandsForState(): Band[] {
@@ -125,6 +127,10 @@ export function svgWidthIndicator(projection: Projection, context: iD.Context, d
 
 
     function drawWidthIndicator(selection: d3.Selection<SVGGElement>) {
+        if (!_listening) {
+            _listening = true;
+            widthIndicator.on('change.svgWidthIndicator', () => dispatch.call('change'));
+        }
         const bands = bandsForState();
 
         const paths = selection.selectAll<SVGPathElement, Band>('path.width-indicator-band')

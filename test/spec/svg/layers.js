@@ -1,5 +1,6 @@
 import { select as d3_select } from 'd3-selection';
 import { geoProjection as d3_geoProjection } from 'd3-geo';
+import { measureTape } from '../../../modules/measure/measure_tape';
 
 describe('iD.svgLayers', function () {
     var context, container;
@@ -57,4 +58,31 @@ describe('iD.svgLayers', function () {
         /* eslint-enable no-useless-assignment */
     });
 
+});
+
+
+describe('iD.svgLayers: the measuring tape and the width indicator redraw the main map', function () {
+    var projection = d3_geoProjection(function(x, y) { return [x, -y]; })
+        .translate([0, 0])
+        .scale(iD.geoZoomToScale(17))
+        .clipExtent([[0, 0], [Infinity, Infinity]]);
+
+    afterEach(function () {
+        measureTape.stop();
+    });
+
+    // the turn restrictions field builds its own layers (`.only(['osm', 'touch'])`) after the map did;
+    // the map stopped redrawing while the tape was dragged (it moved only when the map moved)
+    it('still after other layers were built', function () {
+        var context = iD.coreContext().assetPath('../dist/').init();
+        var mainLayers = iD.svgLayers(projection, context);
+        var changes = 0;
+        mainLayers.on('change.test', function() { changes++; });
+        d3_select(document.createElement('div')).call(mainLayers);
+
+        iD.svgLayers(projection, context).only(['osm', 'touch']);
+
+        measureTape.start('w1', 'width', [[0, 0], [0.0001, 0]]);
+        expect(changes).toBe(1);
+    });
 });

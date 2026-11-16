@@ -21,7 +21,9 @@ const CROSS = 4;
  * line moves the whole tape.
  */
 export function svgMeasureTape(projection: Projection, context: iD.Context, dispatch: Dispatch<object>) {
-    measureTape.on('change.svgMeasureTape', () => dispatch.call('change'));
+    // registered on the first draw, not here: other `svgLayers` (the turn restrictions field) build
+    // this layer too without drawing it, and would take over the listener of the main map
+    let _listening = false;
 
     const loupe = uiMeasureLoupe(context);
     let _dragStart: { ends: Vec2[]; pointer: Vec2 } | null = null;
@@ -93,6 +95,10 @@ export function svgMeasureTape(projection: Projection, context: iD.Context, disp
 
 
     function drawMeasureTape(selection: d3.Selection<SVGGElement>) {
+        if (!_listening) {
+            _listening = true;
+            measureTape.on('change.svgMeasureTape', () => dispatch.call('change'));
+        }
         const state = measureTape.state();
         const data = state ? [state] : [];
 
