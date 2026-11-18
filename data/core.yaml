@@ -2276,10 +2276,10 @@ en:
         message: "{feature} is a relation without a type"
     cycleway_oneway_wrong:
       title: Bike Lane Direction Likely Wrong
-      tip: "Find one-way roads with contraflow cycling where the left bike lane is tagged to ride with the one-way (cycleway:left:oneway=yes). Usually -1 is meant; confirm a real yes with “This is correct here”."
+      tip: "Find one-way roads where a bike lane is tagged against the traffic: with contraflow cycling the contraflow side tagged with the one-way direction (left on oneway=yes, right on oneway=-1), or cycleway:*:oneway=yes on a road with oneway=-1. Confirm a real case with “This is correct here”."
     cycleway_oneway_contraflow_missing:
       title: Contraflow Lane Without Direction
-      tip: "Find one-way roads with contraflow cycling with bicycle infrastructure on the left but no cycleway:left:oneway. Without it, the lane rides with the one-way."
+      tip: "Find one-way roads with contraflow cycling with bicycle infrastructure on the contraflow side (left on oneway=yes, right on oneway=-1) but no direction for it. Without it, the lane rides with the one-way."
     sidewalk_shared_path:
       title: Sidewalk Designated for Bicycles
       tip: "Find sidewalks with bicycle=designated and foot=designated (or no foot). They are foot and cycle paths: highway=path with is_sidepath=yes."
@@ -2301,7 +2301,7 @@ en:
       tip: "Find foot and cycle paths with segregated=no that have widths for the cycleway or footway part."
     cycleway_oneway_redundant:
       title: Bike Lane Direction Not Needed
-      tip: "Find roads where the “oneway” tag of a bike lane or cycle track on the side only repeats the default."
+      tip: "Find roads where the “oneway” tag of a bike lane on the road only repeats the default. Cycle tracks may keep it (it says “not in both directions”)."
     unexpected_oneway_direction:
       title: Bike Lane Against the Traffic of Its Side
       tip: "Find roads in both directions where the “oneway” tag of a bike lane or cycle track makes it run against the traffic of its side."

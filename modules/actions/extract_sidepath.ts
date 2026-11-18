@@ -32,7 +32,8 @@ export type SidepathExtraction = {
 /**
  * `planExtraction` of the package, plus: a new way whose bikes ride only against the road
  * (`oneway=-1`, `oneway:bicycle=-1`) is drawn the other way round with its side and direction tags
- * turned, because TILDA ignores `oneway=-1` (fork rule, not in the package yet).
+ * turned, so it points in the riding direction like TILDA publishes such lines (tilda-geo `f752a49a6`).
+ * The package already reads a misread `cycleway:both:oneway=yes` as the direction of each side.
  */
 export function planSidepathExtraction(
     road: Tags, variant: ExtractVariant, side: Side, recommend: SignRecommend | undefined, joinSigns?: JoinSigns
