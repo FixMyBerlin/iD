@@ -107,6 +107,7 @@ function extractSidepathOperation(context: iD.Context, wayID: WayId, option: Ext
     operation.icon = () => '#iD-operation-extract';
     operation.id = 'extract_sidepath';
     operation.side = side;
+    operation.variant = option.protectedLane ? 'protected' : variant;
     operation.keys = [];
     operation.title = t.append(titleID(option));
 
@@ -251,6 +252,7 @@ function extractBothSidesOperation(context: iD.Context, wayID: WayId, variant: E
     operation.icon = () => '#iD-operation-extract';
     operation.id = 'extract_sidepath';
     operation.side = 'both';
+    operation.variant = variant;
     operation.keys = [];
     operation.title = t.append(`operations.extract_sidepath.title.${variant}.both`);
     return operation;

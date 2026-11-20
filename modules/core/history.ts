@@ -57,6 +57,8 @@ export interface Operation {
     };
     /** Radnetz fork: the side an extract entry works on (groups of the extract menu) */
     side?: 'right' | 'left' | 'both';
+    /** Radnetz fork: what an extract entry extracts (`cycleway`, `sidewalk`, `path`) */
+    variant?: string;
     /** Radnetz fork: an entry that opens a flyout with text entries in groups instead of running */
     flyout?: { id: string; title: LocalizedTextRenderer; operations: Operation[] }[];
 }

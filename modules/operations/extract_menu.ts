@@ -3,6 +3,7 @@ import { t } from '../core/localizer';
 import { operationsExtractBothSides, operationsExtractSidepath, sidepathKeyOperation } from './extract_sidepath';
 import { operationsExtractMergeSidepaths } from './extract_merge_sidepaths';
 import { uiCmd } from '../ui/cmd';
+import { sideTags } from '@tilda-geo/bicycle-infrastructure-tagging';
 import type { Operation } from '../core/history';
 import type { WayId } from '../osm';
 
@@ -22,7 +23,14 @@ export function operationsExtractMenu(context: iD.Context, selectedIDs: string[]
     const both = operationsExtractBothSides(context, wayID);
     const merge = operationsExtractMergeSidepaths(context, selectedIDs, { keys: false });
 
-    const entries = [...both, ...single, ...merge];
+    // a cycle track segregated from the sidewalk (`cycleway:<side>:segregated=yes`) is one segregated
+    // foot and cycle path with it: "extract cycle track" merges it with the sidewalk when there is one
+    const tags = context.entity(wayID).tags;
+    const mergeFor = (operation: Operation) => merge.find(entry => entry.side === operation.side);
+    const withMerge = (operation: Operation) => operation.variant === 'cycleway' && segregated(tags, operation.side)
+        ? preferMerge(operation, mergeFor(operation)) : operation;
+
+    const entries = [...both.map(withMerge), ...single.map(withMerge), ...merge];
     const groups = (['both', 'left', 'right'] as const)
         .map(side => ({
             id: side,
@@ -44,7 +52,7 @@ export function operationsExtractMenu(context: iD.Context, selectedIDs: string[]
     operation.title = t.append('operations.extract_menu.title');
     operation.flyout = groups;
 
-    const bothExtract = both.length ? both : single;
+    const bothExtract = (both.length ? both : single).map(withMerge);
     operation.behavior = behaviorOperation(context)
         .which(sidepathKeyOperation(context, wayID, bothExtract, 'extract_sidepath', uiCmd('⌘E')));
 
@@ -69,4 +77,30 @@ export function operationsExtractMenu(context: iD.Context, selectedIDs: string[]
     }
 
     return [operation];
+}
+
+
+/** `cycleway:<side>:segregated=yes` (or `:both:`, plain); both sides for "both" */
+function segregated(tags: Tags, side: Operation['side']) {
+    const sides = side === 'both' ? ['right', 'left'] as const : side ? [side] : [];
+    return sides.length > 0 && sides.every(one => sideTags(tags, 'cycleway', one).segregated === 'yes');
+}
+
+/**
+ * The extract entry, but it runs "extract and merge with the sidewalk" when that works (a sidewalk
+ * way was found); without one it extracts the cycle track alone, as before.
+ */
+function preferMerge(plain: Operation, merge: Operation | undefined): Operation {
+    if (!merge) return plain;
+    const merging = () => !merge.disabled();
+    const current = () => merging() ? merge : plain;
+
+    const operation: Operation = Object.assign(function(event?: KeyboardEvent) {
+        current()(event);
+    }, plain);
+    operation.disabled = () => merging() ? false : plain.disabled();
+    operation.tooltip = () => current().tooltip();
+    operation.annotation = () => current().annotation();
+    operation.getAuxiliaryGeometry = () => current().getAuxiliaryGeometry?.() ?? [];
+    return operation;
 }
