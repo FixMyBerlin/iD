@@ -1,0 +1,114 @@
+/* Width preview on the map while a width field is hovered or focused */
+
+.data-layer.width-indicator {
+    pointer-events: none;
+}
+
+.width-indicator path.width-indicator-band {
+    /* same blue as the directional combo side indicator (css/20_map.css) */
+    fill: rgba(112, 146, 255, 0.3);
+    stroke: #7092ff;
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+}
+
+.width-indicator text.width-indicator-label {
+    fill: #fff;
+    stroke: #000;
+    stroke-width: 3px;
+    paint-order: stroke;
+    font-size: 12px;
+    font-weight: bold;
+    text-anchor: middle;
+    dominant-baseline: middle;
+}
+
+/* width source as pills (ui/fields/source_pills.ts) */
+.ideditor .form-field-input-sourcePills.source-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 4px;
+    border: none;
+    background: transparent;
+}
+.ideditor .source-pills button.source-pill {
+    width: auto;
+    height: 24px;
+    padding: 0 10px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-color-2);
+    color: var(--text-color);
+    font-size: 12px;
+}
+.ideditor .source-pills button.source-pill:hover {
+    background: var(--bg-color-3);
+}
+.ideditor .source-pills button.source-pill.active {
+    background: var(--link-color);
+    border-color: var(--link-color);
+    color: #fff;
+}
+.ideditor .source-pills input.source-pills-other {
+    flex: 1 1 120px;
+    min-width: 120px;
+    height: 24px;
+    border-radius: 12px;
+    font-size: 12px;
+}
+
+/* stone calculator below a width field (measure/stone_calculator.ts) */
+.stone-calculator {
+    margin: 4px 0 2px;
+    padding: 6px 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background: var(--bg-color-2);
+    font-size: 12px;
+}
+.stone-calculator-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+.ideditor .stone-calculator input.stone-count {
+    width: 64px;
+    height: 24px;
+}
+.stone-sizes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+}
+.ideditor .stone-calculator button.stone-size {
+    width: auto;
+    height: 22px;
+    padding: 0 8px;
+    border-radius: 11px;
+    border: 1px solid var(--border-color);
+    background: transparent;
+    color: var(--text-color);
+    font-size: 11px;
+}
+.ideditor .stone-calculator button.stone-size.active {
+    background: var(--link-color);
+    border-color: var(--link-color);
+    color: #fff;
+}
+.stone-calculator-result {
+    font-weight: bold;
+}
+.ideditor .stone-calculator button.stone-calculator-apply {
+    width: auto;
+    height: 24px;
+    margin-top: 6px;
+    padding: 0 10px;
+}
+
+/* a part source (`source:cycleway:width`) without its own value: the one of `source:width` */
+.ideditor .source-pills button.source-pill.inherited {
+    border-style: dashed;
+    border-color: var(--link-color);
+}

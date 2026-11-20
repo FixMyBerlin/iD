@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <title>iD perf</title>
+    <link rel='stylesheet' href='dist/iD.css'>
+    <link rel='icon' type='image/png' href='data:image/png;base64,iVBORw0KGgo='>
+    <style>html, body { width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden; }</style>
+  </head>
+  <body>
+    <div id='id-container'></div>
+    <!--
+      Host page of the local performance harness (scripts/perf/README.md): like the editor's
+      index.html, with the same project setup, but every service that would go online is either
+      pointed at a local stand-in (build env, scripts/perf/build.mjs) or switched off here.
+    -->
+    <script src='dist/perf/iD.js'></script>
+    <script>
+      // no imagery list: the background stays empty instead of loading tiles from the internet
+      iD.fileFetcher.cache().imagery = [];
+      iD.fileFetcher.cache().wmf_sitematrix = [];
+      // the name suggestion index is several MB from a CDN; taginfo and the geocoder go online
+      delete iD.services.nsi;
+      delete iD.services.taginfo;
+      delete iD.services.geocoder;
+
+      var container = document.getElementById('id-container');
+      var context = iD.coreContext()
+        .assetPath('dist/')
+        .containerNode(container);
+      window.context = window.id = context;
+
+      // the project setup of index.html
+      iD.presetManager.customize(iD.RADNETZ_PRESET_CUSTOMIZATION);
+      iD.mapillaryConfig({
+        defaultFromDate: '2024-01-01',
+        highlightUsers: ['radinfra'],
+        highlightOrgs: ['fixmycity'],
+        signGroups: ['bike', 'speed', 'access']
+      });
+      iD.tildaNotesConfig({ origin: 'http://127.0.0.1:8085/blackhole/tilda', regionSlug: 'infravelo', folderId: 13 });
+
+      context.init();
+      var q = iD.utilStringQs(window.location.hash);
+      if (!q.hasOwnProperty('disable_features')) {
+        context.features().disable('boundaries');
+      }
+    </script>
+  </body>
+</html>

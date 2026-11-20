@@ -33,6 +33,10 @@ export async function planePhotoFrame(context: coreContext, selection: d3.Select
             selection.on('load', () => {
                 resolve(selection);
             });
+            // nothing to show: close the viewer instead of leaving an empty box
+            selection.on('error', () => {
+                if (path) context.ui().photoviewer.hide();
+            });
         });
     }
 

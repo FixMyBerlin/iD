@@ -21,11 +21,13 @@ import { modeDragNode } from './drag_node';
 import { modeDragNote } from './drag_note';
 import { osmNode, osmWay } from '../osm';
 import * as Operations from '../operations/index';
+import { operationsExtractMenu } from '../operations/extract_menu';
+import { operationsMergeSidepaths } from '../operations/merge_sidepaths';
 import { uiCmd } from '../ui/cmd';
 import {
-    utilArrayIntersection, utilArrayUnion, utilDeepMemberSelector, utilEntityOrDeepMemberSelector,
+    utilArrayIntersection, utilArrayUnion, utilDeepMemberIDs, utilEntityAndDeepMemberIDs,
     utilEntitySelector, utilKeybinding, utilTotalExtent, utilGetAllNodes,
-    utilArrayUniq
+    utilArrayUniq, utilSelectEntityElements
 } from '../util';
 
 
@@ -208,6 +210,15 @@ export function modeSelect(context, selectedIDs) {
                 Operations.operationDowngrade(context, selectedIDs),
                 Operations.operationDelete(context, selectedIDs)
             ]);
+
+        // Radnetz Berlin: "Extract right cycle track" etc., after iD's "Extract"
+        var extractIndex = _operations.findIndex(function(operation) { return operation.id === 'extract'; });
+        // "Extract right cycle track and merge with the sidewalk": both steps in one click
+        // and "Merge into a foot and cycle path" for a cycleway plus footway(s)
+        // one entry with a flyout (both sides / left / right); ⌘E, ⌘G
+        _operations.splice(extractIndex + 1, 0,
+            ...operationsExtractMenu(context, selectedIDs),
+            ...operationsMergeSidepaths(context, selectedIDs));
 
         _operations
             .filter(operation => operation.available())
@@ -478,11 +489,9 @@ export function modeSelect(context, selectedIDs) {
             if (context.map().withinEditableZoom()) {
                 // Apply selection styling if not in wide selection
 
-                surface
-                    .selectAll(utilDeepMemberSelector(selectedIDs, context.graph(), true /* skipMultipolgonMembers */))
+                utilSelectEntityElements(surface, utilDeepMemberIDs(selectedIDs, context.graph(), true /* skipMultipolgonMembers */))
                     .classed('selected-member', true);
-                surface
-                    .selectAll(utilEntityOrDeepMemberSelector(selectedIDs, context.graph()))
+                utilSelectEntityElements(surface, utilEntityAndDeepMemberIDs(selectedIDs, context.graph()))
                     .classed('selected', true);
             }
 

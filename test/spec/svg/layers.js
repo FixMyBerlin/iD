@@ -1,5 +1,6 @@
 import { select as d3_select } from 'd3-selection';
 import { geoProjection as d3_geoProjection } from 'd3-geo';
+import { measureTape } from '../../../modules/measure/measure_tape';
 
 describe('iD.svgLayers', function () {
     var context, container;
@@ -29,12 +30,14 @@ describe('iD.svgLayers', function () {
     it('creates default data layers', function () {
         container.call(iD.svgLayers(projection, context));
         var nodes = container.selectAll('svg .data-layer').nodes();
-        expect(nodes.length).toEqual(17);
+        expect(nodes.length).toEqual(21);
         /* eslint-disable no-useless-assignment */
         let i = 0;
         expect(d3_select(nodes[i++]).classed('osm')).toBe(true);
         expect(d3_select(nodes[i++]).classed('notes')).toBe(true);
+        expect(d3_select(nodes[i++]).classed('tilda-notes')).toBe(true);
         expect(d3_select(nodes[i++]).classed('data')).toBe(true);
+        expect(d3_select(nodes[i++]).classed('custom-data')).toBe(true);
         expect(d3_select(nodes[i++]).classed('osmose')).toBe(true);
         expect(d3_select(nodes[i++]).classed('streetside')).toBe(true);
         expect(d3_select(nodes[i++]).classed('mapillary')).toBe(true);
@@ -46,10 +49,40 @@ describe('iD.svgLayers', function () {
         expect(d3_select(nodes[i++]).classed('vegbilder')).toBe(true);
         expect(d3_select(nodes[i++]).classed('panoramax')).toBe(true);
         expect(d3_select(nodes[i++]).classed('local-photos')).toBe(true);
+        expect(d3_select(nodes[i++]).classed('width-indicator')).toBe(true);
         expect(d3_select(nodes[i++]).classed('debug')).toBe(true);
         expect(d3_select(nodes[i++]).classed('geolocate')).toBe(true);
         expect(d3_select(nodes[i++]).classed('touch')).toBe(true);
+        // above the touch targets, so its handles win over the objects below
+        expect(d3_select(nodes[i++]).classed('measure-tape')).toBe(true);
         /* eslint-enable no-useless-assignment */
     });
 
+});
+
+
+describe('iD.svgLayers: the measuring tape and the width indicator redraw the main map', function () {
+    var projection = d3_geoProjection(function(x, y) { return [x, -y]; })
+        .translate([0, 0])
+        .scale(iD.geoZoomToScale(17))
+        .clipExtent([[0, 0], [Infinity, Infinity]]);
+
+    afterEach(function () {
+        measureTape.stop();
+    });
+
+    // the turn restrictions field builds its own layers (`.only(['osm', 'touch'])`) after the map did;
+    // the map stopped redrawing while the tape was dragged (it moved only when the map moved)
+    it('still after other layers were built', function () {
+        var context = iD.coreContext().assetPath('../dist/').init();
+        var mainLayers = iD.svgLayers(projection, context);
+        var changes = 0;
+        mainLayers.on('change.test', function() { changes++; });
+        d3_select(document.createElement('div')).call(mainLayers);
+
+        iD.svgLayers(projection, context).only(['osm', 'touch']);
+
+        measureTape.start('w1', 'width', [[0, 0], [0.0001, 0]]);
+        expect(changes).toBe(1);
+    });
 });

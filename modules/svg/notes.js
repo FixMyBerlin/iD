@@ -6,11 +6,14 @@ import { dispatch as d3_dispatch } from 'd3-dispatch';
 import { modeBrowse } from '../modes/browse';
 import { svgPointTransform } from './helpers';
 import { services } from '../services';
+import { patchHash } from '../behavior/hash';
+import { notesHashHas, notesHashWith } from '../tilda_notes/notes_hash';
 import { utilStringQs } from '../util';
 
 var hash = utilStringQs(window.location.hash);
 
-var _notesEnabled = !!hash.notes;
+// `notes=true` (upstream) or a list of note layers that includes `osm` (`notes=osm,tilda`)
+var _notesEnabled = notesHashHas(hash.notes, 'osm');
 var _osmService;
 
 
@@ -246,6 +249,7 @@ export function svgNotes(projection, context, dispatch) {
         if (!arguments.length) return _notesEnabled;
 
         _notesEnabled = val;
+        patchHash(current => ({ notes: notesHashWith(current.notes, 'osm', _notesEnabled) }));
         if (_notesEnabled) {
             layerOn();
         } else {

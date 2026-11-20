@@ -1,0 +1,47 @@
+/* Preferences ▸ Interface: hide the captions under the top toolbar buttons.
+   Keep 10px under the buttons, matching the padding above them. */
+.ideditor.hide-toolbar-labels .top-toolbar .toolbar-item .item-label {
+    display: none;
+}
+.ideditor.hide-toolbar-labels .top-toolbar .toolbar-item {
+    padding-bottom: 10px;
+}
+
+/* Right sidebar: zoom, zoom-to-selection and locate are optional (Preferences ▸ Interface) and
+   get the class `hide`. Upstream gives fixed buttons the rounded corners and the gap, so:
+   - the gap to the pane buttons belongs to the first pane button, and is only there
+     when a map button is shown above;
+   - the first and the last shown map button get the rounded corners. */
+.map-controls .geolocate-control {
+    margin-bottom: 0;
+}
+.map-controls:has(> .map-control:not(.map-pane-control):not(.hide)) > .map-control:not(.map-pane-control) + .map-pane-control {
+    margin-top: 10px;
+}
+.map-controls .zoombuttons > button.zoom-in,
+.map-controls .geolocate-control > button {
+    border-radius: 0;
+}
+.map-controls .map-control:not(.map-pane-control):not(.hide):not(.map-control:not(.map-pane-control):not(.hide) ~ *) > button:first-child {
+    border-top-left-radius: 4px;
+}
+.map-controls .map-control:not(.map-pane-control):not(.hide):not(:has(~ .map-control:not(.map-pane-control):not(.hide))) > button:last-child {
+    border-bottom-left-radius: 4px;
+}
+.ideditor[dir='rtl'] .map-controls .map-control:not(.map-pane-control):not(.hide):not(.map-control:not(.map-pane-control):not(.hide) ~ *) > button:first-child {
+    border-radius: 0 4px 0 0;
+}
+.ideditor[dir='rtl'] .map-controls .map-control:not(.map-pane-control):not(.hide):not(:has(~ .map-control:not(.map-pane-control):not(.hide))) > button:last-child {
+    border-radius: 0 0 4px 0;
+}
+
+/* the same for the pane buttons: the help button, upstream's rounded end, is optional */
+.map-controls .help-control > button {
+    border-radius: 0;
+}
+.map-controls .map-pane-control:not(.hide):not(:has(~ .map-pane-control:not(.hide))) > button {
+    border-radius: 0 0 0 4px;
+}
+.ideditor[dir='rtl'] .map-controls .map-pane-control:not(.hide):not(:has(~ .map-pane-control:not(.hide))) > button {
+    border-radius: 0 0 4px 0;
+}

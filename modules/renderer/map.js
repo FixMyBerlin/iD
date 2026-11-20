@@ -192,15 +192,17 @@ export function rendererMap(context) {
             .on(_pointerPrefix + 'over.vertices', function(d3_event) {
                 if (map.editableDataEnabled() && !_isTransformed) {
                     var hover = d3_event.target.__data__;
-                    surface.call(drawVertices.drawHover, context.graph(), hover, map.extent());
-                    dispatch.call('drawn', this, { full: false });
+                    if (drawVertices.drawHover(surface, context.graph(), hover, map.extent())) {
+                        dispatch.call('drawn', this, { full: false });
+                    }
                 }
             })
             .on(_pointerPrefix + 'out.vertices', function(d3_event) {
                 if (map.editableDataEnabled() && !_isTransformed) {
                     var hover = d3_event.relatedTarget && d3_event.relatedTarget.__data__;
-                    surface.call(drawVertices.drawHover, context.graph(), hover, map.extent());
-                    dispatch.call('drawn', this, { full: false });
+                    if (drawVertices.drawHover(surface, context.graph(), hover, map.extent())) {
+                        dispatch.call('drawn', this, { full: false });
+                    }
                 }
             });
 
@@ -287,8 +289,9 @@ export function rendererMap(context) {
 
             dispatch.call('drawn', this, { full: false });
 
-            // redraw everything else later
-            scheduleRedraw();
+            // redraw everything else later: in its own task, so the selection and the sidebar
+            // show up before the full redraw runs (`scheduleRedraw` alone often runs at once)
+            window.setTimeout(scheduleRedraw, 0);
         });
 
         map.dimensions(utilGetDimensions(selection));
@@ -387,7 +390,9 @@ export function rendererMap(context) {
             // update selected vertices - the user might have just double-clicked a way,
             // creating a new vertex, triggering a partial redraw without a mode change
             surface.call(drawPoints.drawSelected, graph);
-            surface.call(drawVertices.drawSelected, graph, map.extent());
+            // Radnetz Berlin: a full redraw below draws all vertices with the selected ones; drawing
+            // them here as well doubled the vertex work of every redraw with a selection
+            surface.call(drawVertices.drawSelected, graph, map.extent(), fullRedraw);
         }
 
         surface
@@ -420,6 +425,7 @@ export function rendererMap(context) {
             'browse': true,
             'save': true,
             'select-note': true,
+            'select-tilda-note': true,
             'select-data': true,
             'select-error': true
         };
@@ -742,6 +748,44 @@ export function rendererMap(context) {
     };
 
 
+    /**
+     * Redraws only the given entities, e.g. after something changed that is not in the history.
+     * @param {string[]} entityIDs
+     */
+    map.redrawEntities = function(entityIDs) {
+        var graph = context.graph();
+        var complete = {};
+        entityIDs.forEach(function(id) {
+            var entity = graph.hasEntity(id);
+            if (entity) complete[id] = entity;
+        });
+        if (_isTransformed) {
+            // mid pan or zoom only full redraws work; one is on its way
+            scheduleRedraw();
+        } else {
+            immediateRedraw({ complete: function() { return complete; } });
+        }
+        return map;
+    };
+
+
+    /**
+     * Redraws the data layers only, not the OSM data, e.g. after a data layer loaded tiles.
+     * Sends a partial `drawn`, so that modes re-apply their classes (e.g. the selected data feature).
+     */
+    map.redrawLayers = function() {
+        if (!surface || surface.empty() || !_redrawEnabled) return map;
+        if (_isTransformed) {
+            // mid pan or zoom only full redraws work; one is on its way
+            scheduleRedraw();
+            return map;
+        }
+        wrapper.call(drawLayers);
+        dispatch.call('drawn', this, { full: false });
+        return map;
+    };
+
+
     map.isTransformed = function() {
         return _isTransformed;
     };
@@ -886,7 +930,7 @@ export function rendererMap(context) {
 
     function footerHeight() {
         const footer = context.container().select('.map-footer-bar');
-        return footer.node().offsetHeight;
+        return footer.empty() ? 0 : footer.node().offsetHeight;
     }
 
     map.zoom = function(z2) {

@@ -7,20 +7,26 @@ import { prefs } from '../core/preferences';
 import { t, localizer } from '../core/localizer';
 import { presetManager } from '../presets';
 import { behaviorHash } from '../behavior';
+import { behaviorPresetFavorites } from '../behavior/preset_favorites';
+import { behaviorLensShortcuts } from '../behavior/lens_shortcuts';
 import { modeBrowse } from '../modes/browse';
-import { svgDefs, svgIcon } from '../svg';
+import { svgDefs } from '../svg';
 import { utilDetect } from '../util/detect';
 import { utilGetDimensions } from '../util/dimensions';
 
-import { uiAccount } from './account';
 import { uiAttribution } from './attribution';
-import { uiContributors } from './contributors';
 import { uiEditMenu } from './edit_menu';
 import { uiFeatureInfo } from './feature_info';
 import { uiFlash } from './flash';
 import { uiFullScreen } from './full_screen';
 import { uiGeolocate } from './geolocate';
 import { uiInfo } from './info';
+import { uiWayTablePanel } from './way_table_panel';
+import { installWidthIndicatorListeners } from '../width/width_indicator';
+import { installMeasureTapeListeners } from '../measure/measure_tape_listeners';
+import { setupLiveTouched } from '../live_touched/live_touched';
+import { applyInterfacePrefs } from './sections/interface';
+import { setupReadOnlyFeatures } from '../renderer/readonly_features';
 import { uiIntro } from './intro';
 import { uiIssuesInfo } from './issues_info';
 import { uiLoading } from './loading';
@@ -31,21 +37,22 @@ import { uiRestore } from './restore';
 import { uiScale } from './scale';
 import { uiShortcuts } from './shortcuts';
 import { uiSidebar } from './sidebar';
-import { uiSourceSwitch } from './source_switch';
 import { uiSpinner } from './spinner';
 import { uiSplash } from './splash';
 import { uiStatus } from './status';
-import { uiTooltip } from './tooltip';
 import { uiTopToolbar } from './top_toolbar';
-import { uiVersion } from './version';
 import { uiZoom } from './zoom';
 import { uiZoomToSelection } from './zoom_to_selection';
 import { uiCmd } from './cmd';
 
+import { initMapillaryAutoShow } from '../mapillary/auto_show';
+import { initMapillarySignBar } from './mapillary_sign_bar';
 import { uiPaneBackground } from './panes/background';
 import { uiPaneHelp } from './panes/help';
 import { uiPaneIssues } from './panes/issues';
 import { uiPaneMapData } from './panes/map_data';
+import { uiPaneMapDisplay } from './panes/map_display';
+import { uiPanePhotos } from './panes/photos';
 import { uiPanePreferences } from './panes/preferences';
 
 export function uiInit(context) {
@@ -57,6 +64,8 @@ export function uiInit(context) {
     var overMap;
 
     function render(container) {
+
+        applyInterfacePrefs(context);
 
         container
             .on('click.ui', function(d3_event) {
@@ -192,6 +201,8 @@ export function uiInit(context) {
             .append('div')
             .attr('class', 'map-controls');
 
+        // zoom, zoom-to-selection and locate are optional (Preferences ▸ Interface);
+        // `applyInterfacePrefs` hides them, their shortcuts keep working
         controls
             .append('div')
             .attr('class', 'map-control zoombuttons')
@@ -219,13 +230,18 @@ export function uiInit(context) {
             .append('div')
             .attr('class', 'map-panes');
 
+        // before the panes, so the Map Data section can subscribe to it
+        ui.liveTouched = setupLiveTouched(context);
+
         var uiPanes = [
-            uiPaneBackground(context),
-            uiPaneMapData(context),
-            uiPaneIssues(context),
-            uiPanePreferences(context),
-            uiPaneHelp(context)
-        ];
+            ['background', uiPaneBackground],
+            ['map-data', uiPaneMapData],
+            ['map-display', uiPaneMapDisplay],
+            ['photos', uiPanePhotos],
+            ['issues', uiPaneIssues],
+            ['preferences', uiPanePreferences],
+            ['help', uiPaneHelp]
+        ].map(function(d) { return d[1](context); });
 
         uiPanes.forEach(function(pane) {
             controls
@@ -242,12 +258,52 @@ export function uiInit(context) {
         overMap
             .call(ui.info);
 
+        // The way table: a dock below the map, and its button in the bottom corner of the map
+        ui.wayTable = uiWayTablePanel(context);
+        content
+            .call(ui.wayTable);
+
+        controls
+            .append('div')
+            .attr('class', 'way-table-control')
+            .call(ui.wayTable.renderToggleButton);
+
+        installWidthIndicatorListeners(context);
+        installMeasureTapeListeners(context);
+        setupReadOnlyFeatures(context);
+
         overMap
             .append('div')
             .attr('class', 'photoviewer')
             .classed('al', true)       // 'al'=left,  'ar'=right
             .classed('hide', true)
             .call(ui.photoviewer);
+
+        // What was in the footer bar now floats above the attribution:
+        // the scale (optional, Preferences ▸ Interface) and the issue / hidden feature chips
+        var mapStatus = overMap
+            .append('div')
+            .attr('class', 'map-status');
+
+        mapStatus
+            .append('div')
+            .attr('class', 'scale-block')
+            .call(uiScale(context));
+
+        mapStatus
+            .append('div')
+            .attr('class', 'issues-info')
+            .call(uiIssuesInfo(context));
+
+        mapStatus
+            .append('div')
+            .attr('class', 'feature-warning')
+            .call(uiFeatureInfo(context));
+
+        // flash messages are a toast at the bottom of the map
+        overMap
+            .append('div')
+            .attr('class', 'flash-wrap footer-hide');
 
         overMap
             .append('div')
@@ -256,97 +312,16 @@ export function uiInit(context) {
             .call(uiAttribution(context));
 
 
-        // Add footer
-        var about = content
+        // The footer only holds the API status message (empty and without height when all is well)
+        content
             .append('div')
-            .attr('class', 'map-footer');
-
-        about
+            .attr('class', 'map-footer')
             .append('div')
             .attr('class', 'api-status')
             .call(uiStatus(context));
 
-
-        var footer = about
-            .append('div')
-            .attr('class', 'map-footer-bar fillD');
-
-        footer
-            .append('div')
-            .attr('class', 'flash-wrap footer-hide');
-
-        var footerWrap = footer
-            .append('div')
-            .attr('class', 'main-footer-wrap footer-show');
-
-        footerWrap
-            .append('div')
-            .attr('class', 'scale-block')
-            .call(uiScale(context));
-
-        var aboutList = footerWrap
-            .append('div')
-            .attr('class', 'info-block')
-            .append('ul')
-            .attr('class', 'map-footer-list');
-
-        aboutList
-            .append('li')
-            .attr('class', 'user-list')
-            .call(uiContributors(context));
-
-        var apiConnections = context.connection().apiConnections();
-        if (apiConnections && apiConnections.length > 1) {
-            aboutList
-                .append('li')
-                .attr('class', 'source-switch')
-                .call(uiSourceSwitch(context)
-                    .keys(apiConnections)
-                );
-        }
-
-        aboutList
-            .append('li')
-            .attr('class', 'issues-info')
-            .call(uiIssuesInfo(context));
-
-        aboutList
-            .append('li')
-            .attr('class', 'feature-warning')
-            .call(uiFeatureInfo(context));
-
-        var issueLinks = aboutList
-            .append('li');
-
-        issueLinks
-            .append('a')
-            .attr('target', '_blank')
-            .attr('href', 'https://github.com/openstreetmap/iD/issues')
-            .attr('aria-label', t('report_a_bug'))
-            .call(svgIcon('#iD-icon-bug', 'light'))
-            .call(uiTooltip()
-                .title(() => t.append('report_a_bug'))
-                .placement('top'));
-
-        issueLinks
-            .append('a')
-            .attr('target', '_blank')
-            .attr('href', 'https://github.com/openstreetmap/iD/blob/develop/CONTRIBUTING.md#translating')
-            .attr('aria-label', t('help_translate'))
-            .call(svgIcon('#iD-icon-translate', 'light'))
-            .call(uiTooltip()
-                .title(() => t.append('help_translate'))
-                .placement('top'));
-
-        aboutList
-            .append('li')
-            .attr('class', 'version')
-            .call(uiVersion(context));
-
-        if (!context.embed()) {
-            aboutList
-                .call(uiAccount(context));
-        }
+        // now that the optional buttons and the scale exist
+        applyInterfacePrefs(context);
 
 
         // Setup map dimensions and move map to initial center/zoom.
@@ -359,13 +334,24 @@ export function uiInit(context) {
             map.centerZoom([0, 0], 2);
         }
 
+        // Setup preset favorites behavior
+        ui.presetFavorites = behaviorPresetFavorites(context);
+        d3_select(document).call(ui.presetFavorites);
+
+        // Setup lens shortcuts behavior (⌥+letter activates an imported lens)
+        ui.lensShortcuts = behaviorLensShortcuts(context);
+        d3_select(document).call(ui.lensShortcuts);
+
         // Bind events
         window.onbeforeunload = function() {
             return context.save();
         };
-        window.onunload = function() {
+        // Radnetz Berlin: `pagehide`, not `unload`. Chrome is turning `unload` off ("Permissions policy
+        // violation: unload is not allowed"); then the lock stayed and the next visit could not
+        // save or restore the edits.
+        window.addEventListener('pagehide', function() {
             context.history().unlock();
-        };
+        });
 
         d3_select(window)
             .on('resize.editor', function() {
@@ -435,6 +421,9 @@ export function uiInit(context) {
                 container
                     .classed('mode-' + exited.id, false);
             });
+
+        initMapillaryAutoShow(context);
+        initMapillarySignBar(context);
 
         context.enter(modeBrowse(context));
 
@@ -538,6 +527,11 @@ export function uiInit(context) {
         // This will call `getBoundingClientRect` and trigger reflow,
         //  but the values will be cached for later use.
         var mapDimensions = utilGetDimensions(context.container().select('.main-content'), true);
+        // the way table dock below the map takes its share of the height
+        var dock = context.container().select('.main-content > .way-table-panel:not(.hide)');
+        if (!dock.empty()) {
+            mapDimensions = [mapDimensions[0], Math.max(mapDimensions[1] - dock.node().offsetHeight, 0)];
+        }
         utilGetDimensions(context.container().select('.sidebar'), true);
 
         if (withPan !== undefined) {
@@ -551,7 +545,6 @@ export function uiInit(context) {
 
         // check if header or footer have overflowed
         ui.checkOverflow('.top-toolbar');
-        ui.checkOverflow('.map-footer-bar');
 
         const event = new Event('resizeWindow', {
             bubbles: true,

@@ -49,6 +49,24 @@
           var context = iD.coreContext()
             .assetPath('')
             .containerNode(container);
+
+          // Radnetz Berlin: same project setup as the development index.html
+          iD.presetManager.customize(iD.RADNETZ_PRESET_CUSTOMIZATION);
+          iD.mapillaryConfig({
+            defaultFromDate: '2024-01-01',
+            highlightUsers: ['radinfra'],
+            highlightOrgs: ['fixmycity'],
+            signGroups: ['bike', 'speed', 'access']
+          });
+
+          // Radnetz Berlin: internal notes from TILDA (modules/tilda_notes/config.ts).
+          // `folderId` is the `key` of TILDA's `notes` URL parameter
+          iD.tildaNotesConfig({
+            origin: 'https://tilda-geo.de',
+            regionSlug: 'infravelo',
+            folderId: 13
+          });
+
           context.init();
 
           // disable boundaries (unless we have an explicit disable_features list)

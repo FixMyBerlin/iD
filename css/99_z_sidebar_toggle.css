@@ -1,0 +1,24 @@
+/* One look for buttons in the sidebar that are switched on ("Per direction", measuring a width,
+   an open related-tags editor, an open TILDA editor): a tint of the link color with a thin ring.
+   Visible in the light and the dark theme, calmer than a filled blue button. */
+.ideditor {
+    --toggle-on-bg: color-mix(in srgb, var(--link-color) 24%, var(--bg-color));
+    --toggle-on-ring: color-mix(in srgb, var(--link-color) 70%, var(--bg-color));
+}
+.ideditor[dir] .entity-editor .form-field > .field-label > button.active,
+.ideditor .entity-editor button.form-field-button.measure-tape-button.active,
+.ideditor .entity-editor .field-related button.field-related-edit.active,
+.ideditor .tilda-card button.tilda-edit.active,
+.ideditor button.tilda-check.active {
+    background: var(--toggle-on-bg);
+    box-shadow: inset 0 0 0 1px var(--toggle-on-ring);
+    border-color: transparent;
+    color: var(--text-color);
+}
+.ideditor[dir] .entity-editor .form-field > .field-label > button.active:hover,
+.ideditor .entity-editor button.form-field-button.measure-tape-button.active:hover,
+.ideditor .entity-editor .field-related button.field-related-edit.active:hover,
+.ideditor .tilda-card button.tilda-edit.active:hover,
+.ideditor button.tilda-check.active:hover:not([disabled]) {
+    background: color-mix(in srgb, var(--link-color) 34%, var(--bg-color));
+}

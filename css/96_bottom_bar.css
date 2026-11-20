@@ -1,0 +1,169 @@
+/* The footer bar is gone (WORKDOC feature 31). What it held now floats over the map,
+   lives in a pane, or sits in the top toolbar. */
+
+/* Scale (optional) and the issue / hidden feature chips: bottom left, above the attribution */
+.map-status {
+    position: absolute;
+    bottom: 32px;
+    left: 5px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    z-index: 0;
+    pointer-events: none;
+}
+.ideditor[dir='rtl'] .map-status {
+    left: auto;
+    right: 5px;
+}
+.map-status > * {
+    pointer-events: auto;
+}
+.map-status > *:empty {
+    display: none;
+}
+
+.map-status .scale-block {
+    position: relative;
+    width: 250px;
+    height: 24px;
+    user-select: none;
+    background: rgba(0,0,0,0.33);
+    border-radius: 4px;
+}
+.map-status .scale-block .scale g {
+    transform: translate(10px, 8px);
+}
+.map-status .scale-block .scale-text {
+    top: 3px;
+    color: #eee;
+}
+.map-status .scale-block .scale path {
+    stroke: #eee;
+}
+
+.map-status a.chip {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #fff;
+    white-space: nowrap;
+}
+.map-status a.chip .icon {
+    width: 14px;
+    height: 14px;
+    margin-top: -2px;
+}
+.map-status a.chip span.count {
+    margin: 0 3px;
+}
+
+/* Flash messages: a toast at the bottom center of the map (was a second row of the footer bar) */
+.over-map > .flash-wrap {
+    position: absolute;
+    left: 50%;
+    right: auto;
+    bottom: 64px;
+    transform: translateX(-50%);
+    display: block;
+    height: auto;
+    max-width: 80%;
+    padding: 4px 12px 4px 4px;
+    border-radius: 4px;
+    background: rgba(0,0,0,0.8);
+    color: #fff;
+    z-index: 2;
+    pointer-events: none;
+    transition: opacity 100ms linear;
+}
+.over-map > .flash-wrap.footer-hide {
+    bottom: 64px;
+    opacity: 0;
+}
+.over-map > .flash-wrap.footer-show {
+    opacity: 1;
+}
+
+/* History panel: the mappers of the features in view, while nothing is selected */
+.panel-content-history .history-contributors {
+    margin-top: 5px;
+}
+.panel-content-history .history-contributors:empty {
+    display: none;
+}
+
+/* Help pane: version and project links */
+.help-pane .help-about {
+    clear: both;
+    display: flex;
+    flex-flow: row wrap;
+    gap: 5px 20px;
+    padding-top: 15px;
+    border-top: 1px solid var(--border-color);
+}
+.help-pane .help-about .badge .icon {
+    margin: 0 5px;
+}
+
+/* Preferences ▸ OpenStreetMap server */
+.osm-server-list .osm-server-url {
+    margin-left: 8px;
+    color: var(--passive-text-color, #7092ff);
+    opacity: 0.7;
+}
+.ideditor[dir='rtl'] .osm-server-list .osm-server-url {
+    margin-left: 0;
+    margin-right: 8px;
+}
+.osm-server-hint {
+    margin-top: 8px;
+    opacity: 0.7;
+}
+
+/* Top toolbar: the OSM account */
+.top-toolbar .account-wrap {
+    display: flex;
+}
+.top-toolbar button.account-button.logged-in {
+    padding: 0 8px;
+}
+.top-toolbar button.account-button .user-icon {
+    max-width: 24px;
+    max-height: 24px;
+    border-radius: 50%;
+}
+.account-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 10px;
+    min-width: 180px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    overflow: hidden;
+    z-index: 300;
+}
+.ideditor[dir='rtl'] .account-menu {
+    right: auto;
+    left: 10px;
+}
+.account-menu li:not(:last-child) {
+    border-bottom: 1px solid var(--border-color);
+}
+.account-menu li a {
+    display: block;
+    padding: 8px 12px;
+    white-space: nowrap;
+}
+.account-menu li.account-menu-user a {
+    font-weight: bold;
+}
+.account-menu li a:focus,
+.account-menu li a:active {
+    background: var(--bg-color-3);
+}
+@media (hover: hover) {
+    .account-menu li a:hover {
+        background: var(--bg-color-3);
+    }
+}

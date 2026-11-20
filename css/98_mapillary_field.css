@@ -1,0 +1,84 @@
+/* Mapillary images field (WORKDOC feature 19): one row per image, like the directional combo */
+
+.form-field-input-mapillary-images ul.rows.empty {
+    display: none;
+}
+
+/* label cell: key label, below it small the age and image type */
+.form-field-input-mapillary-images li.labeled-input > .mly-image-label {
+    padding: 4px 10px;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+.mly-image-label .mly-image-title,
+.mly-image-label .mly-image-info {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.mly-image-label .mly-image-info {
+    margin-top: 2px;
+    font-size: 11px;
+    line-height: 1.2;
+    opacity: .7;
+}
+.mly-image-label .mly-image-info:empty {
+    display: none;
+}
+.mly-image-label select.mly-add-key {
+    width: 100%;
+    max-width: 150px;
+    height: 2em;
+    padding: 0 4px;
+    border: 0;
+    font-size: 12px;
+}
+
+/* value cell: the id (cut off, it is not important) and the buttons */
+.form-field-input-mapillary-images li.labeled-input > .mly-image-value {
+    width: 100%;
+    /* a set cell height makes `height: 100%` below fill the whole row, which the
+       two-line label makes taller than the input */
+    height: 2.5em;
+}
+.form-field-input-mapillary-images .mly-image-value-inner {
+    display: flex;
+    align-items: stretch;
+    height: 100%;
+}
+.form-field-input-mapillary-images .mly-image-value .mly-image-input {
+    flex: 1 1 auto;
+    height: auto;
+    min-width: 3em;
+    text-overflow: ellipsis;
+}
+.form-field-input-mapillary-images .mly-image-value .form-field-button {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: auto;
+    border-radius: 0;
+}
+.form-field-input-mapillary-images .mly-image-value .form-field-button.disabled,
+.form-field-input-mapillary-images .mly-image-value .form-field-button:disabled {
+    opacity: .4;
+    pointer-events: none;
+}
+.ideditor[dir='ltr'] .form-field-input-mapillary-images .mly-image-value .form-field-button {
+    border-left: 1px solid var(--border-color);
+}
+.ideditor[dir='rtl'] .form-field-input-mapillary-images .mly-image-value .form-field-button {
+    border-right: 1px solid var(--border-color);
+}
+
+/* "+" in the field label */
+.field-label .mly-add-icon.active .icon {
+    opacity: 1;
+    fill: var(--link-color, #7092ff);
+}
+
+/* the row the viewer bar suggests for the shown image (features 20, 26) */
+.form-field-input-mapillary-images li.labeled-input.mly-active-target > .mly-image-label {
+    box-shadow: inset 3px 0 0 #7c3aed;
+}

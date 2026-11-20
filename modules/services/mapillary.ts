@@ -17,7 +17,7 @@ import type { Vec2 } from '../geo/vector';
 import type { Feature, LineString, Point } from 'geojson';
 import type { coreContext } from '../core';
 
-const accessToken = 'MLY|4100327730013843|5bb78b81720791946a9a7b956c57b7cf';
+export const accessToken = 'MLY|4100327730013843|5bb78b81720791946a9a7b956c57b7cf';
 const apiUrl = 'https://graph.mapillary.com/';
 const baseTileUrl = 'https://tiles.mapillary.com/maps/vtp';
 const mapFeatureTileUrl = `${baseTileUrl}/mly_map_feature_point/2/{z}/{x}/{y}?access_token=${accessToken}`;
@@ -50,12 +50,16 @@ export interface MlyImage {
     unsafeId?: boolean;
     is_pano?: boolean;
     sequence_id?: string;
+    creator_id?: string | number;
+    organization_id?: string | number;
 }
 
 export type MlySequence = Feature<LineString, {
     id: string;
     captured_at: string;
     is_pano?: boolean;
+    creator_id?: string | number;
+    organization_id?: string | number;
 }>;
 
 
@@ -72,6 +76,8 @@ type RawImage = Feature<Point, {
     id: string;
     is_pano: boolean;
     sequence_id: string;
+    creator_id?: string | number;
+    organization_id?: string | number;
 }>;
 
 interface Detection {
@@ -122,11 +128,14 @@ let _mlyCache: {
 };
 let _mlyFallback = false;
 let _mlyHighlightedDetection: unknown | null;
+/** Which outlines the viewer draws (WORKDOC feature 26: only signs of the chosen groups) */
+let _mlyOutlineFilter: ((value: string, detectionID: string) => boolean) | null = null;
 let _mlyShowFeatureDetections = false;
 let _mlyShowSignDetections = false;
 let _mlyViewer: Viewer;
 let _mlyViewerFilter: FilterExpression = ['all'];
 let _isViewerOpen = false;
+let _mlyContext: coreContext | undefined;
 
 
 type Which = 'images' | 'signs' | 'points';
@@ -213,6 +222,8 @@ function loadTileDataToCache(data: ArrayBuffer, tile: Tile, which: Which) {
                 unsafeId,
                 is_pano: feature.properties.is_pano,
                 sequence_id: feature.properties.sequence_id,
+                creator_id: feature.properties.creator_id,
+                organization_id: feature.properties.organization_id,
             };
             cache.forImageId[d.id] = d;
             features.push({
@@ -612,6 +623,7 @@ export default new class {
     // Initialize image viewer (Mapillar JS)
     initViewer(context: coreContext) {
         if (!window.mapillary) return;
+        _mlyContext = context;
 
         const opts: ViewerOptions = {
             accessToken: accessToken,
@@ -684,8 +696,9 @@ export default new class {
         if (!image.unsafeId) {
             _mlyViewer.moveTo(image.id)
                 .then(image => this.setActiveImage(image))
-                .catch(function(e) {
+                .catch(e => {
                     console.error('mly3', e); // eslint-disable-line no-console
+                    this.imageFailed(e);
                 });
         } else {
             fetch(`https://graph.mapillary.com/image_ids?sequence_id=${image.sequence_id}`, { headers: { 'Authorization': `OAuth ${accessToken}` } })
@@ -695,15 +708,42 @@ export default new class {
                         id.startsWith(`${image.id}`.substring(0, 10)));
                     if (!correctedId) {
                         console.error('unable to determine corrected photo id for'); // eslint-disable-line no-console
+                        this.imageFailed();
                     } else {
                         image.id = correctedId;
                         image.unsafeId = false;
                         this.selectImage(image);
                     };
-                });
+                })
+                .catch(() => this.imageFailed());
         }
 
         return this;
+    }
+
+
+    /**
+     * An image could not be loaded: closes the viewer when it has no image to show,
+     * instead of leaving an empty black box on the map.
+     */
+    imageFailed(error?: unknown) {
+        // another image was requested meanwhile
+        if ((error as Error | undefined)?.name === 'CancelMapillaryError') return this;
+        if (_isViewerOpen && !_mlyActiveImage && _mlyContext) this.hideViewer(_mlyContext);
+        return this;
+    }
+
+
+    /** Sets which detection outlines the viewer draws; `null` draws all */
+    setOutlineFilter(filter: ((value: string, detectionID: string) => boolean) | null) {
+        _mlyOutlineFilter = filter;
+        return this;
+    }
+
+
+    /** The Mapillary JS viewer, once it is loaded (WORKDOC feature 26 turns it to a sign) */
+    getViewer(): Viewer | undefined {
+        return _mlyViewer;
     }
 
 
@@ -783,7 +823,7 @@ export default new class {
         // Create a tag for each detection and shows it in the image viewer
         function showDetections(detections: Detection[]) {
             const tagComponent = _mlyViewer.getComponent<TagComponent>('tag');
-            detections.forEach(function(data) {
+            detections.filter(data => !_mlyOutlineFilter || _mlyOutlineFilter(data.value, data.id)).forEach(function(data) {
                 const tag = makeTag(data);
                 if (tag) {
                     tagComponent.add([tag]);
@@ -812,23 +852,9 @@ export default new class {
                 _mlyHighlightedDetection = null;
             }
 
-            var decodedGeometry = window.atob(data.geometry);
-            var uintArray = new Uint8Array(decodedGeometry.length);
-            for (var i = 0; i < decodedGeometry.length; i++) {
-                uintArray[i] = decodedGeometry.charCodeAt(i);
-            }
-            const tile = new VectorTile(new PbfReader(uintArray.buffer));
-            const layer = tile.layers['mpy-or'];
-
-            const geometries = layer.feature(0).loadGeometry();
-
-            const polygon = geometries.map(ring =>
-                ring.map(point =>
-                    [point.x / layer.extent, point.y / layer.extent]));
-
             tag = new mapillary.OutlineTag(
                 data.id,
-                new mapillary.PolygonGeometry(polygon[0]),
+                new mapillary.PolygonGeometry(decodeDetectionOutline(data.geometry)),
                 {
                     text: text,
                     textColor: color,
@@ -849,3 +875,17 @@ export default new class {
         return _mlyCache;
     }
 };
+
+
+/** The outline of a detection (`geometry` of the detections API: a base64 vector tile) in image coordinates */
+export function decodeDetectionOutline(geometry: string): [number, number][] {
+    const decoded = window.atob(geometry);
+    const uintArray = new Uint8Array(decoded.length);
+    for (let i = 0; i < decoded.length; i++) {
+        uintArray[i] = decoded.charCodeAt(i);
+    }
+    const tile = new VectorTile(new PbfReader(uintArray.buffer));
+    const layer = tile.layers['mpy-or'];
+    const rings = layer.feature(0).loadGeometry();
+    return rings[0].map(point => [point.x / layer.extent, point.y / layer.extent] as [number, number]);
+}

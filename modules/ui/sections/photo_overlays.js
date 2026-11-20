@@ -7,6 +7,10 @@ import { uiSection } from '../section';
 import { utilNoAuto } from '../../util';
 import { uiSettingsLocalPhotos } from '../settings/local_photos';
 import { svgIcon } from '../../svg';
+import { mapillaryConfig } from '../../mapillary/config';
+import { AGE_BANDS, ageBandClass } from '../../mapillary/age_bands';
+import { autoShowEnabled, setAutoShowEnabled } from '../../mapillary/auto_show';
+import { uiMapillarySignGroups } from '../mapillary_sign_groups';
 
 export function uiSectionPhotoOverlays(context) {
 
@@ -18,10 +22,12 @@ export function uiSectionPhotoOverlays(context) {
 
     var layers = context.layers();
 
+    var _signGroups = uiMapillarySignGroups(context);
+
+
+    // The only section of the Photos pane, so it has no open/close header (like the Issues pane)
     var section = uiSection('photo-overlays', context)
-        .label(() => t.append('photo_overlays.title'))
-        .disclosureContent(renderDisclosureContent)
-        .expandedByDefault(false);
+        .content(renderDisclosureContent);
 
     const photoDates = {};
     const now = +new Date();
@@ -42,6 +48,8 @@ export function uiSectionPhotoOverlays(context) {
             .call(drawPhotoTypeItems)
             .call(drawDateSlider)
             .call(drawUsernameFilter)
+            .call(drawHighlightFilters)
+            .call(drawAutoShowOption)
             .call(drawLocalPhotos);
     }
 
@@ -136,6 +144,11 @@ export function uiSectionPhotoOverlays(context) {
             .selectAll('input')
             .property('disabled', d => !layerRendered(d))
             .property('checked', layerEnabled);
+
+        // sign group filter below the traffic signs (WORKDOC feature 26)
+        li.merge(liEnter)
+            .filter(d => d.id === 'mapillary-signs')
+            .call(_signGroups);
     }
 
     /**
@@ -271,6 +284,11 @@ export function uiSectionPhotoOverlays(context) {
         sliderWrap.append('div')
             .attr('class', 'date-slider-label');
 
+        sliderWrap.append('div')
+            .attr('class', 'date-slider-cutoff')
+            .append('span')
+            .attr('class', 'date-slider-cutoff-label');
+
         sliderWrap
             .append('input')
             .attr('type', 'range')
@@ -295,6 +313,18 @@ export function uiSectionPhotoOverlays(context) {
                 ? t.addOrUpdate('photo_overlays.age_slider_filter.label_all')
                 : t.addOrUpdate('photo_overlays.age_slider_filter.label_date', {
                     date: new Date(now - Math.pow(dateSliderValue('from'), 1.45) * 10 * 365.25 * 86400 * 1000).toLocaleDateString(localizer.localeCode()) }));
+
+        // marker at the configured default date, so mappers see the older imagery they hide (WORKDOC feature 18)
+        const defaultFrom = mapillaryConfig().defaultFromDate;
+        const cutoffValue = defaultFrom ? Math.pow((now - +new Date(defaultFrom)) / (10 * 365.25 * 86400 * 1000), 1/1.45) : NaN;
+        const showCutoff = !isNaN(cutoffValue) && cutoffValue > 0 && cutoffValue < 1;
+        // the "from" slider runs right to left in left-to-right locales
+        const cutoffFraction = localizer.textDirection() === 'rtl' ? cutoffValue : 1 - cutoffValue;
+        selection.select('.date-slider-cutoff')
+            .style('display', showCutoff ? null : 'none')
+            .style('left', showCutoff ? `calc(8px + (100% - 16px) * ${cutoffFraction})` : null)
+            .select('.date-slider-cutoff-label')
+            .call(t.addOrUpdate('photo_overlays.age_cutoff_marker', { date: defaultFrom }));
 
         sliderWrap.append('datalist')
             .attr('class', 'date-slider-values')
@@ -326,6 +356,23 @@ export function uiSectionPhotoOverlays(context) {
             .merge(ticksInverted)
             .attr('value', d => 1 - d);
 
+
+        // legend of the age colors, only for the Mapillary layer
+        const legendData = showsLayer('mapillary') ? [0] : [];
+        const legend = li.merge(liEnter).selectAll('.mly-age-legend').data(legendData);
+        legend.exit().remove();
+        const legendEnter = legend.enter().append('div').attr('class', 'mly-age-legend');
+        legendEnter.selectAll('span.mly-age-band')
+            .data(AGE_BANDS.slice().reverse())
+            .enter()
+            .append('span')
+            .attr('class', d => 'mly-age-band ' + ageBandClass(d));
+        const cutoff = context.photos().ageCutoff();
+        li.merge(liEnter).select('.mly-age-legend').selectAll('span.mly-age-band').each(function(d) {
+            d3_select(this).call(t.addOrUpdate('photo_overlays.age_legend.' + d, {
+                date: cutoff ? new Date(cutoff).toLocaleDateString(localizer.localeCode()) : ''
+            }));
+        });
 
         li
             .merge(liEnter)
@@ -426,6 +473,111 @@ export function uiSectionPhotoOverlays(context) {
             if (usernames) return usernames.join('; ');
             return usernames;
         }
+    }
+
+    /**
+     * Draws the inputs for highlighted Mapillary users and organizations (WORKDOC feature 18)
+     */
+    function drawHighlightFilters(selection) {
+        const filters = [
+            { id: 'highlight-users', title: 'highlight_users_filter', get: () => context.photos().highlightUsers(), set: value => context.photos().setHighlightUsers(value, true) },
+            { id: 'highlight-orgs', title: 'highlight_orgs_filter', get: () => context.photos().highlightOrgs(), set: value => context.photos().setHighlightOrgs(value, true) }
+        ];
+
+        let ul = selection
+            .selectAll('.layer-list-highlight-filters')
+            .data([0]);
+
+        ul = ul.enter()
+            .append('ul')
+            .attr('class', 'layer-list layer-list-highlight-filters')
+            .merge(ul);
+
+        const li = ul.selectAll('.list-item-highlight-filter')
+            .data(showsLayer('mapillary') ? filters : [], d => d.id);
+
+        li.exit()
+            .remove();
+
+        const liEnter = li.enter()
+            .append('li')
+            .attr('class', d => 'list-item-highlight-filter list-item-' + d.id);
+
+        const labelEnter = liEnter
+            .append('label')
+            .each(function(d) {
+                d3_select(this)
+                    .call(uiTooltip()
+                        .title(() => t.append('photo_overlays.' + d.title + '.tooltip'))
+                        .placement('top')
+                    );
+            });
+
+        labelEnter
+            .append('span')
+            .each(function(d) {
+                d3_select(this).call(t.append('photo_overlays.' + d.title + '.title'));
+            });
+
+        labelEnter
+            .append('input')
+            .attr('type', 'text')
+            .attr('class', 'list-item-input')
+            .call(utilNoAuto)
+            .on('change', function(d3_event, d) {
+                d.set(d3_select(this).property('value'));
+            });
+
+        li.merge(liEnter)
+            .classed('active', d => d.get().length > 0)
+            .select('input')
+            .property('value', d => d.get().join(', '));
+    }
+
+    /**
+     * Draws the option to show the selected feature's Mapillary image (WORKDOC feature 19)
+     */
+    function drawAutoShowOption(selection) {
+        let ul = selection
+            .selectAll('.layer-list-mapillary-auto-show')
+            .data([0]);
+
+        ul = ul.enter()
+            .append('ul')
+            .attr('class', 'layer-list layer-list-mapillary-auto-show')
+            .merge(ul);
+
+        const li = ul.selectAll('.list-item-mapillary-auto-show')
+            .data(showsLayer('mapillary') ? [0] : []);
+
+        li.exit()
+            .remove();
+
+        const liEnter = li.enter()
+            .append('li')
+            .attr('class', 'list-item-mapillary-auto-show');
+
+        const labelEnter = liEnter
+            .append('label')
+            .call(uiTooltip()
+                .title(() => t.append('photo_overlays.auto_show.tooltip'))
+                .placement('top')
+            );
+
+        labelEnter
+            .append('input')
+            .attr('type', 'checkbox')
+            .on('change', function() {
+                setAutoShowEnabled(d3_select(this).property('checked'));
+            });
+
+        labelEnter
+            .append('span')
+            .call(t.append('photo_overlays.auto_show.title'));
+
+        li.merge(liEnter)
+            .select('input')
+            .property('checked', autoShowEnabled());
     }
 
     /**

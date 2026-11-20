@@ -1,4 +1,4 @@
-import type { Fields, Geometry, Preset, PresetCategories, PresetDefaults, Presets } from '@openstreetmap/id-tagging-schema';
+import type { Field, Fields, Geometry, Preset, PresetCategories, PresetDefaults, Presets } from '@openstreetmap/id-tagging-schema';
 import { prefs } from '../core/preferences';
 import { fileFetcher } from '../core/file_fetcher';
 import { locationManager } from '../core/location_manager';
@@ -12,11 +12,15 @@ import { presetCategory } from './category';
 import { presetCollection } from './collection';
 import { presetField } from './field';
 import { presetPreset } from './preset';
+import { applyTrafficSignFieldTypes, EXTRA_TRAFFIC_SIGN_FIELDS } from './traffic_sign_fields';
+import { applyPresetCustomization, type PresetCustomization } from './customization';
 import { utilArrayUniq } from '../util';
 
 export { presetCategory };
 export { presetCollection };
 export { presetField };
+export { type PresetCustomization } from './customization';
+export { RADNETZ_PRESET_CUSTOMIZATION } from './radnetz_customization';
 export { presetPreset };
 
 let _mainPresetIndex = presetIndex(); // singleton
@@ -58,6 +62,8 @@ export interface presetIndex extends presetCollection {
     getPresets(): { [presetId: string]: presetPreset };
     getRawPresets(): { [presetId: string]: Preset };
     addablePresetIDs: GetSet<presetIndex, Set<string> | null>;
+    /** Project-specific fields and preset changes, see `customization.ts`. Call before the presets load. */
+    customize(customization: PresetCustomization | undefined): this;
 
     recent(): presetCollection;
     getRecents(): RibbonItem[];
@@ -102,6 +108,12 @@ export function presetIndex() {
   // Index of presets by (geometry, tag key).
   let _geometryIndex: Record<Geometry, Record<string, Record<string, presetPreset[]>>> = { point: {}, vertex: {}, line: {}, area: {}, relation: {} };
   let _loadPromise: Promise<void>;
+  let _customization: PresetCustomization | undefined;
+
+  _this.customize = (customization) => {
+    _customization = customization;
+    return _this;
+  };
 
 
   _this.ensureLoaded = (bypassCache) => {
@@ -117,8 +129,7 @@ export function presetIndex() {
         _this.merge({
           categories: vals[0],
           defaults: vals[1],
-          presets: vals[2],
-          fields: vals[3]
+          ...applyPresetCustomization(_customization, { presets: vals[2], fields: vals[3] })
         });
         osmSetAreaKeys(_this.areaKeys());
         osmSetPointTags(_this.pointTags());
@@ -140,6 +151,8 @@ export function presetIndex() {
 
     // Merge Fields
     if (d.fields) {
+      applyTrafficSignFieldTypes(d.fields);
+
       Object.entries(d.fields).forEach(([fieldID, rawField]) => {
 
         if (rawField) {   // add or replace
@@ -151,6 +164,11 @@ export function presetIndex() {
           delete _fields[fieldID];
         }
       });
+
+      for (const [fieldID, rawField] of Object.entries(EXTRA_TRAFFIC_SIGN_FIELDS)) {
+        _fields[fieldID] ??= presetField(fieldID, rawField as unknown as Field);
+      }
+      applyTrafficSignFieldTypes(_fields);
     }
 
     // Merge Presets

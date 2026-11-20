@@ -1,8 +1,12 @@
-import { throttle } from 'es-toolkit';
+import { debounce, throttle } from 'es-toolkit';
 import type { Dispatch } from 'd3-dispatch';
 import { select as d3_select } from 'd3-selection';
 import { svgPath, svgPointTransform } from './helpers';
 import { services } from '../services';
+import { accessToken } from '../services/mapillary';
+import { AGE_BANDS, ageBand, ageBandClass } from '../mapillary/age_bands';
+import { createHighlightResolver } from '../mapillary/highlight';
+import { selectedFeatureImages } from '../mapillary/selected_images';
 import type { Projection } from '../geo/raw_mercator';
 import type { MlyImage, MlySequence } from '../services/mapillary';
 import type { coreContext } from '../core';
@@ -15,6 +19,11 @@ export function svgMapillaryImages(projection: Projection, context: coreContext,
     const minViewfieldZoom = 18;
     let layer: d3.Selection<SVGGElement> = d3_select(null!);
     let _mapillary: typeof services.mapillary | null;
+    const highlightResolver = createHighlightResolver(
+        url => fetch(url, { headers: { 'Authorization': `OAuth ${accessToken}` } }).then(response => response.json()),
+        throttledRedraw
+    );
+    const debouncedUpdate = debounce(function() { if (svgMapillaryImages.enabled) update(); }, 200);
 
 
     function init() {
@@ -190,6 +199,40 @@ export function svgMapillaryImages(projection: Projection, context: coreContext,
         images = filterImages(images);
         sequences = filterSequences(sequences);
 
+        // images of the selected features are shown regardless of the filters
+        const selectedTags = context.selectedIDs()
+            .map(id => context.hasEntity(id))
+            .filter(entity => !!entity)
+            .map(entity => entity!.tags);
+        const selectedImages = service ? selectedFeatureImages(selectedTags, id => service.cachedImage(id) as MlyImage | undefined) : [];
+        const selectedImageIds = new Set(selectedImages.map(image => String(image.id)));
+        if (selectedImages.length) {
+            const shown = new Set(images.map(image => String(image.id)));
+            images = images.concat(selectedImages.filter(image => !shown.has(String(image.id))));
+        }
+
+        const cutoff = context.photos().ageCutoff();
+        const now = Date.now();
+        const users = context.photos().highlightUsers();
+        const orgs = context.photos().highlightOrgs();
+        highlightResolver.prefetchUsers(users);
+        const highlightedSequenceIds = new Set<string>();
+        images.forEach(image => {
+            if (image.sequence_id && highlightResolver.isHighlighted(image, users, orgs)) {
+                highlightedSequenceIds.add(image.sequence_id);
+            }
+        });
+        const isHighlightedImage = (image: MlyImage) => highlightResolver.isHighlighted(image, users, orgs);
+        const isHighlightedSequence = (sequence: MlySequence) =>
+            highlightedSequenceIds.has(sequence.properties.id) || highlightResolver.isHighlighted(sequence.properties, users, orgs);
+        function setAgeClasses(selection: d3.Selection<any>, capturedAt: (d: any) => string | undefined) {
+            selection.each(function(this: any, d: any) {
+                const band = cutoff ? ageBand(capturedAt(d), cutoff, now) : 'new';
+                const element = d3_select(this);
+                AGE_BANDS.forEach(b => element.classed(ageBandClass(b), b === band));
+            });
+        }
+
         service.filterViewer(context);
 
         let traces = layer.selectAll('.sequences').selectAll<SVGPathElement, MlySequence>('.sequence')
@@ -204,7 +247,9 @@ export function svgMapillaryImages(projection: Projection, context: coreContext,
             .append('path')
             .attr('class', 'sequence')
             .merge(traces)
-            .attr('d', svgPath(projection).geojson);
+            .attr('d', svgPath(projection).geojson)
+            .classed('mly-highlighted', isHighlightedSequence)
+            .call(setAgeClasses, d => d.properties.captured_at);
 
 
         const groups = layer.selectAll('.markers').selectAll<SVGGElement, MlyImage>('.viewfield-group')
@@ -230,19 +275,40 @@ export function svgMapillaryImages(projection: Projection, context: coreContext,
         const markers = groups
             .merge(groupsEnter)
             .sort(function(a, b) {
-                return b.loc[1] - a.loc[1];  // sort Y
+                // selected features' images on top, then sort Y
+                const selected = +selectedImageIds.has(String(a.id)) - +selectedImageIds.has(String(b.id));
+                return selected || (b.loc[1] - a.loc[1]);
             })
             .attr('transform', transform)
+            .classed('mly-selected-feature-image', d => selectedImageIds.has(String(d.id)))
+            .call(setAgeClasses, d => d.captured_at)
             .select('.viewfield-scale');
 
 
-        markers.selectAll('circle')
+        markers.selectAll('circle:not(.mly-extra)')
             .data([0])
             .enter()
             .append('circle')
             .attr('dx', '0')
             .attr('dy', '0')
             .attr('r', '6');
+
+        // extra rings/dots: the selected feature's images and highlighted users/organizations
+        const rings = markers.selectAll('.mly-selected-ring')
+            .data(function(d: any) { return selectedImageIds.has(String(d.id)) ? [0] : []; });
+        rings.exit().remove();
+        rings.enter()
+            .append('circle')
+            .attr('class', 'mly-extra mly-selected-ring')
+            .attr('r', '10');
+
+        const dots = markers.selectAll('.mly-highlight-dot')
+            .data(function(d: any) { return isHighlightedImage(d) ? [0] : []; });
+        dots.exit().remove();
+        dots.enter()
+            .append('circle')
+            .attr('class', 'mly-extra mly-highlight-dot')
+            .attr('r', '3');
 
         const viewfields = markers.selectAll('.viewfield')
             .data(showViewfields ? [0] : []);
@@ -314,9 +380,14 @@ export function svgMapillaryImages(projection: Projection, context: coreContext,
         if (svgMapillaryImages.enabled) {
             showLayer();
             context.photos().on('change.mapillary_images', update);
+            // the selected feature's images are drawn specially
+            context.on('enter.mapillary_images', debouncedUpdate);
+            context.history().on('change.mapillary_images', debouncedUpdate);
         } else {
             hideLayer();
             context.photos().on('change.mapillary_images', null);
+            context.on('enter.mapillary_images', null);
+            context.history().on('change.mapillary_images', null);
         }
         dispatch.call('change');
         return this;

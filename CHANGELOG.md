@@ -37,6 +37,8 @@ _Breaking developer changes, which may affect downstream projects or sites that 
 
 # Unreleased (2.43.0-dev)
 
+#### :tada: New Features
+* Support multiple saved custom background layers, each with an optional name, that can be added, edited, switched, and deleted from the Background pane ([#8874])
 #### :sparkles: Usability & Accessibility
 * Increase the colour contrast of the blue text used for links and preset fields ([#12724], thanks [@k-yle])
 * Render diameter and radius tags when a node is selected ([#9732], thanks [@k-yle])
@@ -68,6 +70,7 @@ _Breaking developer changes, which may affect downstream projects or sites that 
 
 [#8402]: https://github.com/openstreetmap/iD/issues/8402
 [#8424]: https://github.com/openstreetmap/iD/issues/8424
+[#8874]: https://github.com/openstreetmap/iD/issues/8874
 [#9732]: https://github.com/openstreetmap/iD/pull/9732
 [#12679]: https://github.com/openstreetmap/iD/pull/12679
 [#12704]: https://github.com/openstreetmap/iD/pull/12704

@@ -5,7 +5,7 @@ import { watch } from 'chokidar';
 import serve from 'serve-handler';
 import { buildCSS } from './build_css.js';
 
-const port = 8080;
+const port = Number(process.env.PORT) || 8080;  // eslint-disable-line no-process-env
 
 watch(
   await Array.fromAsync(glob('css/**/*.css')), {

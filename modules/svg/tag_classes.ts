@@ -1,6 +1,13 @@
 import type { Geometry } from '@openstreetmap/id-tagging-schema';
 import { select as d3_select } from 'd3-selection';
 import { osmPathHighwayTagValues, osmPavedTags, osmSemipavedTags, osmLifecyclePrefixes } from '../osm/tags';
+import { appendLensTagClasses, lensClassesVersion } from '../core/lenses';
+
+// Computing the classes is the most expensive part of a redraw, and nearly every call repeats an
+// earlier one: the tags of an entity are never changed in place, and the element still has the
+// classes from the last time. So the results are kept per tags object and current class string.
+let _cache = new WeakMap<Tags, Map<string, string>>();
+let _cacheLensVersion = -1;
 
 export type TagGetter<T> = (entity: T) => Tags;
 
@@ -43,6 +50,25 @@ export function svgTagClasses<T>() {
 
 
     tagClasses.getClassesString = function(t: Tags, value: string) {
+        if (_cacheLensVersion !== lensClassesVersion()) {
+            _cache = new WeakMap();
+            _cacheLensVersion = lensClassesVersion();
+        }
+        let results = _cache.get(t);
+        if (!results) {
+            results = new Map();
+            _cache.set(t, results);
+        }
+        let result = results.get(value);
+        if (result === undefined) {
+            result = computeClassesString(t, value);
+            results.set(value, result);
+        }
+        return result;
+    };
+
+
+    function computeClassesString(t: Tags, value: string) {
         let primary, status;
 
         // in some situations we want to render perimeter strokes a certain way
@@ -161,13 +187,16 @@ export function svgTagClasses<T>() {
             classes.push('tag-wikidata');
         }
 
+        // add classes for the OSM keys the active lens's CSS styles
+        appendLensTagClasses(classes, t);
+
         // ensure that classes for tags keys/values with special characters like spaces
         // are not added to the DOM, because it can cause bizarre issues (#9448)
         return classes
             .filter(klass => /^[-_a-z0-9]+$/.test(klass))
             .join(' ')
             .trim();
-    };
+    }
 
 
     function tags(): TagGetter<T>

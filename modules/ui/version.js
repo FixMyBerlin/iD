@@ -45,7 +45,7 @@ export function uiVersion(context) {
                 .call(uiTooltip()
                     .title(() => t.append('version.whats_new', { version: currVersion }))
                     .placement('top')
-                    .scrollContainer(context.container().select('.main-footer-wrap'))
+                    .scrollContainer(context.container().select('.help-pane .pane-content'))
                 );
         }
     };

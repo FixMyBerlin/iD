@@ -14,6 +14,7 @@ import { utilEditDistance, utilGetSetValue, utilRebind, utilTriggerEvent } from 
 //   }, ...]
 
 var _comboHideTimerID;
+var _openers = new WeakMap();
 
 export function fuzzyMatch(search, string) {
     const numAllowedTypos = Math.floor(search.length / 5);
@@ -379,8 +380,8 @@ export function uiCombobox(context, klass) {
         }
 
 
-        function render() {
-            if (_suggestions.length < _minItems || document.activeElement !== input.node()) {
+        function render(forceOpen) {
+            if (_suggestions.length < _minItems || (!forceOpen && document.activeElement !== input.node())) {
                 hide();
                 return;
             }
@@ -489,6 +490,14 @@ export function uiCombobox(context, klass) {
             hide();
         }
 
+        _openers.set(input.node(), function() {
+            if (input.classed('disabled')) return;
+            fetchComboData('', function() {
+                show();
+                render(true);
+            });
+        });
+
     };
 
 
@@ -538,6 +547,18 @@ export function uiCombobox(context, klass) {
 }
 
 
+uiCombobox.open = function(input) {
+    var selection = input && input.node ? input : d3_select(input);
+    var node = selection.node();
+    if (!node) return;
+    if (document.activeElement !== node) {
+        node.focus();
+    }
+    var open = _openers.get(node);
+    if (open) open();
+};
+
+
 function _hide(container) {
     if (_comboHideTimerID) {
         window.clearTimeout(_comboHideTimerID);
@@ -554,6 +575,9 @@ function _hide(container) {
 
 uiCombobox.off = function(input, context) {
     _hide(context.container());
+    if (input && input.node()) {
+        _openers.delete(input.node());
+    }
     input
         .on('focus.combo-input', null)
         .on('blur.combo-input', null)

@@ -105,6 +105,22 @@
 .layer-mapdata text.label.selected {
     fill: #fff;
 }
+/* Multiple custom data layers, each with its own color */
+.layer-custom-data path.stroke {
+    stroke: var(--custom-data-color);
+}
+.layer-custom-data path.fill {
+    stroke: var(--custom-data-color);
+    fill: var(--custom-data-color);
+}
+.layer-custom-data path.shadow {
+    stroke: var(--custom-data-color);
+}
+.layer-custom-data path.MultiPoint.shadow,
+.layer-custom-data path.Point.shadow {
+    fill: var(--custom-data-color);
+}
+
 .layer-mapdata text.label-halo {
     opacity: 0.7;
     stroke: #000;

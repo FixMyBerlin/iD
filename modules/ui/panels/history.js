@@ -1,9 +1,11 @@
 import { t, localizer } from '../../core/localizer';
 import { svgIcon } from '../../svg';
+import { uiHistoryContributors } from './history_contributors';
 
 
 export function uiPanelHistory(context) {
     var osm;
+    var contributors = uiHistoryContributors(context);
 
     function displayTimestamp(timestamp) {
         if (!timestamp) return t('info_panels.history.unknown');
@@ -127,6 +129,9 @@ export function uiPanelHistory(context) {
         } else {
             heading.call(t.append('info_panels.selected', { n: selected.length }));
         }
+
+        // nothing selected: who mapped what is in view
+        if (!selected.length) selection.call(contributors.render);
 
         if (!singular) return;
 
@@ -253,6 +258,7 @@ export function uiPanelHistory(context) {
     panel.off = function() {
         context.map().on('drawn.info-history', null);
         context.on('enter.info-history', null);
+        contributors.off();
     };
 
     panel.id = 'history';

@@ -73,7 +73,9 @@ export function uiPane(id, context) {
             _paneTooltip = uiTooltip()
                 .scrollContainer(context.container().select('.over-map'))
                 .placement((localizer.textDirection() === 'rtl') ? 'right' : 'left')
-                .title(() => _description)
+                // the pane's name, then what is inside it
+                .heading(() => _label)
+                .title(() => t.append('pane_tooltips.' + id))
                 .keys([_key]);
         }
 
