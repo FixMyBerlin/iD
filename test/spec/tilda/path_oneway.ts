@@ -28,6 +28,9 @@ describe('tilda/path_oneway', () => {
         // cycleways without foot traffic and roads keep `oneway`
         const cycleway = { highway: 'cycleway', 'oneway:bicycle': 'yes' };
         expect(withPathOneway(cycleway, ['oneway:bicycle'])).toBe(cycleway);
+        // a path under construction too
+        const building = { highway: 'construction', construction: 'path', 'oneway:bicycle': 'yes' };
+        expect(withPathOneway(building, ['oneway:bicycle'])).toEqual({ ...building, oneway: 'no' });
         const noFoot = { highway: 'cycleway', foot: 'no', 'oneway:bicycle': 'yes' };
         expect(withPathOneway(noFoot, ['oneway:bicycle'])).toBe(noFoot);
         const road = { highway: 'residential', oneway: 'yes', 'oneway:bicycle': 'no' };

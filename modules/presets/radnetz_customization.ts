@@ -365,7 +365,7 @@ export const RADNETZ_PRESET_CUSTOMIZATION: PresetCustomization = {
         ...Object.fromEntries(FOOTWAY_PRESETS.map(id => [id, { fields: FOOTWAY_FIELDS, moreFields: FOOTWAY_MORE_FIELDS }]))
     },
     // crossings: TILDA category `crossing` needs width, surface, oneway; bicycle access on footway/path crossings.
-    // Where pedestrians cross too, TILDA asks for the direction as `oneway:bicycle` (see `sharedWithPedestrians`)
+    // Where pedestrians cross too, TILDA asks for the direction as `oneway:bicycle` (`onewayKey` of the tagging package)
     addFields: Object.fromEntries(CROSSING_PRESETS.map(id => [id, ['width', crossingSharedWithFoot(id) ? 'oneway/bicycle/path' : 'oneway', 'access']])),
     addMoreFields: Object.fromEntries(CROSSING_PRESETS.map(id => [id, [
         ...(crossingSharedWithFoot(id) ? [] : ['oneway/bicycle/path']),
