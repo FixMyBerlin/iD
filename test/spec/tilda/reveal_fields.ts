@@ -21,7 +21,10 @@ const schemaFields = JSON.parse(readFileSync(
 
 const { fields, presets } = applyPresetCustomization(RADNETZ_PRESET_CUSTOMIZATION, {
     fields: schemaFields as any,
-    presets: Object.fromEntries(Object.keys(RADNETZ_PRESET_CUSTOMIZATION.setFields!).map(id => [id, { tags: {}, geometry: ['line'] }])) as any
+    presets: Object.fromEntries([
+        ...Object.keys(RADNETZ_PRESET_CUSTOMIZATION.setFields!),
+        ...Object.keys(RADNETZ_PRESET_CUSTOMIZATION.addFields!)
+    ].map(id => [id, { tags: {}, geometry: ['line'] }])) as any
 });
 
 function presetFieldDefs(presetID: string): FieldDef[] {
@@ -77,6 +80,37 @@ const CASES: { name: string; presetID: string; tags: Record<string, string> }[] 
         name: 'cycleway',
         presetID: 'highway/cycleway',
         tags: { highway: 'cycleway', is_sidepath: 'yes' }
+    },
+    {
+        // 0.5.0: the direction row asks for `oneway:bicycle` where pedestrians use the cycleway too
+        name: 'one-way cycleway with foot access',
+        presetID: 'highway/cycleway/bicycle_foot',
+        tags: { highway: 'cycleway', bicycle: 'designated', foot: 'designated', segregated: 'no', is_sidepath: 'yes' }
+    },
+    {
+        name: 'cycleway with foot=yes',
+        presetID: 'highway/cycleway',
+        tags: { highway: 'cycleway', foot: 'yes', is_sidepath: 'yes' }
+    },
+    {
+        name: 'segregated cycleway without a foot tag',
+        presetID: 'highway/cycleway',
+        tags: { highway: 'cycleway', segregated: 'yes', is_sidepath: 'yes' }
+    },
+    {
+        name: 'cycleway crossing with foot access',
+        presetID: 'highway/cycleway/crossing/bicycle_foot',
+        tags: { highway: 'cycleway', cycleway: 'crossing', bicycle: 'designated', foot: 'designated' }
+    },
+    {
+        name: 'path crossing',
+        presetID: 'highway/path/crossing',
+        tags: { highway: 'path', path: 'crossing', bicycle: 'designated', foot: 'designated' }
+    },
+    {
+        name: 'cycleway crossing',
+        presetID: 'highway/cycleway/crossing',
+        tags: { highway: 'cycleway', cycleway: 'crossing' }
     },
     {
         name: 'road with bike lanes',

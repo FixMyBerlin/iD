@@ -112,8 +112,9 @@ const FIELDS: Record<string, Field> = {
         options: ['no', 'red', 'green', 'red;green'],
         strings: { options: { no: 'Not coloured', red: 'Red', green: 'Green', 'red;green': 'Red and green' } }
     } as Field,
-    // paths and footways: TILDA reads the riding direction from `oneway:bicycle` (no `oneway` needed
-    // first, unlike the schema's `oneway/bicycle`); a value also sets `oneway=no` (tilda/path_oneway.ts)
+    // ways shared with pedestrians (paths, footways, cycleways with foot traffic): TILDA asks for the riding
+    // direction as `oneway:bicycle` (no `oneway` needed first, unlike the schema's `oneway/bicycle`); a value
+    // also sets `oneway=no` (tilda/path_oneway.ts)
     'oneway/bicycle/path': {
         key: 'oneway:bicycle',
         type: 'onewayCheck',
@@ -254,7 +255,7 @@ const SEPARATE_WAY_MORE_FIELDS = withPartColour(['marking', 'buffer', 'traffic_m
 const FOOTWAY_FIELDS = ['name', 'access', 'traffic_sign', 'is_sidepath', 'surface_smoothness', 'width', 'structure'];
 const FOOTWAY_MORE_FIELDS = withPartColour(['oneway/bicycle/path', 'segregated', 'tactile_paving', 'wheelchair', ...WAY_DETAILS_MORE]);
 
-/** paths: the bike direction instead of `oneway` (TILDA reads `oneway:bicycle` there) */
+/** ways shared with pedestrians: the bike direction instead of `oneway` (TILDA asks for `oneway:bicycle` there) */
 function pathOneway(fields: string[]) {
     return fields.map(id => id === 'oneway' ? 'oneway/bicycle/path' : id);
 }
@@ -277,6 +278,11 @@ const SEPARATE_WAY_PRESETS = [
     'highway/path/bicycle_foot'
 ];
 const FOOTWAY_PRESETS = ['highway/footway', 'highway/footway/sidewalk', 'highway/path'];
+
+/** footway and path crossings, and cycleway crossings with `foot=designated` */
+function crossingSharedWithFoot(id: string) {
+    return !id.startsWith('highway/cycleway/') || id.endsWith('bicycle_foot');
+}
 
 const CROSSING_PRESETS = [
     'highway/cycleway/crossing', 'highway/cycleway/crossing/bicycle_foot', 'highway/cycleway/crossing/marked',
@@ -346,15 +352,25 @@ export const RADNETZ_PRESET_CUSTOMIZATION: PresetCustomization = {
             moreFields: [...extraMore, ...ROAD_MORE_FIELDS]
         }])),
         ...Object.fromEntries(SEPARATE_WAY_PRESETS.map(id => [id, {
-            // shared foot and cycle paths: `segregated` decides the TILDA category; on a path TILDA reads
-            // the riding direction from `oneway:bicycle`
-            fields: id === 'highway/path/bicycle_foot' ? pathOneway(SHARED_WAY_FIELDS)
-                : id.endsWith('bicycle_foot') ? SHARED_WAY_FIELDS : SEPARATE_WAY_FIELDS,
-            moreFields: SEPARATE_WAY_MORE_FIELDS.filter(f => !(id.endsWith('bicycle_foot') && f === 'segregated'))
+            // shared foot and cycle paths: `segregated` decides the TILDA category; where pedestrians use
+            // the way too, TILDA asks for the riding direction as `oneway:bicycle` (`oneway` would apply to them)
+            fields: id.endsWith('bicycle_foot') ? pathOneway(SHARED_WAY_FIELDS) : SEPARATE_WAY_FIELDS,
+            // a plain cycleway with `foot=yes` or `segregated=yes`: TILDA asks for `oneway:bicycle` there
+            // too (tagging package 0.5.0), "add below" opens this field
+            moreFields: [
+                ...(id === 'highway/cycleway' ? ['oneway/bicycle/path'] : []),
+                ...SEPARATE_WAY_MORE_FIELDS.filter(f => !(id.endsWith('bicycle_foot') && f === 'segregated'))
+            ]
         }])),
         ...Object.fromEntries(FOOTWAY_PRESETS.map(id => [id, { fields: FOOTWAY_FIELDS, moreFields: FOOTWAY_MORE_FIELDS }]))
     },
-    // crossings: TILDA category `crossing` needs width, surface, oneway; bicycle access on footway/path crossings
-    addFields: Object.fromEntries(CROSSING_PRESETS.map(id => [id, ['width', 'oneway', 'access']])),
-    addMoreFields: Object.fromEntries(CROSSING_PRESETS.map(id => [id, ['surface/colour', 'smoothness', 'traffic_sign']]))
+    // crossings: TILDA category `crossing` needs width, surface, oneway; bicycle access on footway/path crossings.
+    // Where pedestrians cross too, TILDA asks for the direction as `oneway:bicycle` (see `sharedWithPedestrians`)
+    addFields: Object.fromEntries(CROSSING_PRESETS.map(id => [id, ['width', crossingSharedWithFoot(id) ? 'oneway/bicycle/path' : 'oneway', 'access']])),
+    addMoreFields: Object.fromEntries(CROSSING_PRESETS.map(id => [id, [
+        ...(crossingSharedWithFoot(id) ? [] : ['oneway/bicycle/path']),
+        'surface/colour', 'smoothness', 'traffic_sign'
+    ]])),
+    // the schema's `oneway` field would make the crossing one-way for pedestrians too
+    removeFields: Object.fromEntries(CROSSING_PRESETS.filter(crossingSharedWithFoot).map(id => [id, ['oneway']]))
 };
