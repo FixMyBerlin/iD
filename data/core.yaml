@@ -122,6 +122,10 @@ en:
         both: "Extract both cycle tracks and merge each with the sidewalk way next to it into one highway=path. The sidewalks keep their lines and get the tags of both."
       flash: "Extracted and merged into a foot and cycle path. This road: {changes}"
       flash_dropped: "Extracted and merged into a foot and cycle path. This road: {changes}. Not taken over from the deleted cycleway: {dropped}"
+      flash_apart: "Extracted. This road: {changes}. {apart}"
+      kept_apart:
+        alone: "{side} side: no sidewalk way found, the cycle track became a segregated foot and cycle path of its own."
+        two_lines: "{side} side: only the road or only the sidewalk is under construction, so they were not merged; the cycle track is a cycleway line next to the sidewalk (traffic_mode=foot)."
       loading: Loading the traffic sign rules, try again in a moment.
       no_sidewalk: This can't be merged because no sidewalk way runs along that cycle track. Extract it and merge by hand, or map the sidewalk first.
       incomplete: This can't be extracted because not all of its nodes are downloaded.
@@ -131,6 +135,7 @@ en:
       lengths: These can't be merged because the lengths of the sidewalk pieces and the cycle track differ too much. Split the sidewalk first.
       apart: These can't be merged because the sidewalk does not run side by side with the cycle track (more than 25 m apart somewhere). Split the sidewalk first.
       different_values: "These can't be merged because the sidewalk pieces have different values of {key}. Split the way first."
+      different_lifecycle: "These can't be merged because only one of them is under construction. Extracting the cycle track alone keeps the sidewalk as its own line."
       not_eligible: This can't be extracted and merged.
       failed:
         extract: "Nothing was changed. Step 1 (extract, {side} side) doesn't work: {reason}"
@@ -155,6 +160,7 @@ en:
       lengths: These can't be merged because their lengths differ too much and more than two ways are selected. Split the ways first, or select one cycleway and one footway.
       apart: These can't be merged because they don't run side by side (more than 25 m apart somewhere). Split the ways first.
       different_values: "These can't be merged because the ways that would be deleted have different values of {key}. Split the way that stays first."
+      different_lifecycle: "These can't be merged because only one of them is under construction."
       not_eligible: These can't be merged into a foot and cycle path.
     _unavailable:
       Cannot perform “{operation}” on currently selected features.

@@ -8,6 +8,13 @@ import {
 } from '@tilda-geo/bicycle-infrastructure-tagging';
 import { definedTags } from '../tilda/tags';
 import type { Action } from '../core/history';
+
+/**
+ * A cycle track with `segregated=yes`: by default one segregated foot and cycle path (`path`); with
+ * `twoLines` the cycleway line of two lines (`traffic_mode:<side>=foot`), when the sidewalk way next
+ * to it stays apart (its construction state differs from the road's)
+ */
+export type SegregatedTrack = 'path' | 'twoLines';
 import type { coreGraph } from '../core';
 import type { WayId } from '../osm';
 
@@ -36,9 +43,10 @@ export type SidepathExtraction = {
  * The package already reads a misread `cycleway:both:oneway=yes` as the direction of each side.
  */
 export function planSidepathExtraction(
-    road: Tags, variant: ExtractVariant, side: Side, recommend: SignRecommend | undefined, joinSigns?: JoinSigns
+    road: Tags, variant: ExtractVariant, side: Side, recommend: SignRecommend | undefined, joinSigns?: JoinSigns,
+    segregatedTrack?: SegregatedTrack
 ): SidepathExtraction {
-    const plan = planExtraction(road, variant, side, { recommend, joinSigns });
+    const plan = planExtraction(road, variant, side, { recommend, joinSigns, segregatedTrack });
     const wayTags = definedTags(plan.wayTags);
     const reversed = wayTags.oneway === '-1' || wayTags['oneway:bicycle'] === '-1';
     return { ...plan, wayTags: reversed ? definedTags(reverseTags(wayTags)) : wayTags, roadTags: definedTags(plan.roadTags), reversed };
@@ -58,14 +66,15 @@ export function actionExtractSidepath(
     variant: ExtractVariant,
     side: Side,
     recommend: SignRecommend | undefined,
-    joinSigns?: JoinSigns
+    joinSigns?: JoinSigns,
+    segregatedTrack?: SegregatedTrack
 ): ActionExtractSidepath {
     let _wayId: WayId;
     let _keptBicycle: string | undefined;
 
     const action: ActionExtractSidepath = function(graph: coreGraph) {
         const road = graph.entity(wayID);
-        const plan = planSidepathExtraction(road.tags, variant, side, recommend, joinSigns);
+        const plan = planSidepathExtraction(road.tags, variant, side, recommend, joinSigns, segregatedTrack);
         _keptBicycle = plan.keptBicycle;
 
         const locs = graph.childNodes(road).map(node => node.loc as [number, number]);

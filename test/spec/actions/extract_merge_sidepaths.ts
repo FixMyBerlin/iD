@@ -67,6 +67,46 @@ describe('iD.actionExtractMergeSidepaths', () => {
         expect(after.entity(both.extractedIds()[0]).tags.highway).toBe('cycleway');
     });
 
+    describe('a segregated cycle track (cycleway:<side>:segregated=yes)', () => {
+        const segregatedRoad = { ...road, 'cycleway:both:segregated': 'yes' };
+
+        it('merges it with the sidewalk into a segregated path', () => {
+            const before = graph(segregatedRoad, { 2: [-8.5, 0, 100] });
+            const action = actionExtractMergeSidepaths('w1', ['right'], undefined, undefined, nearby(before));
+            const after = action(before);
+            expect(action.survivorIds()).toEqual(['w2']);
+            expect(after.entity('w2').tags).toMatchObject({ highway: 'path', foot: 'designated', segregated: 'yes' });
+            expect(after.entity('w2').tags['traffic_mode:right']).toBeUndefined();
+            expect(action.keptApart()).toEqual([]);
+        });
+
+        it('without a sidewalk way: a segregated path of its own, no problem', () => {
+            const before = graph(segregatedRoad, {});
+            const action = actionExtractMergeSidepaths('w1', ['right'], undefined, undefined, nearby(before));
+            expect(action.disabled!(before)).toBe(false);
+            const after = action(before);
+            expect(action.partialProblem()).toBeUndefined();
+            expect(action.keptApart()).toMatchObject([{ side: 'right', outcome: 'alone' }]);
+            expect(after.entity(action.extractedIds()[0]).tags).toMatchObject({
+                highway: 'path', foot: 'designated', segregated: 'yes', oneway: 'no', 'oneway:bicycle': 'yes'
+            });
+        });
+
+        it('road under construction, sidewalk not: two lines, not merged', () => {
+            const building = { ...segregatedRoad, highway: 'construction', construction: 'residential' };
+            const before = graph(building, { 2: [-8.5, 0, 100] });
+            const action = actionExtractMergeSidepaths('w1', ['right'], undefined, undefined, nearby(before));
+            const after = action(before);
+            expect(action.partialProblem()).toBeUndefined();
+            expect(action.survivorIds()).toEqual([]);
+            expect(action.keptApart()).toMatchObject([{ side: 'right', outcome: 'two_lines' }]);
+            expect(after.entity(action.extractedIds()[0]).tags).toMatchObject({
+                highway: 'construction', construction: 'cycleway', 'traffic_mode:right': 'foot', oneway: 'yes'
+            });
+            expect(after.entity('w2').tags.highway).toBe('footway');
+        });
+    });
+
     it('cuts a sidewalk that runs on past the road', () => {
         const before = graph(road, { 2: [-8.5, -50, 150] });
         const action = actionExtractMergeSidepaths('w1', ['right'], undefined, undefined, nearby(before));

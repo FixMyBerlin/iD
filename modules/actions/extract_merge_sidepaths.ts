@@ -1,7 +1,7 @@
 import { actionExtractSidepath } from './extract_sidepath';
 import { actionMergeSidepaths, mergeSidepathsSelection } from './merge_sidepaths';
 import { sidewalkCandidates } from '../sidepath/find_sidewalk';
-import type { JoinSigns, Side, SignRecommend } from '@tilda-geo/bicycle-infrastructure-tagging';
+import { sideTags, type JoinSigns, type Side, type SignRecommend } from '@tilda-geo/bicycle-infrastructure-tagging';
 import type { Action } from '../core/history';
 import type { coreGraph } from '../core';
 import type { geoExtent } from '../geo';
@@ -9,6 +9,13 @@ import type { osmWay, WayId } from '../osm';
 
 /** The ways of the map near an extent, e.g. from the history's tree */
 export type NearbyWays = (graph: coreGraph, extent: geoExtent) => osmWay[];
+
+/**
+ * A segregated cycle track (`cycleway:<side>:segregated=yes`) that was not merged, and why: `alone`
+ * (no sidewalk way: a segregated foot and cycle path of its own), `two_lines` (the sidewalk's
+ * construction state differs: the cycleway line next to it, `traffic_mode:<side>=foot`)
+ */
+export type KeptApart = { side: Side; outcome: 'alone' | 'two_lines'; wayId: WayId };
 
 /** Why the action can't run, for which side and in which step; `key` names the tag of `different_values` */
 export type ExtractMergeProblem = { reason: string; key?: string; side: Side; step: 'extract' | 'merge' };
@@ -24,6 +31,8 @@ export interface ActionExtractMergeSidepaths extends Action {
     partialProblem(): ExtractMergeProblem | undefined;
     /** the extracted cycleways that were not merged (known after the action ran once) */
     extractedIds(): WayId[];
+    /** segregated cycle tracks that were extracted on purpose without a merge (known after the action ran once) */
+    keptApart(): KeptApart[];
 }
 
 /** Footways are looked for this far around the road: its stacked lanes and the sidewalk fit in */
@@ -46,6 +55,7 @@ export function actionExtractMergeSidepaths(
     let _dropped: string[] = [];
     let _partial: ExtractMergeProblem | undefined;
     let _extractedIds: WayId[] = [];
+    let _keptApart: KeptApart[] = [];
 
     /** All sides in turn; stops at the first step that fails, what was done before it stays */
     function run(graph: coreGraph) {
@@ -55,26 +65,44 @@ export function actionExtractMergeSidepaths(
         const survivors: WayId[] = [];
         const extracted: WayId[] = [];
         const dropped = new Set<string>();
+        const keptApart: KeptApart[] = [];
         let problem: ExtractMergeProblem | undefined;
 
         for (const side of sides) {
-            const extract = actionExtractSidepath(wayID, 'cycleway', side, recommend, joinSigns);
+            // a segregated cycle track is one segregated path with the sidewalk (Tobias, 2026-11-20): it is
+            // extracted as a cycleway line to merge; it stays apart when the sidewalk can't be merged
+            const segregated = sideTags(graph.entity(wayID).tags, 'cycleway', side).segregated === 'yes';
+            const extract = actionExtractSidepath(wayID, 'cycleway', side, recommend, joinSigns, segregated ? 'twoLines' : undefined);
             const extractProblem = extract.disabled!(graph);
             if (extractProblem) {
                 problem = { reason: extractProblem, side, step: 'extract' };
                 break;
             }
+            const beforeExtract = graph;
             graph = extract(graph);
             const bikeID = extract.getWayId();
             extracted.push(bikeID);
 
             const footIDs = sidewalkCandidates(graph, bikeID, found);
+            if (!footIDs.length && segregated) {
+                // no sidewalk way: a segregated foot and cycle path of its own
+                const alone = actionExtractSidepath(wayID, 'cycleway', side, recommend, joinSigns, 'path');
+                graph = alone(beforeExtract);
+                extracted[extracted.length - 1] = alone.getWayId();
+                keptApart.push({ side, outcome: 'alone', wayId: alone.getWayId() });
+                continue;
+            }
             if (!footIDs.length) {
                 problem = { reason: 'no_sidewalk', side, step: 'merge' };
                 break;
             }
             const wayIDs = [bikeID, ...footIDs];
             const selection = mergeSidepathsSelection(graph, wayIDs);
+            if (segregated && selection?.disabled === 'different_lifecycle') {
+                // only one of them is under construction: two lines, the cycleway line next to the sidewalk
+                keptApart.push({ side, outcome: 'two_lines', wayId: bikeID });
+                continue;
+            }
             if (!selection || selection.disabled) {
                 problem = {
                     reason: selection ? selection.disabled as string : 'no_sidewalk',
@@ -90,7 +118,7 @@ export function actionExtractMergeSidepaths(
             survivors.push(...merge.survivorIds());
             for (const tag of merge.dropped()) dropped.add(tag);
         }
-        return { graph, survivors, extracted, dropped: [...dropped], problem };
+        return { graph, survivors, extracted, dropped: [...dropped], problem, keptApart };
     }
 
     const action: ActionExtractMergeSidepaths = function(graph: coreGraph) {
@@ -102,6 +130,7 @@ export function actionExtractMergeSidepaths(
         _extractedIds = result.extracted;
         _dropped = result.dropped;
         _partial = result.problem;
+        _keptApart = result.keptApart;
         return result.graph;
     };
 
@@ -111,6 +140,7 @@ export function actionExtractMergeSidepaths(
     };
     action.partialProblem = () => _partial;
     action.extractedIds = () => _extractedIds;
+    action.keptApart = () => _keptApart;
 
     action.disabled = function(graph: coreGraph) {
         const road = graph.hasEntity(wayID);

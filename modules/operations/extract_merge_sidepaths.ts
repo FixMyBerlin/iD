@@ -69,15 +69,23 @@ function extractMergeOperation(context: iD.Context, wayID: WayId, choice: Choice
             context.enter(modeSelect(context, [...act.survivorIds(), ...act.extractedIds()]));
             return;
         }
+        // segregated cycle tracks that stayed apart on purpose (no sidewalk way, or only one is under construction)
+        const apart = act.keptApart().map(kept => t(`operations.extract_merge_sidepaths.kept_apart.${kept.outcome}`, {
+            side: t(`operations.extract_sidepath.side.${kept.side}`)
+        }));
+        const merged = act.survivorIds().length > 0;
+        const label = !merged && apart.length
+            ? t('operations.extract_merge_sidepaths.flash_apart', { changes, apart: apart.join(' ') })
+            : dropped.length
+                ? t('operations.extract_merge_sidepaths.flash_dropped', { changes, dropped: dropped.join(', ') })
+                : t('operations.extract_merge_sidepaths.flash', { changes });
         (context.ui().flash as any)
-            .duration(4000)
+            .duration(apart.length ? 6000 : 4000)
             .iconName('#iD-operation-extract')
             .iconClass('operation')
-            .label(dropped.length
-                ? t('operations.extract_merge_sidepaths.flash_dropped', { changes, dropped: dropped.join(', ') })
-                : t('operations.extract_merge_sidepaths.flash', { changes }))();
+            .label(merged && apart.length ? `${label} ${apart.join(' ')}` : label)();
 
-        context.enter(modeSelect(context, act.survivorIds()));
+        context.enter(modeSelect(context, [...act.survivorIds(), ...act.extractedIds()]));
     };
 
     operation.available = function() {

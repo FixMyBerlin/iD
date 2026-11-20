@@ -27,6 +27,18 @@ describe('iD.actionExtractSidepath', () => {
         expect(nodes[0].loc[0]).toBeLessThan(nodes[1].loc[0]);
     });
 
+    it('a segregated track is a segregated path, or with twoLines the cycleway line next to the sidewalk', () => {
+        const road = { highway: 'residential', 'cycleway:right': 'track', 'cycleway:right:segregated': 'yes', sidewalk: 'separate' };
+        const path = actionExtractSidepath('w1', 'cycleway', 'right', undefined);
+        const pathTags = path(graph(road)).entity(path.getWayId()).tags;
+        expect(pathTags).toMatchObject({ highway: 'path', foot: 'designated', segregated: 'yes', oneway: 'no', 'oneway:bicycle': 'yes' });
+
+        const twoLines = actionExtractSidepath('w1', 'cycleway', 'right', undefined, undefined, 'twoLines');
+        const lineTags = twoLines(graph(road)).entity(twoLines.getWayId()).tags;
+        expect(lineTags).toMatchObject({ highway: 'cycleway', oneway: 'yes', 'traffic_mode:right': 'foot' });
+        expect(lineTags.foot).toBeUndefined();
+    });
+
     it('draws a left track against the road direction, with oneway=yes', () => {
         const before = graph({ highway: 'residential', 'cycleway:left': 'track' });
         const action = actionExtractSidepath('w1', 'cycleway', 'left', undefined);

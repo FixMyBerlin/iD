@@ -87,18 +87,18 @@ function segregated(tags: Tags, side: Operation['side']) {
 }
 
 /**
- * The extract entry, but it runs "extract and merge with the sidewalk" when that works (a sidewalk
- * way was found); without one it extracts the cycle track alone, as before.
+ * The extract entry, but it runs "extract and merge with the sidewalk": for a segregated cycle track
+ * that action decides (merged with the sidewalk; the cycleway line of two lines when only one of them
+ * is under construction; a segregated foot and cycle path of its own without a sidewalk way).
  */
 function preferMerge(plain: Operation, merge: Operation | undefined): Operation {
     if (!merge) return plain;
-    const merging = () => !merge.disabled();
-    const current = () => merging() ? merge : plain;
+    const current = () => merge.disabled() ? plain : merge;
 
     const operation: Operation = Object.assign(function(event?: KeyboardEvent) {
         current()(event);
     }, plain);
-    operation.disabled = () => merging() ? false : plain.disabled();
+    operation.disabled = () => current().disabled();
     operation.tooltip = () => current().tooltip();
     operation.annotation = () => current().annotation();
     operation.getAuxiliaryGeometry = () => current().getAuxiliaryGeometry?.() ?? [];

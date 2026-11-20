@@ -497,6 +497,10 @@ de:
         both: Beide Radwege herauslösen und jeweils mit dem Gehweg daneben zu einem highway=path zusammenführen. Die Gehwege behalten ihren Verlauf und bekommen die Tags von beiden.
       flash: "Herausgelöst und zu einem Geh- und Radweg zusammengeführt. Diese Straße: {changes}"
       flash_dropped: "Herausgelöst und zu einem Geh- und Radweg zusammengeführt. Diese Straße: {changes}. Vom gelöschten Radweg nicht übernommen: {dropped}"
+      flash_apart: "Herausgelöst. Diese Straße: {changes}. {apart}"
+      kept_apart:
+        alone: "Seite {side}: kein Gehweg gefunden, der Radweg ist ein eigener getrennter Geh- und Radweg geworden."
+        two_lines: "Seite {side}: nur die Straße oder nur der Gehweg ist im Bau, deshalb nicht zusammengeführt; der Radweg ist eine Radweg-Linie neben dem Gehweg (traffic_mode=foot)."
       loading: Die Verkehrszeichen-Regeln werden geladen, versuche es gleich noch einmal.
       no_sidewalk: Das lässt sich nicht zusammenführen, weil neben diesem Radweg kein Gehweg verläuft. Löse ihn heraus und führe ihn von Hand zusammen, oder zeichne zuerst den Gehweg.
       incomplete: Das lässt sich nicht herauslösen, weil nicht alle Knoten geladen sind.
@@ -506,6 +510,7 @@ de:
       lengths: Das lässt sich nicht zusammenführen, weil die Längen der Gehwegstücke und des Radwegs zu stark voneinander abweichen. Teile zuerst den Gehweg.
       apart: Das lässt sich nicht zusammenführen, weil der Gehweg nicht neben dem Radweg verläuft (stellenweise mehr als 25 m Abstand). Teile zuerst den Gehweg.
       different_values: "Das lässt sich nicht zusammenführen, weil die Gehwegstücke unterschiedliche Werte für {key} haben. Teile zuerst den Weg."
+      different_lifecycle: "Das lässt sich nicht zusammenführen, weil nur einer der Wege im Bau ist. „Radweg herauslösen“ lässt den Gehweg als eigene Linie."
       not_eligible: Das lässt sich nicht herauslösen und zusammenführen.
       failed:
         extract: "Nichts wurde geändert. Schritt 1 (Herauslösen, Seite {side}) funktioniert nicht: {reason}"
@@ -530,6 +535,7 @@ de:
       lengths: Das lässt sich nicht zusammenführen, weil die Längen zu stark voneinander abweichen und mehr als zwei Wege ausgewählt sind. Teile zuerst die Wege oder wähle einen Radweg und einen Fußweg.
       apart: Das lässt sich nicht zusammenführen, weil die Wege nicht nebeneinander verlaufen (stellenweise mehr als 25 m Abstand). Teile zuerst die Wege.
       different_values: "Das lässt sich nicht zusammenführen, weil die Wege, die gelöscht würden, unterschiedliche Werte für {key} haben. Teile zuerst den Weg, der bleibt."
+      different_lifecycle: "Das lässt sich nicht zusammenführen, weil nur einer der Wege im Bau ist."
       not_eligible: Das lässt sich nicht zu einem Geh- und Radweg zusammenführen.
   preset_shortcut:
     title: Tastaturkürzel festlegen
