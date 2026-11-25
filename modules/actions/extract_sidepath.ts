@@ -47,9 +47,33 @@ export function planSidepathExtraction(
     segregatedTrack?: SegregatedTrack
 ): SidepathExtraction {
     const plan = planExtraction(road, variant, side, { recommend, joinSigns, segregatedTrack });
-    const wayTags = definedTags(plan.wayTags);
+    const wayTags = variant === 'sidewalk' ? definedTags(plan.wayTags) : withCrossing(definedTags(plan.wayTags), road, side);
     const reversed = wayTags.oneway === '-1' || wayTags['oneway:bicycle'] === '-1';
     return { ...plan, wayTags: reversed ? definedTags(reverseTags(wayTags)) : wayTags, roadTags: definedTags(plan.roadTags), reversed };
+}
+
+/** The keys of a side that mark a crossing (`cycleway:right:track=crossing`), most specific first */
+const CROSSING_KEYS = ['track', 'lane'];
+
+/**
+ * A cycle track or lane marked as a crossing (`cycleway:<side>:track=crossing`, `…:lane=crossing`,
+ * also `:both:` or without a side) is a crossing way: `cycleway=crossing` on a cycleway,
+ * `path=crossing` on a path, as TILDA reads it, never `track=crossing` or `lane=crossing`. The package
+ * copies `track` as it is and drops `lane` as a key of the road.
+ */
+function withCrossing(wayTags: Tags, road: Tags, side: Side): Tags {
+    if (!isCrossingSide(road, side)) return wayTags;
+    const result = { ...wayTags };
+    for (const key of CROSSING_KEYS) if (result[key] === 'crossing') delete result[key];
+    const highway = result.highway === 'construction' ? result.construction : result.highway;
+    if (highway) result[highway] = 'crossing';
+    return result;
+}
+
+/** The cycle track or lane of this side is marked as a crossing: it is extracted only, never merged */
+export function isCrossingSide(road: Tags, side: Side) {
+    return CROSSING_KEYS.some(key =>
+        [`cycleway:${side}:${key}`, `cycleway:both:${key}`, `cycleway:${key}`].some(sideKey => road[sideKey] === 'crossing'));
 }
 
 /** Ways shorter than this are not extracted */

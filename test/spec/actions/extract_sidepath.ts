@@ -39,6 +39,44 @@ describe('iD.actionExtractSidepath', () => {
         expect(lineTags.foot).toBeUndefined();
     });
 
+    describe('a crossing (cycleway:<side>:track=crossing, …:lane=crossing)', () => {
+        const extracted = (road: Record<string, string>, variant: 'cycleway' | 'path') => {
+            const action = actionExtractSidepath('w1', variant, 'right', undefined);
+            const after = action(graph(road));
+            return { way: after.entity(action.getWayId()).tags, road: after.entity('w1').tags };
+        };
+
+        for (const key of ['track', 'lane']) {
+            it(`${key}=crossing becomes cycleway=crossing on the cycleway, path=crossing on the path`, () => {
+                const road = { highway: 'residential', 'cycleway:right': 'track', [`cycleway:right:${key}`]: 'crossing', 'sidewalk:right': 'yes' };
+
+                const cycleway = extracted(road, 'cycleway');
+                expect(cycleway.way).toMatchObject({ highway: 'cycleway', cycleway: 'crossing' });
+                expect(cycleway.way.track).toBeUndefined();
+                expect(cycleway.way.lane).toBeUndefined();
+                expect(cycleway.road[`cycleway:right:${key}`]).toBeUndefined();
+
+                const path = extracted(road, 'path');
+                expect(path.way).toMatchObject({ highway: 'path', path: 'crossing' });
+                expect(path.way.track).toBeUndefined();
+                expect(path.way.lane).toBeUndefined();
+            });
+        }
+
+        it('reads cycleway:both:lane=crossing for each side, and a road under construction', () => {
+            const road = { highway: 'construction', construction: 'residential', 'cycleway:both': 'track', 'cycleway:both:lane': 'crossing' };
+            const { way } = extracted(road, 'cycleway');
+            expect(way).toMatchObject({ highway: 'construction', construction: 'cycleway', cycleway: 'crossing' });
+            expect(way.lane).toBeUndefined();
+        });
+
+        it('keeps other track and lane values as they are', () => {
+            const road = { highway: 'residential', 'cycleway:right': 'track', 'cycleway:right:track': 'other' };
+            expect(extracted(road, 'cycleway').way).toMatchObject({ track: 'other' });
+            expect(extracted(road, 'cycleway').way.cycleway).toBeUndefined();
+        });
+    });
+
     it('draws a left track against the road direction, with oneway=yes', () => {
         const before = graph({ highway: 'residential', 'cycleway:left': 'track' });
         const action = actionExtractSidepath('w1', 'cycleway', 'left', undefined);

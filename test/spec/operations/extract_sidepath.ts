@@ -275,6 +275,11 @@ describe('sidepath operations: keyboard shortcuts', () => {
             const protectedLane = context(roadGraph({ highway: 'residential', 'cycleway:right': 'lane' }));
             expect(operationsExtractMergeSidepaths(protectedLane.fake, ['w1'])).toEqual([]);
         });
+
+        it('offers nothing for a side marked as a crossing: a crossing is extracted, not merged', () => {
+            const { fake } = context(roadGraph({ highway: 'residential', 'cycleway:both': 'track', 'cycleway:right:track': 'crossing' }));
+            expect(operationsExtractMergeSidepaths(fake, ['w1']).map(operation => operation.side)).toEqual(['left']);
+        });
     });
 
     describe('merge into a foot and cycle path', () => {
