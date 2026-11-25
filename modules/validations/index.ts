@@ -20,6 +20,7 @@ export {
     validationCyclewayOnewayContraflowMissing,
     validationCyclewayOnewayRedundant,
     validationCyclewayOnewayWrong,
+    validationOnewayReverseWay,
     validationSidewalkSharedPath,
     validationUnexpectedOnewayDirection,
     validationWidthPartSum,

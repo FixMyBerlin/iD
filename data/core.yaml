@@ -2319,6 +2319,9 @@ en:
     unexpected_oneway_direction:
       title: Bike Lane Against the Traffic of Its Side
       tip: "Find roads in both directions where the “oneway” tag of a bike lane or cycle track makes it run against the traffic of its side."
+    oneway_reverse_way:
+      title: Cycle Path Drawn Against Its Direction
+      tip: "Find cycle paths with oneway=-1 or oneway:bicycle=-1. Better reverse the way so that it points in the riding direction; then the direction is yes."
     cycleway_traffic_mode_foot:
       title: Footway Next to the Cycleway
       tip: "Find cycleways with a footway right next to them where “traffic_mode” does not say so yet."

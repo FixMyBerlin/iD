@@ -9,6 +9,7 @@ import {
     type TagFix
 } from '@tilda-geo/bicycle-infrastructure-tagging/validation';
 import { actionChangeTags } from '../actions/change_tags';
+import { actionReverse } from '../actions/reverse';
 import { kvErrorMessage } from '../core/kv_error_message';
 import { t } from '../core/localizer';
 import { validationIssue, validationIssueFix } from '../core/validation';
@@ -77,11 +78,22 @@ function createValidator(context: iD.Context, ruleId: string): Validator {
     function tagFix(fix: TagFix) {
         const title = renderMessage(fix.message, packageLanguage());
         return new validationIssueFix({
-            icon: fix.remove?.length && !fix.add && !fix.change ? 'iD-operation-delete' : 'iD-icon-apply',
+            icon: fix.reverseWay ? 'iD-operation-reverse'
+                : fix.remove?.length && !fix.add && !fix.change ? 'iD-operation-delete' : 'iD-icon-apply',
             title: t.append('issues.fix.tilda_rule.title', { text: title }),
             onClick: function(context) {
                 const id = this.issue!.entityIds[0] as EntityID;
-                context.perform(actionChangeTags(id, definedTags(applyTagFix(context.entity(id).tags, fix))), title);
+                if (!fix.reverseWay) {
+                    context.perform(actionChangeTags(id, definedTags(applyTagFix(context.entity(id).tags, fix))), title);
+                    return;
+                }
+                // iD reverses the nodes and the keys that follow the way (`:forward`/`:backward`,
+                // `:left`/`:right`) but keeps `oneway`: the fix's `change` flips the oneway keys after it
+                context.perform((graph: iD.Graph) => {
+                    const reversed = actionReverse(id)(graph);
+                    const tags = definedTags(applyTagFix(reversed.entity(id).tags, { ...fix, reverseWay: undefined }));
+                    return actionChangeTags(id, tags)(reversed);
+                }, title);
             }
         });
     }
@@ -137,3 +149,5 @@ export const validationSidewalkSharedPath = tildaRuleValidator('sidewalk_shared_
 // From the tilda-geo rules: on a road in both directions, `cycleway_oneway_wrong` reports only the
 // contraflow case; a side `oneway` against the traffic of its side is this rule.
 export const validationUnexpectedOnewayDirection = tildaRuleValidator('unexpected_oneway_direction');
+// A cycle path whose bikes ride against its line (`oneway=-1`, `oneway:bicycle=-1`): the fix reverses the way
+export const validationOnewayReverseWay = tildaRuleValidator('oneway_reverse_way');
