@@ -1,4 +1,4 @@
-import { actionExtractSidepath, isCrossingSide, isPlainLaneSide, planSidepathExtraction, type SegregatedTrack } from '../actions/extract_sidepath';
+import { actionExtractSidepath, planSidepathExtraction, type SegregatedTrack } from '../actions/extract_sidepath';
 import { behaviorOperation } from '../behavior/operation';
 import { t } from '../core/localizer';
 import { modeSelect } from '../modes/select';
@@ -10,28 +10,17 @@ import type { Operation } from '../core/history';
 import type { WayId } from '../osm';
 
 /**
- * An extract entry: the package's options, plus the fork's bike lane entries (`lane`: the lane as a
- * line, `lane_crossing`: as a crossing way, `highway=cycleway` + `cycleway=crossing`)
+ * What the entry extracts, in the titles, annotations and the extract menu: the package's bike lane
+ * entries (`extractOptions(…, { plainLanes: true })`) are `lane` (as a line) and `lane_crossing`
  */
-type Entry = ExtractOption & { lane?: 'lane' | 'lane_crossing' };
-
-/** What the entry extracts, in the titles, annotations and the extract menu */
-function entryVariant(option: Entry) {
-    return option.lane ?? (option.protectedLane ? 'protected' : option.variant);
+function entryVariant(option: ExtractOption) {
+    if (option.lane) return option.lane === 'crossing' ? 'lane_crossing' : 'lane';
+    return option.protectedLane ? 'protected' : option.variant;
 }
 
-function titleID(option: Entry) {
+function titleID(option: ExtractOption) {
     return `operations.extract_sidepath.title.${entryVariant(option)}.${option.side}`;
 }
-
-/** The bike lanes of a road (not protected ones): as a line, and as a crossing; only the crossing if it is marked as one */
-function laneEntries(tags: Tags): Entry[] {
-    return (['right', 'left'] as const).filter(side => isPlainLaneSide(tags, side)).flatMap(side => [
-        ...(isCrossingSide(tags, side) ? [] : [{ variant: 'cycleway', side, protectedLane: false, lane: 'lane' } as const]),
-        { variant: 'cycleway', side, protectedLane: false, lane: 'lane_crossing' } as const
-    ]);
-}
-
 
 /**
  * "Extract" makes the cycleway line of a segregated cycle track (`cycleway:<side>:segregated=yes`),
@@ -53,9 +42,10 @@ export function roadChanges(before: Tags, after: Tags) {
 }
 
 
-function extractSidepathOperation(context: iD.Context, wayID: WayId, option: Entry): Operation {
+function extractSidepathOperation(context: iD.Context, wayID: WayId, option: ExtractOption): Operation {
     const { variant, side } = option;
-    const asCrossing = option.lane === 'lane_crossing';
+    // a side marked as a crossing, or the bike lane entry "as a crossing"
+    const asCrossing = option.crossing;
 
     function recommend() {
         return loadedSignRecommender() ?? undefined;
@@ -205,7 +195,8 @@ export function operationsExtractSidepath(context: iD.Context, selectedIDs: stri
     // start loading the traffic sign rules early
     if (loadedSignRecommender() === undefined) loadSignRecommender(context).catch(() => { /* see disabled() */ });
 
-    const entries: Entry[] = [...extractOptions(way.tags), ...laneEntries(way.tags)];
+    // bike lanes too: as a line or as a crossing, never merged
+    const entries = extractOptions(way.tags, { plainLanes: true });
     const operations = entries.map(option => extractSidepathOperation(context, wayID, option));
     // the behavior is installed and removed with the operation list: hang it on the first entry
     if (operations.length && options.keys !== false) {

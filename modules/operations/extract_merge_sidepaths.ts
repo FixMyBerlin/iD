@@ -1,10 +1,9 @@
 import { actionExtractMergeSidepaths } from '../actions/extract_merge_sidepaths';
-import { isCrossingSide } from '../actions/extract_sidepath';
 import { behaviorOperation } from '../behavior/operation';
 import { t } from '../core/localizer';
 import { modeSelect } from '../modes/select';
 import { roadChanges, sidepathKeyOperation } from './extract_sidepath';
-import { extractOptions, type Side } from '@tilda-geo/bicycle-infrastructure-tagging';
+import { extractAndMergeSides, type Side } from '@tilda-geo/bicycle-infrastructure-tagging';
 import { svgPath } from '../svg/helpers';
 import { uiCmd } from '../ui/cmd';
 import { loadSignRecommender, loadedSignJoiner, loadedSignRecommender } from '../traffic_sign/recommender';
@@ -157,10 +156,8 @@ export function operationsExtractMergeSidepaths(context: iD.Context, selectedIDs
     const way = context.hasEntity(wayID);
     if (!way || way.isClosed()) return [];
 
-    // protected lanes are usually kept on the road: they are not offered here; a crossing is not merged
-    const sides = extractOptions(way.tags)
-        .filter(option => option.variant === 'cycleway' && !option.protectedLane && !isCrossingSide(way.tags, option.side))
-        .map(option => option.side);
+    // never bike lanes, protected lanes or crossings: they are extracted only
+    const sides = extractAndMergeSides(way.tags);
     if (!sides.length) return [];
 
     // start loading the traffic sign rules early

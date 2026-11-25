@@ -2,8 +2,6 @@ import { osmNode } from '../osm/node';
 import { osmWay } from '../osm/way';
 import { lineLengthMeters, offsetLine } from '../sidepath/offset_line';
 import {
-    cyclewayKind,
-    isRoad,
     planExtraction,
     reverseTags,
     type ExtractVariant, type JoinSigns, type Side, type SignRecommend
@@ -48,48 +46,11 @@ export function planSidepathExtraction(
     road: Tags, variant: ExtractVariant, side: Side, recommend: SignRecommend | undefined, joinSigns?: JoinSigns,
     segregatedTrack?: SegregatedTrack, asCrossing?: boolean
 ): SidepathExtraction {
-    const plan = planExtraction(road, variant, side, { recommend, joinSigns, segregatedTrack });
-    const wayTags = variant === 'sidewalk' ? definedTags(plan.wayTags) : withCrossing(definedTags(plan.wayTags), road, side, asCrossing);
+    // a side marked as a crossing, or `asCrossing`: `cycleway=crossing` / `path=crossing`, no `is_sidepath`
+    const plan = planExtraction(road, variant, side, { recommend, joinSigns, segregatedTrack, asCrossing });
+    const wayTags = definedTags(plan.wayTags);
     const reversed = wayTags.oneway === '-1' || wayTags['oneway:bicycle'] === '-1';
     return { ...plan, wayTags: reversed ? definedTags(reverseTags(wayTags)) : wayTags, roadTags: definedTags(plan.roadTags), reversed };
-}
-
-/** The keys of a side that mark a crossing (`cycleway:right:track=crossing`), most specific first */
-const CROSSING_KEYS = ['track', 'lane'];
-
-/**
- * A cycle track or lane marked as a crossing (`cycleway:<side>:track=crossing`, `…:lane=crossing`,
- * also `:both:` or without a side) is a crossing way: `cycleway=crossing` on a cycleway,
- * `path=crossing` on a path, as TILDA reads it, never `track=crossing` or `lane=crossing`. The package
- * copies `track` as it is and drops `lane` as a key of the road. `asCrossing`: a crossing without a mark
- * (the extract menu's "bike lane as a crossing").
- */
-function withCrossing(wayTags: Tags, road: Tags, side: Side, asCrossing = false): Tags {
-    if (!asCrossing && !isCrossingSide(road, side)) return wayTags;
-    const result = { ...wayTags };
-    for (const key of CROSSING_KEYS) if (result[key] === 'crossing') delete result[key];
-    const highway = result.highway === 'construction' ? result.construction : result.highway;
-    if (highway) result[highway] = 'crossing';
-    // a crossing runs across the road, not along it: no `is_sidepath` (Tobias, 2026-11-25)
-    delete result.is_sidepath;
-    return result;
-}
-
-/** The cycle track or lane of this side is marked as a crossing: it is extracted only, never merged */
-export function isCrossingSide(road: Tags, side: Side) {
-    return CROSSING_KEYS.some(key =>
-        [`cycleway:${side}:${key}`, `cycleway:both:${key}`, `cycleway:${key}`].some(sideKey => road[sideKey] === 'crossing'));
-}
-
-/**
- * A bike lane on this side (`cycleway:<side>=lane`, `opposite_lane` on the left) that is not a protected
- * lane: the package does not offer to extract it, the fork does (as a line or as a crossing), never merged
- */
-export function isPlainLaneSide(road: Tags, side: Side) {
-    if (!isRoad(road) || road.area === 'yes') return false;
-    const value = road[`cycleway:${side}`] ?? road['cycleway:both'] ?? road.cycleway;
-    const lane = value === 'lane' || (value === 'opposite_lane' && side === 'left');
-    return lane && cyclewayKind(road, side) === undefined;
 }
 
 /** Ways shorter than this are not extracted */
