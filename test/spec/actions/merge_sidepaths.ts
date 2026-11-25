@@ -35,6 +35,27 @@ describe('iD.actionMergeSidepaths', () => {
         });
     });
 
+    it('merges a foot crossing and a bike crossing into one path=crossing, without is_sidepath', () => {
+        const before = graph([],
+            { footway: 'crossing', crossing: 'traffic_signals' },
+            { cycleway: 'crossing', crossing: 'traffic_signals', is_sidepath: undefined });
+        const action = actionMergeSidepaths(['w1', 'w-1'], undefined, undefined);
+        expect(action.disabled!(before)).toBe(false);
+        const tags = action(before).entity('w1').tags;
+        expect(tags).toMatchObject({ highway: 'path', path: 'crossing', crossing: 'traffic_signals', bicycle: 'designated', foot: 'designated' });
+        expect(tags.footway).toBeUndefined();
+        expect(tags.cycleway).toBeUndefined();
+        expect(tags.is_sidepath).toBeUndefined();
+    });
+
+    it('keeps traffic_island: a foot traffic island and a bike traffic island are path=traffic_island', () => {
+        const before = graph([], { footway: 'traffic_island' }, { cycleway: 'traffic_island', is_sidepath: undefined });
+        const tags = actionMergeSidepaths(['w1', 'w-1'], undefined, undefined)(before).entity('w1').tags;
+        expect(tags).toMatchObject({ highway: 'path', path: 'traffic_island' });
+        expect(tags.footway).toBeUndefined();
+        expect(tags.cycleway).toBeUndefined();
+    });
+
     it('keeps the cycleway when its changeset is older, and moves the footway\'s relation to it', () => {
         const before = new iD.coreGraph([
             new iD.osmNode({ id: 'n1', loc: [lon(0), lat(0)] }),

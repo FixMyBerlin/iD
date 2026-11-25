@@ -69,7 +69,38 @@ function mergedTags(
     const along = direction(wayLocs(graph, survivor));
     const other = commonTags(deleted.map(way => dot(along, direction(wayLocs(graph, way))) < 0 ? definedTags(reverseTags(way.tags)) : way.tags));
     const [bike, foot] = surviving === 'bike' ? [survivor.tags, other] : [other, survivor.tags];
-    return combinedPathTags(bike, foot, { recommend, joinSigns, primary: surviving });
+    const result = combinedPathTags(bike, foot, { recommend, joinSigns, primary: surviving });
+    return { ...result, tags: withPathCrossing(definedTags(result.tags), bike, foot) };
+}
+
+
+/** The values of `cycleway=` / `footway=` / `path=` that make a way a crossing, as TILDA reads them */
+const CROSSING_VALUES = new Set(['crossing', 'traffic_island']);
+const CROSSING_KEYS = ['cycleway', 'footway', 'path'];
+
+/** `crossing` or `traffic_island` of a way's own class key (`cycleway=crossing` on a cycleway, …) */
+function crossingValue(tags: Readonly<Record<string, string | undefined>>) {
+    const highway = tags.highway === 'construction' ? tags.construction : tags.highway;
+    const value = highway ? tags[highway] : undefined;
+    return value && CROSSING_VALUES.has(value) ? value : undefined;
+}
+
+/**
+ * A foot crossing and a bike crossing merged (Tobias, 2026-11-25: merging crossings is done by hand)
+ * are one crossing of the foot and cycle path: `path=crossing`, as TILDA reads a crossing on a
+ * `highway=path`, not `footway=crossing` and `cycleway=crossing` side by side. No `is_sidepath`.
+ */
+function withPathCrossing(
+    tags: Tags, bike: Readonly<Record<string, string | undefined>>, foot: Readonly<Record<string, string | undefined>>
+): Tags {
+    const value = crossingValue(bike) ?? crossingValue(foot);
+    if (!value) return tags;
+    const result = { ...tags };
+    for (const key of CROSSING_KEYS) if (result[key] !== undefined && CROSSING_VALUES.has(result[key])) delete result[key];
+    const highway = result.highway === 'construction' ? result.construction : result.highway;
+    if (highway) result[highway] = value;
+    delete result.is_sidepath;
+    return result;
 }
 
 
