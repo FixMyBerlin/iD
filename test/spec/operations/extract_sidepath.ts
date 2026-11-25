@@ -222,14 +222,32 @@ describe('sidepath operations: keyboard shortcuts', () => {
             };
         }
 
-        it('"extract" does not merge: the sidewalk way stays as it is', () => {
+        it('"extract" adds the cycleway line only: the sidewalk way stays as it is', () => {
             const real = realContext();
             const { extract } = rightEntries(real);
             expect(extract.disabled()).toBe(false);
             extract();
             expect(real.graph().entity('w2').tags).toEqual({ highway: 'footway', footway: 'sidewalk' });
             expect(real.graph().entity('w1').tags['cycleway:right']).toBe('separate');
-            expect(real.selectedIDs()).not.toContain('w2');
+            const [newID] = real.selectedIDs();
+            expect(newID).not.toBe('w2');
+            const tags = real.graph().entity(newID as 'w1').tags;
+            expect(tags).toMatchObject({ highway: 'cycleway', 'traffic_mode:right': 'foot' });
+            expect(tags.foot).toBeUndefined();
+        });
+
+        it('"extract" on both sides adds two cycleway lines', () => {
+            const both = { highway: 'residential', 'cycleway:both': 'track', 'cycleway:both:segregated': 'yes', 'sidewalk:both': 'separate' };
+            const real = realContext(both);
+            const [menu] = operationsExtractMenu(real, ['w1']);
+            const extract = menu.flyout![0].operations.find(operation => operation.id === 'extract_sidepath' && operation.variant === 'cycleway')!;
+            expect(extract.disabled()).toBe(false);
+            extract();
+            expect(real.graph().entity('w2').tags).toEqual({ highway: 'footway', footway: 'sidewalk' });
+            const lines = real.selectedIDs().map(id => real.graph().entity(id as 'w1').tags);
+            expect(lines).toHaveLength(2);
+            expect(lines.map(tags => tags.highway)).toEqual(['cycleway', 'cycleway']);
+            expect(lines.every(tags => tags.foot === undefined)).toBe(true);
         });
 
         it('"extract and merge" merges the cycle track into the sidewalk way', () => {

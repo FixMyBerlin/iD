@@ -1,8 +1,8 @@
-import { actionExtractSidepath, planSidepathExtraction } from '../actions/extract_sidepath';
+import { actionExtractSidepath, planSidepathExtraction, type SegregatedTrack } from '../actions/extract_sidepath';
 import { behaviorOperation } from '../behavior/operation';
 import { t } from '../core/localizer';
 import { modeSelect } from '../modes/select';
-import { extractOptions, type ExtractOption } from '@tilda-geo/bicycle-infrastructure-tagging';
+import { extractOptions, sideTags, type ExtractOption, type Side } from '@tilda-geo/bicycle-infrastructure-tagging';
 import { svgPath } from '../svg/helpers';
 import { uiCmd } from '../ui/cmd';
 import { loadSignRecommender, loadedSignJoiner, loadedSignRecommender } from '../traffic_sign/recommender';
@@ -12,6 +12,15 @@ import type { WayId } from '../osm';
 function titleID(option: ExtractOption) {
     const variant = option.protectedLane ? 'protected' : option.variant;
     return `operations.extract_sidepath.title.${variant}.${option.side}`;
+}
+
+
+/**
+ * "Extract" makes the cycleway line of a segregated cycle track (`cycleway:<side>:segregated=yes`),
+ * not a segregated foot and cycle path: it does not merge with the sidewalk, that is "extract and merge"
+ */
+function segregatedTrack(road: Tags, variant: ExtractOption['variant'], side: Side): SegregatedTrack | undefined {
+    return variant === 'cycleway' && sideTags(road, 'cycleway', side).segregated === 'yes' ? 'twoLines' : undefined;
 }
 
 
@@ -34,11 +43,13 @@ function extractSidepathOperation(context: iD.Context, wayID: WayId, option: Ext
     }
 
     function action() {
-        return actionExtractSidepath(wayID, variant, side, recommend(), loadedSignJoiner());
+        const track = segregatedTrack(context.entity(wayID).tags, variant, side);
+        return actionExtractSidepath(wayID, variant, side, recommend(), loadedSignJoiner(), track);
     }
 
     function plan() {
-        return planSidepathExtraction(context.entity(wayID).tags, variant, side, recommend(), loadedSignJoiner());
+        const road = context.entity(wayID).tags;
+        return planSidepathExtraction(road, variant, side, recommend(), loadedSignJoiner(), segregatedTrack(road, variant, side));
     }
 
     const operation: Operation = function() {
@@ -190,7 +201,8 @@ export function operationsExtractSidepath(context: iD.Context, selectedIDs: stri
  */
 function extractBothSidesOperation(context: iD.Context, wayID: WayId, variant: ExtractOption['variant']): Operation {
     const recommend = () => loadedSignRecommender() ?? undefined;
-    const sideAction = (side: 'right' | 'left') => actionExtractSidepath(wayID, variant, side, recommend(), loadedSignJoiner());
+    const sideAction = (side: 'right' | 'left') => actionExtractSidepath(
+        wayID, variant, side, recommend(), loadedSignJoiner(), segregatedTrack(context.entity(wayID).tags, variant, side));
 
     function action() {
         const right = sideAction('right');
