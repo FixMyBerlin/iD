@@ -186,6 +186,62 @@ describe('sidepath operations: keyboard shortcuts', () => {
         });
     });
 
+    describe('extract vs. extract and merge: a segregated cycle track with a sidewalk way', () => {
+        // road along the x axis, the sidewalk way 8.5 m to its right
+        const road = { highway: 'residential', 'cycleway:right': 'track', 'cycleway:right:segregated': 'yes', 'sidewalk:right': 'separate' };
+
+        let cleanup: (() => void) | undefined;
+        afterEach(() => cleanup?.());
+
+        /** A real context with the road and the sidewalk way: the merge looks for it in the history's tree */
+        function realContext(roadTags: Record<string, string> = road) {
+            const container = d3_select('body').append('div');
+            const real = iD.coreContext().assetPath('../dist/').init().container(container as never);
+            container.append('div').attr('class', 'main-map').call(real.map() as never).append('div').attr('class', 'inspector-wrap');
+            real.enter(iD.modeBrowse(real) as never);
+            real.perform(...[
+                ...roadEntities(roadTags),
+                new iD.osmNode({ id: 'n21', loc: [lon(0), lat(-8.5)] }),
+                new iD.osmNode({ id: 'n22', loc: [lon(100), lat(-8.5)] }),
+                new iD.osmWay({ id: 'w2', nodes: ['n21', 'n22'], tags: { highway: 'footway', footway: 'sidewalk' } })
+            ].map(entity => iD.actionAddEntity(entity)), 'setup' as never);
+            cleanup = () => {
+                (real.mode() as unknown as { exit(): void }).exit();
+                container.remove();
+                cleanup = undefined;
+            };
+            return real;
+        }
+
+        function rightEntries(real: iD.Context) {
+            const [menu] = operationsExtractMenu(real, ['w1']);
+            const right = menu.flyout!.find(group => group.id === 'right')!.operations;
+            return {
+                extract: right.find(operation => operation.id === 'extract_sidepath' && operation.variant === 'cycleway')!,
+                merge: right.find(operation => operation.id === 'extract_merge_sidepaths')!
+            };
+        }
+
+        it('"extract" does not merge: the sidewalk way stays as it is', () => {
+            const real = realContext();
+            const { extract } = rightEntries(real);
+            expect(extract.disabled()).toBe(false);
+            extract();
+            expect(real.graph().entity('w2').tags).toEqual({ highway: 'footway', footway: 'sidewalk' });
+            expect(real.graph().entity('w1').tags['cycleway:right']).toBe('separate');
+            expect(real.selectedIDs()).not.toContain('w2');
+        });
+
+        it('"extract and merge" merges the cycle track into the sidewalk way', () => {
+            const real = realContext();
+            const { merge } = rightEntries(real);
+            expect(merge.disabled()).toBe(false);
+            merge();
+            expect(real.graph().entity('w2').tags).toMatchObject({ highway: 'path', foot: 'designated', segregated: 'yes' });
+            expect(real.selectedIDs()).toEqual(['w2']);
+        });
+    });
+
     describe('extract and merge', () => {
         it('binds ⌘G once, through the first entry, for a road with a cycle track on both sides', () => {
             const { fake } = context(roadGraph({ highway: 'residential', 'cycleway:both': 'track' }));
