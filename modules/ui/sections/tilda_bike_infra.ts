@@ -25,6 +25,7 @@ import {
     mappingKindLabel,
     mappingOptionRows,
     normalizeMappingChoice,
+    optionMeaningText,
     planForMappingChoice,
     reminderText,
     reminders,
@@ -798,7 +799,8 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
         type KindGroup = { id: string; label: string; kinds: string[] };
         const groups: KindGroup[] = [
             { id: 'none', label: '', kinds: [''] },
-            ...groupMappingKinds().map(group => ({
+            // with a road side also "drawn as a separate way" (`cycleway:<side>=separate`)
+            ...groupMappingKinds(card.side).map(group => ({
                 id: group.id,
                 label: MAPPING_TARGET_GROUP_LABELS[lang][group.id],
                 kinds: group.kinds.map(kind => kind.id)
@@ -1052,9 +1054,12 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
             .each(function(value) {
                 const attribute = d3_select(this.closest('.tilda-attribute')!).datum() as RequiredAttribute;
                 const moved = onewayToMove(attribute) === value;
+                // values that need words (`oneway`): what the value means here, the tag in the tooltip
+                const meaning = moved ? undefined : optionMeaningText(attribute, value, packageLanguage());
                 d3_select(this)
-                    .text(moved ? t('inspector.tilda.move_oneway', { tag: `${attribute.key}=${value}` }) : value)
-                    .attr('title', moved ? t('inspector.tilda.move_oneway_tooltip', { tag: `${attribute.key}=${value}`, old: `oneway=${value}` }) : null);
+                    .text(moved ? t('inspector.tilda.move_oneway', { tag: `${attribute.key}=${value}` }) : meaning?.label ?? value)
+                    .attr('title', moved ? t('inspector.tilda.move_oneway_tooltip', { tag: `${attribute.key}=${value}`, old: `oneway=${value}` })
+                        : meaning ? `${attribute.key}=${value}: ${meaning.hint}` : null);
             })
             .on('click', function(_d3_event: MouseEvent, value: string) {
                 const attribute = d3_select(this.closest('.tilda-attribute')!).datum() as RequiredAttribute;
