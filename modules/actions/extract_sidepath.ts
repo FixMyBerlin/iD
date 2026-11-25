@@ -70,6 +70,8 @@ function withCrossing(wayTags: Tags, road: Tags, side: Side, asCrossing = false)
     for (const key of CROSSING_KEYS) if (result[key] === 'crossing') delete result[key];
     const highway = result.highway === 'construction' ? result.construction : result.highway;
     if (highway) result[highway] = 'crossing';
+    // a crossing runs across the road, not along it: no `is_sidepath` (Tobias, 2026-11-25)
+    delete result.is_sidepath;
     return result;
 }
 

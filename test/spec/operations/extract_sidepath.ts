@@ -287,7 +287,7 @@ describe('sidepath operations: keyboard shortcuts', () => {
         it('"as a line" makes a cycleway, "as a crossing" a cycleway with cycleway=crossing', () => {
             for (const [variant, expected] of [
                 ['lane', { highway: 'cycleway', is_sidepath: 'yes', surface: 'asphalt', oneway: 'yes' }],
-                ['lane_crossing', { highway: 'cycleway', cycleway: 'crossing', is_sidepath: 'yes', surface: 'asphalt', oneway: 'yes' }]
+                ['lane_crossing', { highway: 'cycleway', cycleway: 'crossing', surface: 'asphalt', oneway: 'yes' }]
             ] as const) {
                 const container = d3_select('body').append('div');
                 const real = iD.coreContext().assetPath('../dist/').init().container(container as never);

@@ -52,12 +52,14 @@ describe('iD.actionExtractSidepath', () => {
 
                 const cycleway = extracted(road, 'cycleway');
                 expect(cycleway.way).toMatchObject({ highway: 'cycleway', cycleway: 'crossing' });
+                expect(cycleway.way.is_sidepath).toBeUndefined();
                 expect(cycleway.way.track).toBeUndefined();
                 expect(cycleway.way.lane).toBeUndefined();
                 expect(cycleway.road[`cycleway:right:${key}`]).toBeUndefined();
 
                 const path = extracted(road, 'path');
                 expect(path.way).toMatchObject({ highway: 'path', path: 'crossing' });
+                expect(path.way.is_sidepath).toBeUndefined();
                 expect(path.way.track).toBeUndefined();
                 expect(path.way.lane).toBeUndefined();
             });
