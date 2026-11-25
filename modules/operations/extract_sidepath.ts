@@ -1,4 +1,4 @@
-import { actionExtractSidepath, planSidepathExtraction, type SegregatedTrack } from '../actions/extract_sidepath';
+import { actionExtractSidepath, isCrossingSide, isPlainLaneSide, planSidepathExtraction, type SegregatedTrack } from '../actions/extract_sidepath';
 import { behaviorOperation } from '../behavior/operation';
 import { t } from '../core/localizer';
 import { modeSelect } from '../modes/select';
@@ -9,9 +9,27 @@ import { loadSignRecommender, loadedSignJoiner, loadedSignRecommender } from '..
 import type { Operation } from '../core/history';
 import type { WayId } from '../osm';
 
-function titleID(option: ExtractOption) {
-    const variant = option.protectedLane ? 'protected' : option.variant;
-    return `operations.extract_sidepath.title.${variant}.${option.side}`;
+/**
+ * An extract entry: the package's options, plus the fork's bike lane entries (`lane`: the lane as a
+ * line, `lane_crossing`: as a crossing way, `highway=cycleway` + `cycleway=crossing`)
+ */
+type Entry = ExtractOption & { lane?: 'lane' | 'lane_crossing' };
+
+/** What the entry extracts, in the titles, annotations and the extract menu */
+function entryVariant(option: Entry) {
+    return option.lane ?? (option.protectedLane ? 'protected' : option.variant);
+}
+
+function titleID(option: Entry) {
+    return `operations.extract_sidepath.title.${entryVariant(option)}.${option.side}`;
+}
+
+/** The bike lanes of a road (not protected ones): as a line, and as a crossing; only the crossing if it is marked as one */
+function laneEntries(tags: Tags): Entry[] {
+    return (['right', 'left'] as const).filter(side => isPlainLaneSide(tags, side)).flatMap(side => [
+        ...(isCrossingSide(tags, side) ? [] : [{ variant: 'cycleway', side, protectedLane: false, lane: 'lane' } as const]),
+        { variant: 'cycleway', side, protectedLane: false, lane: 'lane_crossing' } as const
+    ]);
 }
 
 
@@ -35,8 +53,9 @@ export function roadChanges(before: Tags, after: Tags) {
 }
 
 
-function extractSidepathOperation(context: iD.Context, wayID: WayId, option: ExtractOption): Operation {
+function extractSidepathOperation(context: iD.Context, wayID: WayId, option: Entry): Operation {
     const { variant, side } = option;
+    const asCrossing = option.lane === 'lane_crossing';
 
     function recommend() {
         return loadedSignRecommender() ?? undefined;
@@ -44,12 +63,12 @@ function extractSidepathOperation(context: iD.Context, wayID: WayId, option: Ext
 
     function action() {
         const track = segregatedTrack(context.entity(wayID).tags, variant, side);
-        return actionExtractSidepath(wayID, variant, side, recommend(), loadedSignJoiner(), track);
+        return actionExtractSidepath(wayID, variant, side, recommend(), loadedSignJoiner(), track, asCrossing);
     }
 
     function plan() {
         const road = context.entity(wayID).tags;
-        return planSidepathExtraction(road, variant, side, recommend(), loadedSignJoiner(), segregatedTrack(road, variant, side));
+        return planSidepathExtraction(road, variant, side, recommend(), loadedSignJoiner(), segregatedTrack(road, variant, side), asCrossing);
     }
 
     const operation: Operation = function() {
@@ -100,7 +119,7 @@ function extractSidepathOperation(context: iD.Context, wayID: WayId, option: Ext
     };
 
     operation.annotation = function() {
-        return t(`operations.extract_sidepath.annotation.${option.protectedLane ? 'protected' : variant}`, {
+        return t(`operations.extract_sidepath.annotation.${entryVariant(option)}`, {
             side: t(`operations.extract_sidepath.side.${side}`)
         });
     };
@@ -118,7 +137,7 @@ function extractSidepathOperation(context: iD.Context, wayID: WayId, option: Ext
     operation.icon = () => '#iD-operation-extract';
     operation.id = 'extract_sidepath';
     operation.side = side;
-    operation.variant = option.protectedLane ? 'protected' : variant;
+    operation.variant = entryVariant(option);
     operation.keys = [];
     operation.title = t.append(titleID(option));
 
@@ -186,7 +205,8 @@ export function operationsExtractSidepath(context: iD.Context, selectedIDs: stri
     // start loading the traffic sign rules early
     if (loadedSignRecommender() === undefined) loadSignRecommender(context).catch(() => { /* see disabled() */ });
 
-    const operations = extractOptions(way.tags).map(option => extractSidepathOperation(context, wayID, option));
+    const entries: Entry[] = [...extractOptions(way.tags), ...laneEntries(way.tags)];
+    const operations = entries.map(option => extractSidepathOperation(context, wayID, option));
     // the behavior is installed and removed with the operation list: hang it on the first entry
     if (operations.length && options.keys !== false) {
         operations[0].behavior = behaviorOperation(context).which(sidepathKeyOperation(context, wayID, operations, 'extract_sidepath', uiCmd('⌘E')));

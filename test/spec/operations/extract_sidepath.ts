@@ -260,6 +260,55 @@ describe('sidepath operations: keyboard shortcuts', () => {
         });
     });
 
+    describe('a bike lane (cycleway:<side>=lane): extracted as a line or as a crossing, never merged', () => {
+        const lane = { highway: 'residential', 'cycleway:right': 'lane', 'cycleway:right:surface': 'asphalt' };
+
+        it('offers "as a line" and "as a crossing", and no "extract and merge"', () => {
+            const { fake } = context(roadGraph(lane));
+            const operations = operationsExtractSidepath(fake, ['w1']);
+            expect(operations.map(operation => `${operation.variant}.${operation.side}`)).toEqual(['lane.right', 'lane_crossing.right']);
+            expect(operationsExtractMergeSidepaths(fake, ['w1'])).toEqual([]);
+            const [menu] = operationsExtractMenu(fake, ['w1']);
+            expect(menu.flyout!.flatMap(group => group.operations).map(operation => operation.id)).toEqual(['extract_sidepath', 'extract_sidepath']);
+        });
+
+        it('offers only "as a crossing" when the lane is marked as one', () => {
+            const { fake } = context(roadGraph({ ...lane, 'cycleway:right:lane': 'crossing' }));
+            expect(operationsExtractSidepath(fake, ['w1']).map(operation => operation.variant)).toEqual(['lane_crossing']);
+        });
+
+        it('offers nothing for opposite_lane on the right or for a footway', () => {
+            const { fake } = context(roadGraph({ highway: 'residential', 'cycleway:right': 'opposite_lane' }));
+            expect(operationsExtractSidepath(fake, ['w1'])).toEqual([]);
+            const footway = context(roadGraph({ highway: 'footway', 'cycleway:right': 'lane' }));
+            expect(operationsExtractSidepath(footway.fake, ['w1'])).toEqual([]);
+        });
+
+        it('"as a line" makes a cycleway, "as a crossing" a cycleway with cycleway=crossing', () => {
+            for (const [variant, expected] of [
+                ['lane', { highway: 'cycleway', is_sidepath: 'yes', surface: 'asphalt', oneway: 'yes' }],
+                ['lane_crossing', { highway: 'cycleway', cycleway: 'crossing', is_sidepath: 'yes', surface: 'asphalt', oneway: 'yes' }]
+            ] as const) {
+                const container = d3_select('body').append('div');
+                const real = iD.coreContext().assetPath('../dist/').init().container(container as never);
+                container.append('div').attr('class', 'main-map').call(real.map() as never).append('div').attr('class', 'inspector-wrap');
+                real.enter(iD.modeBrowse(real) as never);
+                real.perform(...roadEntities(lane).map(entity => iD.actionAddEntity(entity)), 'setup' as never);
+                try {
+                    const operation = operationsExtractSidepath(real, ['w1']).find(entry => entry.variant === variant)!;
+                    expect(operation.disabled()).toBe(false);
+                    operation();
+                    const [newID] = real.selectedIDs();
+                    expect(real.graph().entity(newID as 'w1').tags).toEqual(expected);
+                    expect(real.graph().entity('w1').tags).toEqual({ highway: 'residential', 'cycleway:right': 'separate' });
+                } finally {
+                    (real.mode() as unknown as { exit(): void }).exit();
+                    container.remove();
+                }
+            }
+        });
+    });
+
     describe('extract and merge', () => {
         it('binds ⌘G once, through the first entry, for a road with a cycle track on both sides', () => {
             const { fake } = context(roadGraph({ highway: 'residential', 'cycleway:both': 'track' }));

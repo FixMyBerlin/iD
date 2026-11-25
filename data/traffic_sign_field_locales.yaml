@@ -445,6 +445,12 @@ de:
         protected:
           right: Rechten geschützten Radfahrstreifen herauslösen
           left: Linken geschützten Radfahrstreifen herauslösen
+        lane:
+          right: Rechten Radfahrstreifen als Linie herauslösen
+          left: Linken Radfahrstreifen als Linie herauslösen
+        lane_crossing:
+          right: Rechten Radfahrstreifen als Querung herauslösen
+          left: Linken Radfahrstreifen als Querung herauslösen
         sidewalk:
           right: Rechten Gehweg herauslösen
           left: Linken Gehweg herauslösen
@@ -464,6 +470,8 @@ de:
       annotation:
         cycleway: "Den Radweg ({side}) als eigenen Weg herausgelöst."
         protected: "Den geschützten Radfahrstreifen ({side}) als eigenen Weg herausgelöst."
+        lane: "Den Radfahrstreifen ({side}) als eigenen Weg herausgelöst."
+        lane_crossing: "Den Radfahrstreifen ({side}) als eigene Querung herausgelöst."
         sidewalk: "Den Gehweg ({side}) als eigenen Weg herausgelöst."
         path: "Den Radweg und Gehweg ({side}) als eigenen Weg herausgelöst."
       description: "Erzeugt einen eigenen Weg highway={highway} etwa {meters} m {side} der Straße; {moved} Tags dieser Seite wandern dorthin. Diese Straße bekommt {changes}."

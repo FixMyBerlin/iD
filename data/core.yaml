@@ -70,6 +70,12 @@ en:
         protected:
           right: Extract right protected bike lane
           left: Extract left protected bike lane
+        lane:
+          right: Extract right bike lane as a line
+          left: Extract left bike lane as a line
+        lane_crossing:
+          right: Extract right bike lane as a crossing
+          left: Extract left bike lane as a crossing
         sidewalk:
           right: Extract right sidewalk
           left: Extract left sidewalk
@@ -89,6 +95,8 @@ en:
       annotation:
         cycleway: "Extracted the {side} cycle track into a separate way."
         protected: "Extracted the {side} protected bike lane into a separate way."
+        lane: "Extracted the {side} bike lane into a separate way."
+        lane_crossing: "Extracted the {side} bike lane into a separate crossing way."
         sidewalk: "Extracted the {side} sidewalk into a separate way."
         path: "Extracted the {side} cycle track and sidewalk into a separate path."
       description: "Create a separate highway={highway} about {meters} m to the {side}; {moved} tags of that side move to it. This road gets {changes}."
