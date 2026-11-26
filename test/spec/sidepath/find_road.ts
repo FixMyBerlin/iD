@@ -64,8 +64,18 @@ describe('sidepath/find_road', () => {
 
     });
 
-    // Tobias' rank includes sidewalk:bicycle:<side>=separate; the package does not read it yet (asked 2026-11-26)
-    it.todo('takes sidewalk:bicycle:<side>=separate like sidewalk=separate');
+    it('takes sidewalk:bicycle=separate like sidewalk=separate (Tobias\' rank), not on the other side', () => {
+        way('w2', [0, 0], [100, 0], { highway: 'secondary', 'sidewalk:bicycle:right': 'separate' });
+        way('w3', [0, -12], [100, -12], { highway: 'service' });
+        cycleway(-8);
+        expect(find()).toMatchObject({ roadID: 'w2', side: 'right' });
+
+        entities = [];
+        way('w2', [0, 0], [100, 0], { highway: 'secondary', 'sidewalk:bicycle:left': 'separate' });
+        way('w3', [0, -12], [100, -12], { highway: 'service' });
+        cycleway(-8);
+        expect(find()).toMatchObject({ roadID: 'w3' });
+    });
 
     it('prefers cycleway=separate over sidewalk=separate', () => {
         way('w2', [0, 0], [100, 0], { highway: 'secondary', 'sidewalk:right': 'separate' });
