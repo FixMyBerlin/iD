@@ -1578,7 +1578,7 @@ Left as it is (iD in general): a full redraw at z17 costs 250–500 ms and runs 
 - **Not to be published** until Tobias' manual check of the 36 Berlin hits (from the check script) shows they are right. Otherwise it stays a check script.
 - **Direction icons (built 2026-11-26, ed7677bb8):** Maid's `forward`, `reversed`, `both`, `drawn` SVGs unchanged in `dist/img/maid-direction/` (from Maid a94b157). On the oneway buttons of the TILDA box by value like Maid (`yes` → forward, `-1` → reversed, `no` → both), turned to the screen angle of the way's first segment; "Linienrichtung: →" (`drawn`) before them. Also in iD's oneway field (`modules/ui/fields/check.ts`), where a separate cycleway's direction is edited: a marker for the value after its text, and the reverse button shows the drawing direction (`drawn`, turned) instead of iD's pseudo-direction icon. Shared code: `modules/tilda/direction_marker.ts`.
 
-### 40. Extract the bike lane from a segregated foot and cycle path — 🟡 (built 2026-11-26 against the unreleased tagging 0.9.0; waits for the release)
+### 40. Extract the bike lane from a segregated foot and cycle path — 🟡 (built 2026-11-26; tagging 0.9.0 adopted)
 
 **Goal.** Mapper request (Ines): a way mapped as a segregated foot and cycle path that is really a sidewalk next to a bike lane on the carriageway. The way stays and becomes the sidewalk; the lane becomes its own line or is tagged on the road.
 
@@ -1586,7 +1586,6 @@ Left as it is (iD in general): a full redraw at z17 costs 250–500 ms and runs 
 - Tags: the package's `planLaneFromSegregatedPath` (tilda-schemas 97f9c89). Road: `roadNextTo` → `pickSidepathRoad` + `wayPlacement` of the package (`modules/sidepath/find_road.ts`, which now keeps only the candidate search).
 - The new lane line: the stretch of the road line beside the path (projections of the path's nodes), moved to the path's side, 1.5 m nearer the road than the path; drawn in the road's direction, as the package's `oneway` expects. Hover preview; one undo step; path and lane selected after. The package's review messages (traffic sign, the whole way's width, `bicycle=use_sidepath` on the road) go into the flash.
 - Code: `modules/actions/lane_from_path.ts`, `modules/operations/lane_from_path.ts`, hooked into `modules/modes/select.js`; strings `operations.lane_from_path.*`. Tests: `test/spec/actions/lane_from_path.ts`, `test/spec/operations/lane_from_path.ts`, `test/spec/sidepath/find_road.ts`.
-- **Before pushing:** tagging 0.9.0 released and adopted in `package.json` (the local build was installed with `--no-save`).
 
 ## Progress log
 
