@@ -22,6 +22,7 @@ import { modeDragNote } from './drag_note';
 import { osmNode, osmWay } from '../osm';
 import * as Operations from '../operations/index';
 import { operationsExtractMenu } from '../operations/extract_menu';
+import { operationsLaneFromPath } from '../operations/lane_from_path';
 import { operationsMergeSidepaths } from '../operations/merge_sidepaths';
 import { uiCmd } from '../ui/cmd';
 import {
@@ -218,6 +219,8 @@ export function modeSelect(context, selectedIDs) {
         // one entry with a flyout (both sides / left / right); ⌘E, ⌘G
         _operations.splice(extractIndex + 1, 0,
             ...operationsExtractMenu(context, selectedIDs),
+            // a segregated foot and cycle path that is really sidewalk + bike lane (never a road: no clash on ⌘E)
+            ...operationsLaneFromPath(context, selectedIDs),
             ...operationsMergeSidepaths(context, selectedIDs));
 
         _operations

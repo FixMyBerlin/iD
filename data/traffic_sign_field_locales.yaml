@@ -495,6 +495,28 @@ de:
         both: Beide Seiten
         left: Nur links
         right: Nur rechts
+    lane_from_path:
+      title: Radstreifen herauslösen …
+      description:
+        menu: "Dieser Weg ist als getrennter Geh- und Radweg erfasst. Ist er eigentlich ein Gehweg neben einem Radstreifen auf der Fahrbahn? Dann wird der Weg zum Gehweg, und der Radstreifen wird eine eigene Linie oder an der Straße getaggt."
+        line: Der Weg wird zum Gehweg; der Radstreifen wird eine eigene Linie auf der Fahrbahn, die Straßenseite wird auf separat gesetzt.
+        centerline: Der Weg wird zum Gehweg; der Radstreifen wird an der Straßenseite getaggt.
+      group:
+        line: Als eigene Linie
+        centerline: An der Straße taggen
+      lane:
+        exclusive: "Radfahrstreifen (lane=exclusive)"
+        advisory: "Schutzstreifen (lane=advisory)"
+      annotation:
+        line: Radstreifen als eigene Linie herausgelöst.
+        centerline: Radstreifen an der Straße getaggt.
+      flash:
+        line: Der Weg ist jetzt der Gehweg, der Radstreifen eine eigene Linie.
+        centerline: Der Weg ist jetzt der Gehweg, der Radstreifen ist an der Straße getaggt.
+      no_road: Neben diesem Weg verläuft keine Straße (in den geladenen Daten), oder der Weg liegt nicht eindeutig auf einer Seite.
+      not_eligible: Das ist kein getrennter Geh- und Radweg.
+      incomplete: Der Weg oder die Straße ist nicht ganz geladen.
+      too_short: Der Weg verläuft nur an einem zu kurzen Stück der Straße.
     extract_merge_sidepaths:
       title:
         right: Rechten Radweg herauslösen und mit dem Gehweg zusammenführen

@@ -284,9 +284,9 @@ describe('sidepath operations: keyboard shortcuts', () => {
             expect(operationsExtractSidepath(footway.fake, ['w1'])).toEqual([]);
         });
 
-        it('"as a line" makes a cycleway, "as a crossing" a cycleway with cycleway=crossing', () => {
+        it('"as a line" makes a cycleway with cycleway=lane (no is_sidepath: it lies on the carriageway), "as a crossing" a cycleway with cycleway=crossing', () => {
             for (const [variant, expected] of [
-                ['lane', { highway: 'cycleway', is_sidepath: 'yes', surface: 'asphalt', oneway: 'yes' }],
+                ['lane', { highway: 'cycleway', cycleway: 'lane', surface: 'asphalt', oneway: 'yes' }],
                 ['lane_crossing', { highway: 'cycleway', cycleway: 'crossing', surface: 'asphalt', oneway: 'yes' }]
             ] as const) {
                 const container = d3_select('body').append('div');

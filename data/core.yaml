@@ -115,6 +115,28 @@ en:
         both: Both sides
         left: Left side only
         right: Right side only
+    lane_from_path:
+      title: Extract bike lane …
+      description:
+        menu: "This way is mapped as a segregated foot and cycle path, but is it a sidewalk next to a bike lane on the carriageway? Then the way becomes the sidewalk, and the bike lane becomes its own line or is tagged on the road."
+        line: The way becomes the sidewalk; the bike lane becomes its own line on the carriageway, and the road side is set to separate.
+        centerline: The way becomes the sidewalk; the bike lane is tagged on the road's side.
+      group:
+        line: As its own line
+        centerline: Tagged on the road
+      lane:
+        exclusive: "Bike lane (lane=exclusive)"
+        advisory: "Advisory lane (lane=advisory)"
+      annotation:
+        line: Extracted the bike lane as its own line.
+        centerline: Tagged the bike lane on the road.
+      flash:
+        line: The way is now the sidewalk, the bike lane is its own line.
+        centerline: The way is now the sidewalk, the bike lane is tagged on the road.
+      no_road: No road runs along this way (in the loaded data), or the way does not clearly lie on one side of it.
+      not_eligible: This is not a segregated foot and cycle path.
+      incomplete: Not all of this way or the road is downloaded.
+      too_short: The way runs along too short a piece of the road.
     extract_merge_sidepaths:
       title:
         right: Extract right cycle track and merge with sidewalk
