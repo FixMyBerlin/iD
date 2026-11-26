@@ -1,5 +1,5 @@
 import { dispatch as d3_dispatch } from 'd3-dispatch';
-import { select as d3_select } from 'd3-selection';
+import { select as d3_select, type Selection } from 'd3-selection';
 import {
     analyzeCategoryGaps,
     isIncompleteCategoryId,
@@ -221,6 +221,32 @@ function tildaValueLabel(attribute: RequiredAttribute, value: string | undefined
  *   'reveal' - (keys), show the inspector field for one of these keys
  *   'fieldStatus' - the colors of the field titles changed without a tag change (a check was stored)
  */
+
+/**
+ * The screen direction from `a` to `b` ([lon, lat]), degrees clockwise from east (north is -90°, the screen's y runs
+ * down); east-west distances shrink with the latitude. Nothing for two equal points.
+ */
+export function segmentScreenAngle(a: [number, number], b: [number, number]): number | undefined {
+    if (a[0] === b[0] && a[1] === b[1]) return undefined;
+    const dx = (b[0] - a[0]) * Math.cos((a[1] + b[1]) / 2 * Math.PI / 180);
+    return Math.atan2(-(b[1] - a[1]), dx) * 180 / Math.PI;
+}
+
+/** The marker of a oneway value, by what the value means for the line: `yes` with it, `-1` against it, `no` both (Maid) */
+const ONEWAY_SHAPE: Record<string, 'forward' | 'reversed' | 'both' | undefined> = { yes: 'forward', '-1': 'reversed', no: 'both' };
+
+/**
+ * One of Maid's direction markers (`dist/img/maid-direction`, taken over unchanged), turned by `angle` degrees
+ * clockwise; the files point east, so left to right is the way's drawing direction
+ */
+function directionIcon<E extends HTMLElement>(context: iD.Context, parent: Selection<E, unknown, null, undefined>, shape: 'forward' | 'reversed' | 'both' | 'drawn', angle: number | undefined) {
+    parent.append('img')
+        .attr('class', 'tilda-direction-icon')
+        .attr('src', context.imagePath(`maid-direction/${shape}.svg`))
+        .attr('alt', '')
+        .style('transform', angle ? `rotate(${angle}deg)` : '');
+}
+
 export function uiSectionTildaBikeInfra(context: iD.Context) {
     const dispatch = d3_dispatch('change', 'reveal', 'fieldStatus');
 
@@ -245,6 +271,18 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
     let _assumedFields = new Map<string, RequiredAttribute>();
 
     const checks = tildaChecks(context);
+
+    /**
+     * The screen direction of the selected way along its first segment, degrees clockwise from east (Maid's
+     * `lineAngleOf`): the first segment, not first to last node, which misleads on a U-shaped or closed way
+     */
+    function lineAngle(): number | undefined {
+        if (_entityIDs.length !== 1) return undefined;
+        const way = context.hasEntity(_entityIDs[0] as Parameters<iD.Context['hasEntity']>[0]);
+        if (!way || way.type !== 'way') return undefined;
+        const [a, b] = (way as iD.OsmWay).nodes.slice(0, 2).map(id => context.hasEntity(id)?.loc as [number, number] | undefined);
+        return a && b ? segmentScreenAngle(a, b) : undefined;
+    }
 
     const section = (uiSection('tilda-bike-infra', context) as any)
         .label(() => t.append('inspector.tilda.title'))
@@ -1043,6 +1081,23 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
         listOptions.exit().remove();
         listOptions.enter().append('option').merge(listOptions).attr('value', d => d);
 
+        // "Linienrichtung: →" before the oneway values: the way's drawing direction, so the mapper checks it first
+        rows.select('.tilda-buttons').each(function(d) {
+            const container = d3_select(this);
+            const angle = d.id === 'oneway' && needsInputs(d) ? lineAngle() : undefined;
+            const hint = container.selectAll<HTMLSpanElement, number>('.tilda-line-direction')
+                .data(angle === undefined ? [] : [angle]);
+            hint.exit().remove();
+            const entered = hint.enter().insert('span', ':first-child').attr('class', 'tilda-line-direction');
+            entered.merge(hint)
+                .attr('title', t('inspector.tilda.line_direction_tooltip'))
+                .each(function(value) {
+                    const span = d3_select(this).text('');
+                    span.append('span').text(t('inspector.tilda.line_direction'));
+                    directionIcon(context, span, 'drawn', value);
+                });
+        });
+
         const buttons = rows.select('.tilda-buttons')
             .selectAll<HTMLButtonElement, string>('button')
             .data(d => needsInputs(d) ? d.options.slice(0, MAX_BUTTONS) : quickValue(d) ? [quickValue(d)!] : [], d => d);
@@ -1056,8 +1111,12 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
                 const moved = onewayToMove(attribute) === value;
                 // values that need words (`oneway`): what the value means here, the tag in the tooltip
                 const meaning = moved ? undefined : optionMeaningText(attribute, value, packageLanguage());
-                d3_select(this)
-                    .text(moved ? t('inspector.tilda.move_oneway', { tag: `${attribute.key}=${value}` }) : meaning?.label ?? value)
+                const button = d3_select(this).text('');
+                const shape = attribute.id === 'oneway' && !moved ? ONEWAY_SHAPE[value] : undefined;
+                if (shape) directionIcon(context, button, shape, lineAngle());
+                button.append('span')
+                    .text(moved ? t('inspector.tilda.move_oneway', { tag: `${attribute.key}=${value}` }) : meaning?.label ?? value);
+                button
                     .attr('title', moved ? t('inspector.tilda.move_oneway_tooltip', { tag: `${attribute.key}=${value}`, old: `oneway=${value}` })
                         : meaning ? `${attribute.key}=${value}: ${meaning.hint}` : null);
             })

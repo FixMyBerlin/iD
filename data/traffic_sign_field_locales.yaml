@@ -309,6 +309,8 @@ de:
       nothing_open: An dieser Seite ist nichts offen
       move_oneway: "Als {tag} taggen"
       move_oneway_tooltip: "An Fuß- und Gemeinsamen Wegen gehört die Richtung für Räder in oneway:bicycle. Setzt {tag} und entfernt {old}."
+      line_direction: "Linienrichtung:"
+      line_direction_tooltip: "In diese Richtung ist der Weg gezeichnet (sein erstes Stück, wie auf der Karte). yes heißt in Linienrichtung, -1 gegen sie."
       collapsed_hint: die Radinfrastruktur liegt an den Seiten
       target: Ändern in
       edit: Die Kategorie ändern
