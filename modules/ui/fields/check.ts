@@ -7,11 +7,11 @@ import { omit } from 'es-toolkit/compat';
 import { utilRebind } from '../../util/rebind';
 import { localizer, t } from '../../core/localizer';
 import { actionReverse } from '../../actions/reverse';
-import { svgIcon } from '../../svg/icon';
 import { utilCheckTagDictionary } from '../../util';
 import { osmOneWayTags } from '../../osm/tags';
 import type { EntityId } from '../../osm';
 import { formatTag } from './tag_title';
+import { directionIcon, ONEWAY_SHAPE, wayScreenAngle } from '../../tilda/direction_marker';
 
 export { uiFieldCheck as uiFieldDefaultCheck };
 export { uiFieldCheck as uiFieldOnewayCheck };
@@ -84,15 +84,11 @@ export function uiFieldCheck(field: any, context: iD.Context) {
         if (reverserHidden() || !entity) return selection;
 
         if (entity.type !== 'way') return selection;
-        const first = entity.first();
-        const last = entity.isClosed() ? entity.nodes[entity.nodes.length - 2] : entity.last();
-        const pseudoDirection = first < last;
-        const icon = pseudoDirection ? '#iD-icon-forward' : '#iD-icon-backward';
-
-        selection.selectAll<HTMLElement, any>('.reverser-span')
+        // Radnetz Berlin: the line's drawing direction as on the map (Maid's marker), instead of iD's pseudo direction
+        const span = selection.selectAll<HTMLElement, any>('.reverser-span')
             .text('')
-            .call(t.append('inspector.check.reverser'))
-            .call(svgIcon(icon, 'inline'));
+            .call(t.append('inspector.check.reverser'));
+        directionIcon(context, span, 'drawn', wayScreenAngle(context, entity.id));
 
         return selection;
     }
@@ -238,6 +234,17 @@ export function uiFieldCheck(field: any, context: iD.Context) {
 
         label
             .classed('set', !!_value);
+
+        // Radnetz Berlin: what the value means for the line (Maid's markers), turned like the way on the map
+        if (field.type === 'onewayCheck') {
+            label.selectAll('.oneway-marker').remove();
+            const raw = isMixed ? undefined : (tag as string | undefined) ?? (_impliedYes ? 'yes' : undefined);
+            const shape = raw === '1' ? 'forward' : raw ? ONEWAY_SHAPE[raw] : undefined;
+            const angle = _entityIDs.length === 1 ? wayScreenAngle(context, _entityIDs[0]) : undefined;
+            if (shape && angle !== undefined) {
+                directionIcon(context, text, shape, angle).classed('oneway-marker', true);
+            }
+        }
 
         if (field.type === 'onewayCheck') {
             reverser

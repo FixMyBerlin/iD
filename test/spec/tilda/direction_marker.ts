@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import { segmentScreenAngle } from '../../../../modules/ui/sections/tilda_bike_infra';
+import { segmentScreenAngle } from '../../../modules/tilda/direction_marker';
 
-describe('ui/sections/tilda_bike_infra segmentScreenAngle', () => {
+describe('tilda/direction_marker segmentScreenAngle', () => {
     it('turns the east-pointing markers to the way on the screen', () => {
         expect(segmentScreenAngle([13.4, 52.5], [13.401, 52.5])).toBeCloseTo(0);
         expect(segmentScreenAngle([13.4, 52.5], [13.4, 52.501])).toBeCloseTo(-90);

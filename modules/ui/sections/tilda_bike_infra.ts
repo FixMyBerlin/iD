@@ -1,5 +1,5 @@
 import { dispatch as d3_dispatch } from 'd3-dispatch';
-import { select as d3_select, type Selection } from 'd3-selection';
+import { select as d3_select } from 'd3-selection';
 import {
     analyzeCategoryGaps,
     isIncompleteCategoryId,
@@ -48,6 +48,7 @@ import { svgIcon } from '../../svg/icon';
 import { utilRebind } from '../../util/rebind';
 import { categoryName, packageLanguage } from '../../tilda/package_texts';
 import { definedTags } from '../../tilda/tags';
+import { directionIcon, ONEWAY_SHAPE, wayScreenAngle } from '../../tilda/direction_marker';
 import { tildaChecks, type TildaCheck } from '../../tilda/checks';
 import { trafficSignTagKeysFromTags } from '../../presets/traffic_sign_fields';
 import { presetFieldsOf } from '../fields/side_prerequisite';
@@ -222,31 +223,6 @@ function tildaValueLabel(attribute: RequiredAttribute, value: string | undefined
  *   'fieldStatus' - the colors of the field titles changed without a tag change (a check was stored)
  */
 
-/**
- * The screen direction from `a` to `b` ([lon, lat]), degrees clockwise from east (north is -90°, the screen's y runs
- * down); east-west distances shrink with the latitude. Nothing for two equal points.
- */
-export function segmentScreenAngle(a: [number, number], b: [number, number]): number | undefined {
-    if (a[0] === b[0] && a[1] === b[1]) return undefined;
-    const dx = (b[0] - a[0]) * Math.cos((a[1] + b[1]) / 2 * Math.PI / 180);
-    return Math.atan2(-(b[1] - a[1]), dx) * 180 / Math.PI;
-}
-
-/** The marker of a oneway value, by what the value means for the line: `yes` with it, `-1` against it, `no` both (Maid) */
-const ONEWAY_SHAPE: Record<string, 'forward' | 'reversed' | 'both' | undefined> = { yes: 'forward', '-1': 'reversed', no: 'both' };
-
-/**
- * One of Maid's direction markers (`dist/img/maid-direction`, taken over unchanged), turned by `angle` degrees
- * clockwise; the files point east, so left to right is the way's drawing direction
- */
-function directionIcon<E extends HTMLElement>(context: iD.Context, parent: Selection<E, unknown, null, undefined>, shape: 'forward' | 'reversed' | 'both' | 'drawn', angle: number | undefined) {
-    parent.append('img')
-        .attr('class', 'tilda-direction-icon')
-        .attr('src', context.imagePath(`maid-direction/${shape}.svg`))
-        .attr('alt', '')
-        .style('transform', angle ? `rotate(${angle}deg)` : '');
-}
-
 export function uiSectionTildaBikeInfra(context: iD.Context) {
     const dispatch = d3_dispatch('change', 'reveal', 'fieldStatus');
 
@@ -277,11 +253,7 @@ export function uiSectionTildaBikeInfra(context: iD.Context) {
      * `lineAngleOf`): the first segment, not first to last node, which misleads on a U-shaped or closed way
      */
     function lineAngle(): number | undefined {
-        if (_entityIDs.length !== 1) return undefined;
-        const way = context.hasEntity(_entityIDs[0] as Parameters<iD.Context['hasEntity']>[0]);
-        if (!way || way.type !== 'way') return undefined;
-        const [a, b] = (way as iD.OsmWay).nodes.slice(0, 2).map(id => context.hasEntity(id)?.loc as [number, number] | undefined);
-        return a && b ? segmentScreenAngle(a, b) : undefined;
+        return _entityIDs.length === 1 ? wayScreenAngle(context, _entityIDs[0]) : undefined;
     }
 
     const section = (uiSection('tilda-bike-infra', context) as any)
