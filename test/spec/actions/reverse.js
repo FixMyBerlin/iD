@@ -229,6 +229,55 @@ describe('iD.actionReverse', function () {
     });
 
 
+    // Radnetz: the sides of a road follow TILDA (rows A to G of
+    // https://github.com/osm-editor-kit/maid/blob/main/docs/research/reverse-side-keys.md)
+    describe('reverses the sides of a road as TILDA reads them', function () {
+        function reversed(tags, options) {
+            var way = new iD.osmWay({tags: tags});
+            var graph = iD.actionReverse(way.id, options)(new iD.coreGraph([way]));
+            return graph.entity(way.id).tags;
+        }
+
+        it('A: keeps a second side of a two-way road', function () {
+            expect(reversed({highway: 'residential', 'cycleway:both': 'lane', 'cycleway:both:marking:left': 'dashed_line'}))
+                .toEqual({highway: 'residential', 'cycleway:both': 'lane', 'cycleway:both:marking:left': 'dashed_line'});
+        });
+
+        it('B: turns explicit lane directions of a two-way road, so the lanes ride where they rode', function () {
+            expect(reversed({highway: 'residential', 'cycleway:left:oneway': '-1', 'cycleway:right:oneway': 'yes'}))
+                .toEqual({highway: 'residential', 'cycleway:right:oneway': 'yes', 'cycleway:left:oneway': '-1'});
+        });
+
+        it('C: swaps the road side and keeps the second side', function () {
+            expect(reversed({highway: 'residential', 'cycleway:right': 'lane', 'cycleway:right:separation:left': 'bollard'}))
+                .toEqual({highway: 'residential', 'cycleway:left': 'lane', 'cycleway:left:separation:left': 'bollard'});
+        });
+
+        it('D: keeps the second side and oneway=no of a two-way lane', function () {
+            expect(reversed({highway: 'residential', 'cycleway:right:oneway': 'no', 'cycleway:right:separation:left': 'kerb'}))
+                .toEqual({highway: 'residential', 'cycleway:left:oneway': 'no', 'cycleway:left:separation:left': 'kerb'});
+        });
+
+        it('E: on a one-way road V turns the traffic round, so the second side swaps; with reverseOneway it stays', function () {
+            var tags = {highway: 'residential', oneway: 'yes', 'cycleway:right': 'lane', 'cycleway:right:separation:left': 'bollard'};
+            expect(reversed(tags))
+                .toEqual({highway: 'residential', oneway: 'yes', 'cycleway:left': 'lane', 'cycleway:left:separation:right': 'bollard'});
+            expect(reversed(tags, {reverseOneway: true}))
+                .toEqual({highway: 'residential', oneway: '-1', 'cycleway:left': 'lane', 'cycleway:left:separation:left': 'bollard'});
+        });
+
+        it('F: a one-way cycleway swaps its separation with V and keeps it with reverseOneway', function () {
+            var tags = {highway: 'cycleway', oneway: 'yes', 'separation:left': 'kerb'};
+            expect(reversed(tags)).toEqual({highway: 'cycleway', oneway: 'yes', 'separation:right': 'kerb'});
+            expect(reversed(tags, {reverseOneway: true})).toEqual({highway: 'cycleway', oneway: '-1', 'separation:left': 'kerb'});
+        });
+
+        it('G: a two-way cycleway swaps its separation, relative to the line', function () {
+            expect(reversed({highway: 'cycleway', 'separation:left': 'kerb'})).toEqual({highway: 'cycleway', 'separation:right': 'kerb'});
+        });
+    });
+
+
     describe('reverses directional keys on ways', function () {
         it('transforms *:right=* ⟺ *:left=*', function () {
             var way = new iD.osmWay({tags: {'cycleway:right': 'lane'}});

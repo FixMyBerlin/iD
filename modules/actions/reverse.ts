@@ -216,13 +216,74 @@ export function actionReverse(entityID: EntityId, options?: ReverseOptions): Act
     }
 
 
+    /*
+    Radnetz: differs from iD here. The research and the rule:
+    https://github.com/osm-editor-kit/maid/blob/main/docs/research/reverse-side-keys.md
+    A reverse keeps the street as it is. On a road side (`cycleway:right:separation:left`) the road side swaps (iD
+    swaps only the first `:left`/`:right` it finds); a second left/right under it is read in the lane's riding
+    direction (Proposal:Separation, TILDA) and swaps only when the reverse turns the traffic of a one-way road round;
+    an explicit `<prefix>:<side>:oneway` turns yes/-1 when the traffic stays, so the lanes of a two-way road keep
+    riding with the traffic next to them.
+    */
+    var sidePrefixes = new Set(['cycleway', 'sidewalk', 'parking', 'shoulder']);
+    var sides = new Set(['left', 'right', 'both']);
+    var ridingKeys = new Set(['separation', 'marking', 'buffer', 'traffic_mode']);
+    var oneWayValues = new Set(['yes', '1', 'true', '-1']);
+    var sideOnewayReplacements: Record<string, string> = { yes: '-1', '1': '-1', '-1': 'yes' };
+    var leftRight: Record<string, string> = { left: 'right', right: 'left' };
+    var along: Record<string, string> = { forward: 'backward', backward: 'forward' };
+
+    function keepsKey(key: TagKey) {
+        return keysToKeepUnchanged.some(keyRegex => keyRegex.test(key));
+    }
+
+    /** Whether the reverse turns the traffic round: a one-way way whose `oneway` is kept (iD's V) */
+    function trafficTurns(tags: Tags) {
+        return !(options && options.reverseOneway) && oneWayValues.has(tags.oneway);
+    }
+
+    /** The reversed key of a road side, or undefined for any other key */
+    function reverseSideKey(key: TagKey, turns: boolean): TagKey | undefined {
+        var parts = key.split(':');
+        if (parts.length < 2 || !sidePrefixes.has(parts[0]) || !sides.has(parts[1])) return undefined;
+        return parts.map(function(part, index) {
+            if (index === 0) return part;
+            if (index === 1) return leftRight[part] || part;
+            if (along[part]) return along[part];
+            return turns ? (leftRight[part] || part) : part;
+        }).join(':');
+    }
+
     function reverseWay(graph: coreGraph, way: osmWay) {
         var nodes = way.nodes.slice().reverse();
         var tags: Tags = {};
         var role;
 
+        // Radnetz: the sides of a road follow TILDA (reverseSideKey below)
+        var turns = trafficTurns(way.tags);
+        var ownRidingStays = !!(options && options.reverseOneway) &&
+            (oneWayValues.has(way.tags.oneway) || oneWayValues.has(way.tags['oneway:bicycle']));
         for (var key in way.tags) {
-            tags[reverseKey(key)] = reverseValue(key, way.tags[key], false, way.tags);
+            var value = way.tags[key];
+            if (keepsKey(key)) {
+                tags[key] = value;
+                continue;
+            }
+            var sideKey = reverseSideKey(key, turns);
+            if (sideKey !== undefined) {
+                var sideParts = key.split(':');
+                var isSideOneway = sideParts.length === 3 && sideParts[2] === 'oneway';
+                tags[sideKey] = isSideOneway
+                    ? (turns ? value : (sideOnewayReplacements[value] || value))
+                    : reverseValue(key, value, false, way.tags);
+                continue;
+            }
+            var parts = key.split(':');
+            if (ownRidingStays && ridingKeys.has(parts[0]) && parts.length === 2 && leftRight[parts[1]]) {
+                tags[key] = reverseValue(key, value, false, way.tags);
+                continue;
+            }
+            tags[reverseKey(key)] = reverseValue(key, value, false, way.tags);
         }
 
         graph.parentRelations(way).forEach(function(relation) {

@@ -12,8 +12,10 @@ describe('actions/extract_sidepath planSidepathExtraction', () => {
         const plan = planSidepathExtraction(road, 'cycleway', 'left', undefined);
         expect(plan.reversed).toBe(true);
         expect(plan.wayTags.oneway).toBe('yes');
-        expect(plan.wayTags['separation:right']).toBe('kerb');
-        expect(plan.wayTags['separation:left']).toBeUndefined();
+        // The second side of a lane is read in its riding direction (tagging 0.9.2, Proposal:Separation): the kerb on the
+        // left of the track (riding south: the carriageway side) stays on the left of the new way, drawn in that direction.
+        expect(plan.wayTags['separation:left']).toBe('kerb');
+        expect(plan.wayTags['separation:right']).toBeUndefined();
     });
 
     it('lets an untagged left side of a one-way road with contraflow cycling follow the road (tilda-geo develop)', () => {
